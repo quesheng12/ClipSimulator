@@ -285,7 +285,7 @@ test('standard mode shows a quiet inbox and keeps complete conversation history'
   );
   await expect(page.locator('.choice-card__cost').first().locator('svg')).toHaveCount(2);
   const longChoice = page.getByRole('button', { name: /不秒回没关系，先陪妹妹去吧/ });
-  await expect(longChoice).toContainText('总选月每一份支持都很重要');
+  await expect(longChoice).toContainText('总选月我最近真的很需要你们一直在线');
   await expect
     .poll(() =>
       longChoice.evaluate((card) => {
