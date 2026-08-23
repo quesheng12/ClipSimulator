@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { BatteryCharging, Brain, Heart, Users } from 'lucide-react';
+import { BatteryCharging, Heart, Smile, Users } from 'lucide-react';
 import type { FanDefinition, GameState, Resources, StoryPack } from '@clip/story-core/types';
 
 export function affinityLabel(value: number): string {
@@ -21,6 +21,18 @@ export function FanAvatar({ fan, small = false }: { fan: AvatarIdentity; small?:
       aria-hidden="true"
     >
       {isImage ? <img src={fan.avatar} alt="" /> : fan.avatar}
+    </span>
+  );
+}
+
+export function FanTags({ tags, compact = false }: { tags: string[]; compact?: boolean }) {
+  return (
+    <span className={compact ? 'fan-tag-list fan-tag-list--compact' : 'fan-tag-list'}>
+      {tags.map((tag) => (
+        <span className="fan-tag" key={tag}>
+          {tag}
+        </span>
+      ))}
     </span>
   );
 }
@@ -73,8 +85,8 @@ export function ResourcePanel({ resources, max }: { resources: Resources; max: R
         tone="energy"
       />
       <Meter
-        icon={<Brain size={15} aria-hidden="true" />}
-        label="心态"
+        icon={<Smile size={15} aria-hidden="true" />}
+        label="心情"
         value={resources.mindset}
         max={max.mindset}
         tone="mindset"

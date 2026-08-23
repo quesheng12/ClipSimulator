@@ -1,12 +1,15 @@
 import type { DisplayMode, GameState, PlayerProfile, StoryPack } from '@clip/story-core/types';
 import { isCompatibleSave } from '@clip/story-core/engine';
+import { normalizeProfileAvatarId } from './profile-avatars';
 
 const SAVE_KEY = 'clip-simulator:save:v1';
 const META_KEY = 'clip-simulator:meta:v1';
 const MODE_KEY = 'clip-simulator:display-mode:v1';
 const PROFILE_KEY = 'clip-simulator:player-profile:v1';
+const EARLY_ENDING_CHECKPOINT_KEY = 'clip-simulator:early-ending-checkpoint:v1';
 
 let memoryProfile: PlayerProfile | undefined;
+let memoryEarlyEndingCheckpoint: GameState | undefined;
 
 export interface PlayerMeta {
   endingIds: string[];
@@ -44,6 +47,27 @@ export function persistSave(state: GameState): boolean {
   return writeJson(SAVE_KEY, state);
 }
 
+export function loadEarlyEndingCheckpoint(pack: StoryPack): GameState | undefined {
+  const candidate = readJson(EARLY_ENDING_CHECKPOINT_KEY) ?? memoryEarlyEndingCheckpoint;
+  if (!candidate || typeof candidate !== 'object') return undefined;
+  const state = candidate as GameState;
+  return state.status === 'playing' && isCompatibleSave(state, pack) ? state : undefined;
+}
+
+export function persistEarlyEndingCheckpoint(state: GameState): boolean {
+  memoryEarlyEndingCheckpoint = state;
+  return writeJson(EARLY_ENDING_CHECKPOINT_KEY, state);
+}
+
+export function clearEarlyEndingCheckpoint(): void {
+  memoryEarlyEndingCheckpoint = undefined;
+  try {
+    window.localStorage.removeItem(EARLY_ENDING_CHECKPOINT_KEY);
+  } catch {
+    // The in-memory checkpoint has still been cleared.
+  }
+}
+
 export function loadMode(): DisplayMode {
   return readJson(MODE_KEY) === 'realistic' ? 'realistic' : 'standard';
 }
@@ -67,7 +91,11 @@ function isValidProfile(value: unknown, pack: StoryPack): value is PlayerProfile
 export function loadProfile(pack: StoryPack): PlayerProfile | undefined {
   const candidate = readJson(PROFILE_KEY) ?? memoryProfile;
   if (!isValidProfile(candidate, pack)) return undefined;
-  return { idolName: candidate.idolName.trim(), teamId: candidate.teamId };
+  return {
+    idolName: candidate.idolName.trim(),
+    teamId: candidate.teamId,
+    avatarId: normalizeProfileAvatarId(candidate.avatarId),
+  };
 }
 
 export function persistProfile(profile: PlayerProfile): boolean {
@@ -76,6 +104,7 @@ export function persistProfile(profile: PlayerProfile): boolean {
 }
 
 export function clearSave(): void {
+  clearEarlyEndingCheckpoint();
   try {
     window.localStorage.removeItem(SAVE_KEY);
   } catch {

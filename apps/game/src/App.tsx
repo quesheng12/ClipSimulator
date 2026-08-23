@@ -4,7 +4,6 @@ import {
   ArrowRight,
   BatteryCharging,
   Bell,
-  Brain,
   ChevronLeft,
   ChevronRight,
   Check,
@@ -20,6 +19,11 @@ import {
   LockKeyhole,
   MessageCircleMore,
   Settings,
+  Smile,
+  Sparkles,
+  TrendingDown,
+  TrendingUp,
+  Minus,
   RotateCcw,
   Star,
   Trophy,
@@ -50,7 +54,7 @@ import type {
   TeamDefinition,
 } from '@clip/story-core/types';
 import { buildTemplateVariables, resolveStoryPackTemplates } from '@clip/story-core/templates';
-import { affinityLabel, FanAvatar, ResourcePanel } from './components';
+import { affinityLabel, FanAvatar, FanTags, ResourcePanel } from './components';
 import {
   getBackgroundConversationHistory,
   getBackgroundParticipant,
@@ -61,8 +65,12 @@ import {
   type ConversationParticipant,
 } from './conversations';
 import { storyPack } from './content';
+import { DEFAULT_PROFILE_AVATAR_ID, PROFILE_AVATARS, profileAvatarForId } from './profile-avatars';
+import { recordGameTransition, recordRunAbandoned, recordRunStarted } from './statistics';
 import {
   clearSave,
+  clearEarlyEndingCheckpoint,
+  loadEarlyEndingCheckpoint,
   loadMeta,
   loadMode,
   loadProfile,
@@ -70,6 +78,7 @@ import {
   mergeMeta,
   persistMeta,
   persistMode,
+  persistEarlyEndingCheckpoint,
   persistProfile,
   persistSave,
   type PlayerMeta,
@@ -86,6 +95,56 @@ type View =
     }
   | { name: 'result'; nodeId: string; choiceId: string }
   | { name: 'ending' };
+
+const TAKEOUT_SHOPS = [
+  {
+    name: '鸡柳大人',
+    image: '/assets/takeout/fried-takeout.jpg',
+    imageAlt: '装在纸质外带餐盒里的炸鸡',
+  },
+  {
+    name: '椰子鸡',
+    image: '/assets/takeout/asian-takeout.jpg',
+    imageAlt: '装在一次性餐盒里的鸡肉和面食',
+  },
+  {
+    name: '麻辣烫',
+    image: '/assets/takeout/malatang-takeout.jpg',
+    imageAlt: '装在单人外卖碗里的热汤和面食',
+  },
+  {
+    name: '聚湘缘',
+    image: '/assets/takeout/asian-takeout.jpg',
+    imageAlt: '装在一次性餐盒里的鸡肉和面食',
+  },
+  {
+    name: 'KFC',
+    image: '/assets/takeout/fried-takeout.jpg',
+    imageAlt: '装在纸质外带餐盒里的炸鸡',
+  },
+  {
+    name: '麦麦',
+    image: '/assets/takeout/fried-takeout.jpg',
+    imageAlt: '装在纸质外带餐盒里的炸鸡',
+  },
+  {
+    name: '塔斯汀',
+    image: '/assets/takeout/fried-takeout.jpg',
+    imageAlt: '装在纸质外带餐盒里的炸鸡',
+  },
+] as const;
+
+type TakeoutShop = (typeof TAKEOUT_SHOPS)[number];
+
+interface TakeoutReceipt {
+  shop: TakeoutShop;
+  energyRecovery: number;
+  moodRecovery: number;
+}
+
+function pickTakeoutShop(): TakeoutShop {
+  return TAKEOUT_SHOPS[Math.floor(Math.random() * TAKEOUT_SHOPS.length)] ?? TAKEOUT_SHOPS[0];
+}
 
 type NavigationState = {
   version: 1;
@@ -302,14 +361,6 @@ function TeamSelect({
   );
 }
 
-function relationshipFeedback(delta: number): string {
-  if (delta >= 10) return '这句话被认真收下了。';
-  if (delta > 0) return '她看起来更愿意靠近一点。';
-  if (delta <= -10) return '聊天框安静了很久。';
-  if (delta < 0) return '她似乎有些失望。';
-  return '关系没有明显变化。';
-}
-
 function ProfileForm({
   pack,
   profile,
@@ -344,6 +395,7 @@ function ProfileForm({
   const [teamId, setTeamId] = useState(
     () => profile?.teamId ?? pack.profileSetup.teams[0]?.id ?? '',
   );
+  const [avatarId, setAvatarId] = useState(() => profile?.avatarId ?? DEFAULT_PROFILE_AVATAR_ID);
   const [nameError, setNameError] = useState('');
   const [teamError, setTeamError] = useState('');
   const nameRef = useRef<HTMLInputElement>(null);
@@ -352,12 +404,14 @@ function ProfileForm({
     if (!profile) return;
     setIdolName(profile.idolName);
     setTeamId(profile.teamId);
+    setAvatarId(profile.avatarId ?? DEFAULT_PROFILE_AVATAR_ID);
     setNameError('');
     setTeamError('');
   }, [profile]);
 
   const selectedTeam =
     pack.profileSetup.teams.find((team) => team.id === teamId) ?? pack.profileSetup.teams[0];
+  const selectedAvatar = profileAvatarForId(avatarId);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -375,7 +429,7 @@ function ProfileForm({
       if (nextNameError) nameRef.current?.focus();
       return;
     }
-    onSubmit({ idolName: normalizedName, teamId: selectedTeam.id });
+    onSubmit({ idolName: normalizedName, teamId: selectedTeam.id, avatarId: selectedAvatar.id });
   };
 
   return (
@@ -386,7 +440,7 @@ function ProfileForm({
     >
       <div className="profile-form__preview" aria-live="polite">
         <span className="profile-form__portrait">
-          <img src="/assets/avatars/idol-back.webp" alt="" />
+          <img src={selectedAvatar.src} alt="" width={512} height={512} />
           {selectedTeam && <TeamMark team={selectedTeam} active />}
         </span>
         <div>
@@ -394,6 +448,31 @@ function ProfileForm({
           <small>{selectedTeam?.name ?? '请选择所属队伍'}</small>
         </div>
       </div>
+
+      <fieldset className="profile-avatar-field">
+        <legend>成员头像</legend>
+        <div className="profile-avatar-options">
+          {PROFILE_AVATARS.map((avatar) => (
+            <label key={avatar.id} className="profile-avatar-option">
+              <input
+                type="radio"
+                name={`${idPrefix}-avatar`}
+                value={avatar.id}
+                checked={avatar.id === selectedAvatar.id}
+                onChange={() => setAvatarId(avatar.id)}
+              />
+              <span className="profile-avatar-option__image">
+                <img src={avatar.src} alt="" width={512} height={512} />
+                <span className="profile-avatar-option__check" aria-hidden="true">
+                  <Check size={12} strokeWidth={3} />
+                </span>
+              </span>
+              <small>{avatar.label}</small>
+            </label>
+          ))}
+        </div>
+        <small className="profile-avatar-field__hint">也可以用宠物或玩偶，当作你的口袋头像。</small>
+      </fieldset>
 
       <div className="profile-field">
         <label htmlFor={`${idPrefix}-idol-name`}>偶像姓名</label>
@@ -581,7 +660,7 @@ function SettingsSheet({
         <section className="sheet-mode-section" aria-labelledby="mode-title">
           <div className="sheet-mode-heading">
             <div>
-              <span>好感反馈</span>
+              <span>好感记录</span>
               <h3 id="mode-title">显示方式</h3>
             </div>
             <small>即时生效</small>
@@ -596,7 +675,7 @@ function SettingsSheet({
               <Eye size={20} aria-hidden="true" />
               <span>
                 <strong>标准模式</strong>
-                <small>显示好感变化</small>
+                <small>显示具体数值</small>
               </span>
             </button>
             <button
@@ -608,7 +687,7 @@ function SettingsSheet({
               <EyeOff size={20} aria-hidden="true" />
               <span>
                 <strong>拟真模式</strong>
-                <small>只看文字反应</small>
+                <small>只看变化方向</small>
               </span>
             </button>
           </div>
@@ -628,6 +707,83 @@ function SettingsSheet({
         </p>
       </div>
       <div ref={setSelectPortalContainer} className="settings-select-portal-host" />
+    </dialog>
+  );
+}
+
+function TakeoutReceiptDialog({
+  receipt,
+  onClose,
+}: {
+  receipt: TakeoutReceipt;
+  onClose: () => void;
+}) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const restoreFocusRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    restoreFocusRef.current =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    if (!dialog) return;
+    dialog.showModal();
+    return () => {
+      if (dialog.open) dialog.close();
+      const restoreTarget = restoreFocusRef.current;
+      requestAnimationFrame(() => {
+        const targetCanReceiveFocus =
+          restoreTarget?.isConnected &&
+          (!(restoreTarget instanceof HTMLButtonElement) || !restoreTarget.disabled);
+        if (targetCanReceiveFocus) {
+          restoreTarget.focus();
+          return;
+        }
+        document
+          .querySelector<HTMLElement>(
+            '.turn-actions--fixed .button--primary:not(:disabled), .ending-actions .button--primary',
+          )
+          ?.focus();
+      });
+    };
+  }, []);
+
+  return (
+    <dialog
+      ref={dialogRef}
+      className="takeout-receipt"
+      aria-labelledby="takeout-receipt-title"
+      aria-describedby="takeout-receipt-gains"
+      onCancel={(event) => {
+        event.preventDefault();
+        onClose();
+      }}
+      onMouseDown={(event) => {
+        if (event.target === event.currentTarget) onClose();
+      }}
+    >
+      <div className="takeout-receipt__card" onMouseDown={(event) => event.stopPropagation()}>
+        <div className="takeout-receipt__media">
+          <img src={receipt.shop.image} alt={receipt.shop.imageAlt} />
+          <span className="takeout-receipt__icon" aria-hidden="true">
+            <Utensils size={24} />
+          </span>
+        </div>
+        <span className="takeout-receipt__eyebrow">外卖送到</span>
+        <h2 id="takeout-receipt-title">点了一份{receipt.shop.name}</h2>
+        <div id="takeout-receipt-gains" className="takeout-receipt__gains">
+          <span>
+            <BatteryCharging size={17} aria-hidden="true" />
+            精力 <strong>+{receipt.energyRecovery}</strong>
+          </span>
+          <span>
+            <Smile size={17} aria-hidden="true" />
+            心情 <strong>+{receipt.moodRecovery}</strong>
+          </span>
+        </div>
+        <button type="button" className="button button--primary button--wide" onClick={onClose}>
+          开吃
+        </button>
+      </div>
     </dialog>
   );
 }
@@ -666,6 +822,7 @@ function MenuScreen({
     : undefined;
   const turnEvent = getCurrentTurnEvent(previewState, pack);
   const team = teamForProfile(pack, profile);
+  const memberAvatar = profileAvatarForId(profile.avatarId);
 
   return (
     <main className="menu-screen pocket-home">
@@ -684,12 +841,17 @@ function MenuScreen({
           </button>
         </div>
         <div className="member-portrait" aria-hidden="true">
-          <img src="/assets/avatars/idol-back.webp" alt="" />
+          <img src={memberAvatar.src} alt="" width={512} height={512} />
           <TeamMark team={team} active />
         </div>
         <h1 id="member-name">{profile.idolName}</h1>
         <div className="member-status">
-          <span>{team.shortName}</span>
+          <span
+            className="member-status__team"
+            style={{ '--team-color': team.color } as CSSProperties}
+          >
+            {team.shortName}
+          </span>
           <i />
           {save?.status === 'playing' ? `第 ${save.currentDay} 日营业中` : '准备营业'}
         </div>
@@ -830,7 +992,7 @@ function ConversationRow({
 }: {
   participant: ConversationParticipant;
   preview: string;
-  meta: string;
+  meta?: string;
   timing: string;
   timingUrgent?: boolean;
   onOpen: () => void;
@@ -850,8 +1012,9 @@ function ConversationRow({
             {timing}
           </time>
         </span>
+        <FanTags tags={participant.tags} compact />
         <span className="conversation-row__preview">{preview}</span>
-        <span className="conversation-row__meta">{meta}</span>
+        {meta && <span className="conversation-row__meta">{meta}</span>}
       </span>
       <span className="conversation-row__end">
         <ChevronRight size={17} aria-hidden="true" />
@@ -885,10 +1048,10 @@ function WorkbenchScreen({
     return participant ? [{ participant, node }] : [];
   });
   const repliedConversations = getRepliedConversations(state, pack);
-  const pendingFanIds = new Set(pendingFlips.map((flip) => flip.participant.id));
+  const pendingParticipantIds = new Set(pendingFlips.map((flip) => `core:${flip.participant.id}`));
   const visibleRepliedConversations = repliedConversations.filter(
     (conversation) =>
-      conversation.participant.kind !== 'core' || !pendingFanIds.has(conversation.participant.id),
+      !pendingParticipantIds.has(`${conversation.participant.kind}:${conversation.participant.id}`),
   );
   const event = getCurrentTurnEvent(state, pack);
   const canTakeout = state.takeoutUsesThisTurn < pack.config.takeout.maxPerTurn;
@@ -917,7 +1080,7 @@ function WorkbenchScreen({
           <BatteryCharging size={16} aria-hidden="true" /> 精力 {state.resources.energy}
         </span>
         <span>
-          <Brain size={16} aria-hidden="true" /> 心态 {state.resources.mindset}
+          <Smile size={16} aria-hidden="true" /> 心情 {state.resources.mindset}
         </span>
       </section>
 
@@ -989,13 +1152,14 @@ function WorkbenchScreen({
             <ul className="conversation-list" aria-label="已回复">
               {visibleRepliedConversations.map((conversation) => {
                 const latest = conversation.latestExchange;
-                const preview = latest.outgoing ? `我：${latest.outgoing}` : latest.incoming;
+                const latestIncoming = latest.continuations?.at(-1) ?? latest.incoming;
+                const preview = latest.outgoing ? `我：${latest.outgoing}` : latestIncoming;
                 const meta =
                   conversation.participant.kind === 'core'
                     ? state.mode === 'standard'
                       ? `好感 ${state.affinity[conversation.participant.id]}`
                       : affinityLabel(state.affinity[conversation.participant.id] ?? 0)
-                    : (conversation.participant.tag ?? conversation.participant.handle);
+                    : undefined;
                 return (
                   <li key={conversation.id}>
                     <ConversationRow
@@ -1003,7 +1167,9 @@ function WorkbenchScreen({
                       preview={preview}
                       meta={meta}
                       timing={
-                        latest.status === 'expired' ? '已过期' : `第 ${conversation.latestDay} 日`
+                        latest.status === 'expired'
+                          ? '已过期'
+                          : (latest.timeLabel ?? `第 ${conversation.latestDay} 日`)
                       }
                       timingUrgent={latest.status === 'expired'}
                       onOpen={() => onOpenReplied(conversation.participant)}
@@ -1032,7 +1198,10 @@ function WorkbenchScreen({
             <Utensils size={18} aria-hidden="true" />
             <span>
               <strong>{canTakeout ? '点份外卖' : '本回合已点过'}</strong>
-              <small>精力、心态各 +{pack.config.takeout.recovery.energy}</small>
+              <small>
+                精力 +{pack.config.takeout.recovery.energy} · 心情 +
+                {pack.config.takeout.recovery.mindset}
+              </small>
             </span>
           </button>
           <button type="button" className="button button--primary" onClick={onAdvance}>
@@ -1066,7 +1235,7 @@ function ConversationScreen({
 
   useEffect(() => {
     timelineEndRef.current?.scrollIntoView({ block: 'end' });
-  }, [activeNode?.id, exchanges.length]);
+  }, [activeNode?.id, exchanges.length, exchanges.at(-1)?.selectedChoiceId]);
 
   return (
     <main className="reply-screen conversation-screen">
@@ -1074,46 +1243,71 @@ function ConversationScreen({
         <button type="button" className="icon-button" onClick={onBack} aria-label="返回翻牌消息">
           <ChevronLeft size={21} aria-hidden="true" />
         </button>
-        <div className="reply-header__contact">
+        <div
+          className="reply-header__contact"
+          style={{ '--fan-accent': participant.accent } as React.CSSProperties}
+        >
           <h1>{participant.name}</h1>
-          <span>{participant.handle}</span>
+          {participant.handle && <span className="reply-header__handle">{participant.handle}</span>}
+          <FanTags tags={participant.tags} compact />
         </div>
         <small>第 {state.currentDay} 日</small>
       </header>
 
       <section className="chat-timeline" aria-label={`与${participant.name}的全部翻牌对话`}>
-        {exchanges.map((exchange, index) => (
-          <div className="chat-exchange" key={exchange.id}>
-            {(index === 0 || exchanges[index - 1]?.day !== exchange.day) && (
-              <div className="chat-day-marker">第 {exchange.day} 日</div>
-            )}
-            <div className="chat-row chat-row--fan">
-              <FanAvatar fan={participant} small />
-              <article
-                className="fan-message"
-                style={{ '--fan-accent': participant.accent } as React.CSSProperties}
-              >
-                <p>{exchange.incoming}</p>
-              </article>
-            </div>
-            {exchange.outgoing && (
-              <div className="chat-row chat-row--idol">
-                <article className="idol-message">
-                  <span>你</span>
-                  <p>{exchange.outgoing}</p>
+        {exchanges.map((exchange, index) => {
+          const marker = exchange.timeLabel ?? `第 ${exchange.day} 日`;
+          const previous = exchanges[index - 1];
+          const previousMarker = previous
+            ? (previous.timeLabel ?? `第 ${previous.day} 日`)
+            : undefined;
+          return (
+            <div className="chat-exchange" key={exchange.id}>
+              {(index === 0 || previousMarker !== marker) && (
+                <div className="chat-day-marker">{marker}</div>
+              )}
+              <div className="chat-row chat-row--fan">
+                <FanAvatar fan={participant} small />
+                <article
+                  className="fan-message"
+                  style={{ '--fan-accent': participant.accent } as React.CSSProperties}
+                >
+                  <p>{exchange.incoming}</p>
                 </article>
               </div>
-            )}
-            {exchange.status === 'expired' && (
-              <div className="chat-system-note">
-                这条翻牌已于第 {exchange.deadlineDay} 日 24:00 过期
-              </div>
-            )}
-            {exchange.status === 'pending' && exchange.deadlineDay !== undefined && (
-              <div className="chat-deadline">第 {exchange.deadlineDay} 日 24:00 前回复</div>
-            )}
-          </div>
-        ))}
+              {exchange.continuations?.map((continuation, continuationIndex) => (
+                <div
+                  className="chat-row chat-row--fan chat-row--continuation"
+                  key={`${exchange.id}-continuation-${continuationIndex}`}
+                >
+                  <FanAvatar fan={participant} small />
+                  <article
+                    className="fan-message fan-message--continuation"
+                    style={{ '--fan-accent': participant.accent } as React.CSSProperties}
+                  >
+                    <p>{continuation}</p>
+                  </article>
+                </div>
+              ))}
+              {exchange.outgoing && (
+                <div className="chat-row chat-row--idol">
+                  <article className="idol-message">
+                    <span>你</span>
+                    <p>{exchange.outgoing}</p>
+                  </article>
+                </div>
+              )}
+              {exchange.status === 'expired' && (
+                <div className="chat-system-note">
+                  这条翻牌已于第 {exchange.deadlineDay} 日 24:00 过期
+                </div>
+              )}
+              {exchange.status === 'pending' && exchange.deadlineDay !== undefined && (
+                <div className="chat-deadline">第 {exchange.deadlineDay} 日 24:00 前回复</div>
+              )}
+            </div>
+          );
+        })}
         <div ref={timelineEndRef} aria-hidden="true" />
       </section>
 
@@ -1142,11 +1336,11 @@ function ConversationScreen({
                   </span>
                   <span className="choice-card__copy">
                     <strong>{choice.text}</strong>
-                    {!affordable && <small>当前精力或心态不足</small>}
+                    {!affordable && <small>当前精力或心情不足</small>}
                   </span>
                   <span
                     className="choice-card__cost"
-                    aria-label={`候选回复 ${String.fromCharCode(65 + index)}，消耗 ${choice.cost.energy} 点精力，${choice.cost.mindset} 点心态`}
+                    aria-label={`候选回复 ${String.fromCharCode(65 + index)}，消耗 ${choice.cost.energy} 点精力，${choice.cost.mindset} 点心情`}
                   >
                     <span className="choice-card__cost-item choice-card__cost-item--energy">
                       -{choice.cost.energy}
@@ -1154,7 +1348,7 @@ function ConversationScreen({
                     </span>
                     <span className="choice-card__cost-item choice-card__cost-item--mindset">
                       -{choice.cost.mindset}
-                      <Brain size={14} aria-hidden="true" />
+                      <Smile size={14} aria-hidden="true" />
                     </span>
                   </span>
                 </button>
@@ -1185,6 +1379,11 @@ function ResultScreen({
   const fan = fanById(pack, node.fanId);
   const ownDelta = choice.effects.affinity?.[fan.id] ?? 0;
   const otherDeltas = Object.entries(choice.effects.affinity ?? {}).filter(([id]) => id !== fan.id);
+  const affinityDirection = ownDelta > 0 ? 'positive' : ownDelta < 0 ? 'negative' : 'neutral';
+  const affinityDirectionLabel = ownDelta > 0 ? '上升' : ownDelta < 0 ? '下降' : '不变';
+  const AffinityDirectionIcon = ownDelta > 0 ? TrendingUp : ownDelta < 0 ? TrendingDown : Minus;
+  const hasSecondaryDeltas =
+    choice.effects.popularity !== 0 || (state.mode === 'standard' && otherDeltas.length > 0);
   return (
     <main className="result-screen">
       <section className="sent-message">
@@ -1196,29 +1395,26 @@ function ResultScreen({
         style={{ '--fan-accent': fan.accent } as React.CSSProperties}
       >
         <FanAvatar fan={fan} />
-        <span className="reaction-ticket__eyebrow">回复送达</span>
-        <h1>{relationshipFeedback(ownDelta)}</h1>
-        <p>{choice.note ?? '屏幕另一边的输入状态亮了一会儿，又安静下来。'}</p>
-        <div className="result-deltas">
-          {state.mode === 'standard' ? (
-            <span className={ownDelta >= 0 ? 'is-positive' : 'is-negative'}>
-              {fan.name} 好感 {signed(ownDelta)}
-            </span>
-          ) : (
-            <span>{affinityLabel(state.affinity[fan.id] ?? 0)}</span>
-          )}
-          {choice.effects.popularity !== undefined && choice.effects.popularity !== 0 && (
-            <span className={choice.effects.popularity > 0 ? 'is-positive' : 'is-negative'}>
-              泛人气 {signed(choice.effects.popularity)}
-            </span>
-          )}
-          {state.mode === 'standard' &&
-            otherDeltas.map(([fanId, delta]) => (
-              <span key={fanId} className={delta >= 0 ? 'is-positive' : 'is-negative'}>
-                {fanById(pack, fanId).name} 好感 {signed(delta)}
+        <span className="reaction-ticket__eyebrow">{fan.name} · 好感变化</span>
+        <h1 className={`reaction-ticket__change reaction-ticket__change--${affinityDirection}`}>
+          <AffinityDirectionIcon size={24} strokeWidth={2.4} aria-hidden="true" />
+          {state.mode === 'standard' ? signed(ownDelta) : affinityDirectionLabel}
+        </h1>
+        {hasSecondaryDeltas && (
+          <div className="result-deltas">
+            {choice.effects.popularity !== 0 && (
+              <span className={choice.effects.popularity > 0 ? 'is-positive' : 'is-negative'}>
+                泛人气 {signed(choice.effects.popularity)}
               </span>
-            ))}
-        </div>
+            )}
+            {state.mode === 'standard' &&
+              otherDeltas.map(([fanId, delta]) => (
+                <span key={fanId} className={delta >= 0 ? 'is-positive' : 'is-negative'}>
+                  {fanById(pack, fanId).name} 好感 {signed(delta)}
+                </span>
+              ))}
+          </div>
+        )}
       </section>
       <button type="button" className="button button--primary button--wide" onClick={onContinue}>
         回到工作台 <ArrowRight size={18} aria-hidden="true" />
@@ -1230,28 +1426,57 @@ function ResultScreen({
 function EndingScreen({
   pack,
   state,
+  canReturnToCheckpoint,
+  onReturnToCheckpoint,
   onRestart,
   onMenu,
 }: {
   pack: StoryPack;
   state: GameState;
+  canReturnToCheckpoint: boolean;
+  onReturnToCheckpoint: () => void;
   onRestart: () => void;
   onMenu: () => void;
 }) {
   if (state.status === 'early-ending') {
     const ending = pack.earlyEndings.find((candidate) => candidate.id === state.earlyEndingId)!;
+    const isTakeoutEnding = ending.id === pack.config.takeout.endingId;
     return (
       <main className="ending-screen ending-screen--early">
         <div className="ending-mark">
-          <Utensils size={34} aria-hidden="true" />
+          {isTakeoutEnding ? (
+            <Utensils size={34} aria-hidden="true" />
+          ) : (
+            <Sparkles size={34} aria-hidden="true" />
+          )}
         </div>
         <span className="ending-eyebrow">提前结局 · 已收录</span>
         <h1>{ending.title}</h1>
+        {ending.image && (
+          <figure className="ending-post-image">
+            <img
+              src={ending.image.src}
+              alt={ending.image.alt}
+              width={1448}
+              height={1086}
+              loading="eager"
+              decoding="async"
+            />
+          </figure>
+        )}
         <p>{ending.description}</p>
+        <span className="ending-return-note">
+          结局已经收录。返回后会恢复到触发这次结局之前，可以改选其他分支。
+        </span>
         <div className="ending-actions">
-          <button type="button" className="button button--primary" onClick={onRestart}>
+          <button
+            type="button"
+            className="button button--primary"
+            disabled={!canReturnToCheckpoint}
+            onClick={onReturnToCheckpoint}
+          >
             <RotateCcw size={17} aria-hidden="true" />
-            重新营业
+            回到上一回合
           </button>
           <button type="button" className="button button--ghost" onClick={onMenu}>
             返回菜单
@@ -1338,7 +1563,11 @@ function EndingScreen({
 
 export default function App() {
   const initialSave = useMemo(() => loadSave(storyPack), []);
+  const initialEarlyEndingCheckpoint = useMemo(() => loadEarlyEndingCheckpoint(storyPack), []);
   const [state, setState] = useState<GameState | undefined>(initialSave);
+  const [earlyEndingCheckpoint, setEarlyEndingCheckpoint] = useState<GameState | undefined>(
+    initialEarlyEndingCheckpoint,
+  );
   const [profile, setProfile] = useState<PlayerProfile | undefined>(() => loadProfile(storyPack));
   const runtimePack = useMemo(
     () =>
@@ -1365,6 +1594,7 @@ export default function App() {
     return normalizeNavigation(restored ?? fallback, initialSave);
   });
   const [storageWarning, setStorageWarning] = useState(false);
+  const [takeoutReceipt, setTakeoutReceipt] = useState<TakeoutReceipt>();
   const stateRef = useRef(state);
   const navigationRef = useRef(navigation);
   const view = navigation.view;
@@ -1418,13 +1648,20 @@ export default function App() {
       document.title = `${contactName ?? '聊天记录'} — 成员口袋`;
       return;
     }
+    if (view.name === 'ending' && state?.status === 'early-ending') {
+      const ending = runtimePack.earlyEndings.find(
+        (candidate) => candidate.id === state.earlyEndingId,
+      );
+      document.title = `${ending?.title ?? '特殊结局'} — 成员口袋`;
+      return;
+    }
     const titles = {
       menu: '成员口袋 — 工作台',
       result: '回复送达 — 成员口袋',
       ending: '年度总选 — 成员口袋',
     } as const;
     document.title = titles[view.name];
-  }, [navigation.settingsOpen, profile, runtimePack, view]);
+  }, [navigation.settingsOpen, profile, runtimePack, state, view]);
 
   useEffect(() => {
     if (!state) return;
@@ -1471,9 +1708,16 @@ export default function App() {
   };
 
   const start = (mode: DisplayMode, replace = false) => {
+    recordRunAbandoned(
+      storyPack,
+      stateRef.current?.status === 'early-ending' ? earlyEndingCheckpoint : stateRef.current,
+    );
+    clearEarlyEndingCheckpoint();
+    setEarlyEndingCheckpoint(undefined);
     setDisplayMode(mode);
     if (!persistMode(mode)) setStorageWarning(true);
     const nextState = createInitialGame(storyPack, mode);
+    recordRunStarted(storyPack, mode);
     stateRef.current = nextState;
     setState(nextState);
     commitNavigation({ name: 'workbench' }, { replace });
@@ -1491,6 +1735,10 @@ export default function App() {
   };
 
   const restart = () => {
+    recordRunAbandoned(
+      storyPack,
+      stateRef.current?.status === 'early-ending' ? earlyEndingCheckpoint : stateRef.current,
+    );
     clearSave();
     stateRef.current = undefined;
     setState(undefined);
@@ -1510,6 +1758,22 @@ export default function App() {
     }
   };
 
+  const rememberEarlyEndingCheckpoint = (previous: GameState, next: GameState) => {
+    if (previous.status !== 'playing' || next.status !== 'early-ending') return;
+    setEarlyEndingCheckpoint(previous);
+    if (!persistEarlyEndingCheckpoint(previous)) setStorageWarning(true);
+  };
+
+  const returnToEarlyEndingCheckpoint = () => {
+    const checkpoint = earlyEndingCheckpoint ?? loadEarlyEndingCheckpoint(storyPack);
+    if (!checkpoint) return;
+    clearEarlyEndingCheckpoint();
+    setEarlyEndingCheckpoint(undefined);
+    stateRef.current = checkpoint;
+    setState(checkpoint);
+    commitNavigation({ name: 'workbench' }, { replace: true });
+  };
+
   const currentNode =
     state && view.name === 'conversation' && view.kind === 'core' && view.replyNodeId
       ? runtimePack.nodes.find((node) => node.id === view.replyNodeId)
@@ -1524,7 +1788,7 @@ export default function App() {
     state && view.name === 'conversation'
       ? view.kind === 'core'
         ? getCoreConversationHistory(state, runtimePack, view.participantId, view.replyNodeId)
-        : getBackgroundConversationHistory(runtimePack, state.currentDay, view.participantId)
+        : getBackgroundConversationHistory(state, runtimePack, view.participantId)
       : [];
   const resultNode =
     state && view.name === 'result'
@@ -1542,6 +1806,17 @@ export default function App() {
           浏览器阻止了本地存档；本次游玩仍可继续。
         </div>
       )}
+      {takeoutReceipt && (
+        <TakeoutReceiptDialog
+          receipt={takeoutReceipt}
+          onClose={() => {
+            setTakeoutReceipt(undefined);
+            if (stateRef.current?.status !== 'playing') {
+              commitNavigation({ name: 'ending' }, { replace: true });
+            }
+          }}
+        />
+      )}
       {!profile && <ProfileSetupScreen pack={storyPack} onComplete={changeProfile} />}
       {profile && view.name === 'menu' && (
         <MenuScreen
@@ -1557,7 +1832,9 @@ export default function App() {
           onEnterFlip={() =>
             state?.status === 'playing'
               ? commitNavigation({ name: 'workbench' })
-              : start(displayMode)
+              : state?.status === 'early-ending'
+                ? commitNavigation({ name: 'ending' })
+                : start(displayMode)
           }
           onRestart={() => start(displayMode, true)}
           onProfileChange={changeProfile}
@@ -1585,14 +1862,20 @@ export default function App() {
           }
           onTakeout={() => {
             const next = orderTakeout(state, storyPack);
+            rememberEarlyEndingCheckpoint(state, next);
+            recordGameTransition(storyPack, state, next, { type: 'takeout' });
+            setTakeoutReceipt({
+              shop: pickTakeoutShop(),
+              energyRecovery: storyPack.config.takeout.recovery.energy,
+              moodRecovery: storyPack.config.takeout.recovery.mindset,
+            });
             stateRef.current = next;
             setState(next);
-            if (next.status !== 'playing') {
-              commitNavigation({ name: 'ending' }, { replace: true });
-            }
           }}
           onAdvance={() => {
             const next = advanceTurn(state, storyPack);
+            rememberEarlyEndingCheckpoint(state, next);
+            recordGameTransition(storyPack, state, next, { type: 'advance' });
             stateRef.current = next;
             setState(next);
             if (next.status !== 'playing') {
@@ -1618,10 +1901,18 @@ export default function App() {
               currentNode
                 ? (choice) => {
                     const next = replyToNode(state, storyPack, currentNode.id, choice.id);
+                    rememberEarlyEndingCheckpoint(state, next);
+                    recordGameTransition(storyPack, state, next, {
+                      type: 'reply',
+                      nodeId: currentNode.id,
+                      choiceId: choice.id,
+                    });
                     stateRef.current = next;
                     setState(next);
                     commitNavigation(
-                      { name: 'result', nodeId: currentNode.id, choiceId: choice.id },
+                      next.status === 'early-ending'
+                        ? { name: 'ending' }
+                        : { name: 'result', nodeId: currentNode.id, choiceId: choice.id },
                       { replace: true },
                     );
                   }
@@ -1642,6 +1933,8 @@ export default function App() {
         <EndingScreen
           pack={runtimePack}
           state={state}
+          canReturnToCheckpoint={earlyEndingCheckpoint !== undefined}
+          onReturnToCheckpoint={returnToEarlyEndingCheckpoint}
           onRestart={restart}
           onMenu={() => goBack({ name: 'menu' })}
         />

@@ -36,10 +36,13 @@ export interface StoryEffects {
 export interface StoryChoice {
   id: string;
   text: string;
-  note?: string;
   cost: Resources;
-  effects: StoryEffects;
+  effects: StoryEffects & { popularity: number };
   nextNodeId?: string;
+  /** Defaults to day-start; immediate activates an eligible downstream node after this reply. */
+  nextNodeTiming?: 'day-start' | 'immediate';
+  /** Opens a recoverable early-ending branch instead of continuing to another node. */
+  endingId?: string;
 }
 
 export interface ExpireOutcome extends StoryEffects {
@@ -52,7 +55,7 @@ export interface StoryNode {
   title: string;
   postedDay: number;
   replyWindowDays: number;
-  /** Evaluated only when a new in-game day/turn begins. */
+  /** Evaluated at day start, or after effects when an incoming choice is explicitly immediate. */
   trigger?: StoryTrigger;
   content: {
     text: string;
@@ -72,6 +75,15 @@ export interface VoteTier {
   label: string;
 }
 
+export interface CoreFanPastChat {
+  /** Stable within this fan's authored history; it never enters GameState. */
+  id: string;
+  /** Human-authored marker such as “三个月前” or “出道第 18 天”. */
+  timeLabel: string;
+  message: string;
+  reply: string;
+}
+
 export interface PopularityVoteTier {
   minPopularity: number;
   votes: number;
@@ -83,6 +95,9 @@ export interface FanDefinition {
   name: string;
   handle: string;
   bio: string;
+  tags: string[];
+  /** Read-only relationship history shown before the current election run. */
+  pastChats: CoreFanPastChat[];
   avatar: string;
   accent: string;
   initialAffinity: number;
@@ -101,6 +116,8 @@ export interface TeamDefinition {
 export interface PlayerProfile {
   idolName: string;
   teamId: string;
+  /** Stable app-owned avatar id. Older local profiles omit it and use the default. */
+  avatarId?: string;
 }
 
 export type ProfileNameKind = 'adapted' | 'original';
@@ -133,7 +150,10 @@ export interface BackgroundFlip {
   avatar?: string;
   tag: string;
   message: string;
-  reply: string;
+  /** Optional automatic member reply used by ambient archive exchanges. */
+  reply?: string;
+  /** Extra consecutive bubbles from the same NPC. Omit `reply` for read-only NPC chatter. */
+  continuations?: string[];
 }
 
 export interface ElectionEnding {
@@ -148,6 +168,10 @@ export interface EarlyEnding {
   id: string;
   title: string;
   description: string;
+  image?: {
+    src: string;
+    alt: string;
+  };
   trigger: {
     takeoutCountAtLeast?: number;
     allFlags?: string[];

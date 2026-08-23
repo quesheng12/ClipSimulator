@@ -42,6 +42,7 @@ import {
 } from 'react';
 import {
   RESERVED_TEMPLATE_VARIABLES,
+  buildIdolNickname,
   buildTemplateVariables,
   isValidTemplateVariableName,
   renderTemplateText,
@@ -50,12 +51,12 @@ import {
 import { createProfileNamePicker } from '@clip/story-core/profile-names';
 import { hasValidationErrors, validateStoryPack } from '@clip/story-core/validation';
 import type {
+  BackgroundFlip,
   ExpireOutcome,
   FanDefinition,
   PlayerProfile,
   ProfileNameKind,
   StoryChoice,
-  StoryEffects,
   StoryNode,
   StoryPack,
   StoryTriggerCondition,
@@ -71,6 +72,7 @@ import {
   writeStoryFile,
   type WritableFileHandle,
 } from './file-io';
+import { renameFanReferences } from './story-pack-editing';
 
 const DAY_GAP = 220;
 const HISTORY_LIMIT = 80;
@@ -349,6 +351,7 @@ interface ContentPackInspectorProps {
   previewProfile: PlayerProfile;
   templateVariables: TemplateVariables;
   onUpdate: (updater: (pack: StoryPack) => StoryPack) => void;
+  onRenameFanId: (previousId: string, nextId: string) => void;
   onPreviewProfileChange: (profile: PlayerProfile) => void;
 }
 
@@ -357,6 +360,7 @@ function ContentPackInspector({
   previewProfile,
   templateVariables,
   onUpdate,
+  onRenameFanId,
   onPreviewProfileChange,
 }: ContentPackInspectorProps) {
   const profileSetup = pack.profileSetup ?? EMPTY_PROFILE_SETUP;
@@ -364,6 +368,8 @@ function ContentPackInspector({
   const variableEntries = Object.entries(globalVariables);
   const [variableKeyDrafts, setVariableKeyDrafts] = useState<Record<string, string>>({});
   const [variableKeyErrors, setVariableKeyErrors] = useState<Record<string, string>>({});
+  const [fanIdDrafts, setFanIdDrafts] = useState<Record<string, string>>({});
+  const [fanIdErrors, setFanIdErrors] = useState<Record<string, string>>({});
   const previewNamePicker = useMemo(
     () => createProfileNamePicker(profileSetup.namePools),
     [profileSetup.namePools],
@@ -467,6 +473,106 @@ function ContentPackInspector({
     const suggestion = previewNamePicker.next(previewProfile.idolName);
     if (!suggestion) return;
     onPreviewProfileChange({ ...previewProfile, idolName: suggestion.name });
+  };
+
+  const updateFan = (index: number, updater: (fan: FanDefinition) => FanDefinition) => {
+    onUpdate((current) => ({
+      ...current,
+      fans: current.fans.map((fan, fanIndex) => (fanIndex === index ? updater(fan) : fan)),
+    }));
+  };
+
+  const commitFanId = (fan: FanDefinition) => {
+    const nextId = (fanIdDrafts[fan.id] ?? fan.id).trim();
+    if (!nextId) {
+      setFanIdErrors((current) => ({ ...current, [fan.id]: '核心粉丝 ID 不能为空' }));
+      return;
+    }
+    if (nextId !== fan.id && pack.fans.some((candidate) => candidate.id === nextId)) {
+      setFanIdErrors((current) => ({ ...current, [fan.id]: '这个核心粉丝 ID 已存在' }));
+      return;
+    }
+    if (nextId !== fan.id) onRenameFanId(fan.id, nextId);
+    setFanIdDrafts((current) => {
+      const next = { ...current };
+      delete next[fan.id];
+      return next;
+    });
+    setFanIdErrors((current) => {
+      const next = { ...current };
+      delete next[fan.id];
+      return next;
+    });
+  };
+
+  const addPastChat = (fanIndex: number) => {
+    const fan = pack.fans[fanIndex];
+    if (!fan || fan.pastChats.length >= 8) return;
+    const used = new Set(fan.pastChats.map((chat) => chat.id));
+    let suffix = fan.pastChats.length + 1;
+    while (used.has(`${fan.id}-past-${String(suffix).padStart(2, '0')}`)) suffix += 1;
+    updateFan(fanIndex, (current) => ({
+      ...current,
+      pastChats: [
+        ...current.pastChats,
+        {
+          id: `${fan.id}-past-${String(suffix).padStart(2, '0')}`,
+          timeLabel: '总选月前',
+          message: '填写这名粉丝过去发来的消息。',
+          reply: '填写成员当时已经发出的回复。',
+        },
+      ],
+    }));
+  };
+
+  const updateBackgroundFlip = (
+    index: number,
+    updater: (flip: BackgroundFlip) => BackgroundFlip,
+  ) => {
+    onUpdate((current) => ({
+      ...current,
+      backgroundFlips: current.backgroundFlips.map((flip, flipIndex) =>
+        flipIndex === index ? updater(flip) : flip,
+      ),
+    }));
+  };
+
+  const nextBackgroundFlipId = (base = 'npc-topic') => {
+    const used = new Set(pack.backgroundFlips.map((flip) => flip.id));
+    let suffix = pack.backgroundFlips.length + 1;
+    while (used.has(`${base}-${String(suffix).padStart(2, '0')}`)) suffix += 1;
+    return `${base}-${String(suffix).padStart(2, '0')}`;
+  };
+
+  const addBackgroundFlip = () => {
+    const id = nextBackgroundFlipId();
+    onUpdate((current) => ({
+      ...current,
+      backgroundFlips: [
+        ...current.backgroundFlips,
+        {
+          id,
+          contactId: id,
+          day: 1,
+          fanName: '{{idolName}}的新听众',
+          tag: '河内热议',
+          message: '在这里填写 NPC 随日期出现的第一条闲聊。',
+          continuations: ['需要分成多个气泡时，可以继续填写这一句。'],
+        },
+      ],
+    }));
+  };
+
+  const duplicateBackgroundFlip = (index: number) => {
+    const source = pack.backgroundFlips[index];
+    if (!source) return;
+    const duplicate = structuredClone(source);
+    duplicate.id = nextBackgroundFlipId(`${source.id}-round`);
+    duplicate.day = Math.min(pack.config.totalDays, source.day + pack.config.turnDays);
+    onUpdate((current) => ({
+      ...current,
+      backgroundFlips: [...current.backgroundFlips, duplicate],
+    }));
   };
 
   return (
@@ -812,6 +918,555 @@ function ContentPackInspector({
           </div>
         </section>
 
+        <section className="inspector-section">
+          <div className="section-heading">
+            <span>核心粉丝档案</span>
+            <span className="count-badge">{pack.fans.length}</span>
+          </div>
+          <p className="section-help core-fan-editor-help">
+            稳定 ID
+            会被剧情节点、好感效果、票力修正和延迟触发引用；在这里改名时会同步更新全部引用。标签按顺序显示在消息列表和聊天标题中。过往聊天只构建关系氛围，不参与本周目结算。
+          </p>
+          <div className="core-fan-editor-list">
+            {pack.fans.map((fan, fanIndex) => {
+              const fanIdError = fanIdErrors[fan.id];
+              return (
+                <details className="core-fan-editor" key={fanIndex}>
+                  <summary>
+                    <span className="core-fan-editor__identity">
+                      <span className="core-fan-editor__avatar" aria-hidden="true">
+                        <AvatarPreview avatar={fan.avatar} />
+                      </span>
+                      <span>
+                        <strong>{renderTemplateText(fan.name, templateVariables)}</strong>
+                        <small>{fan.tags.join(' · ')}</small>
+                      </span>
+                    </span>
+                    <span className="core-fan-editor__meta">
+                      {fan.pastChats.length} 条过往 ·{' '}
+                      {pack.nodes.filter((node) => node.fanId === fan.id).length} 个节点
+                    </span>
+                  </summary>
+                  <div className="core-fan-editor__body">
+                    <div className="core-fan-editor__grid">
+                      <label className="compact-field">
+                        <span>稳定 ID</span>
+                        <input
+                          value={fanIdDrafts[fan.id] ?? fan.id}
+                          aria-invalid={Boolean(fanIdError)}
+                          aria-describedby={fanIdError ? `fan-${fanIndex}-id-error` : undefined}
+                          onChange={(event) => {
+                            setFanIdDrafts((current) => ({
+                              ...current,
+                              [fan.id]: event.target.value,
+                            }));
+                            setFanIdErrors((current) => {
+                              const next = { ...current };
+                              delete next[fan.id];
+                              return next;
+                            });
+                          }}
+                          onBlur={() => commitFanId(fan)}
+                          onKeyDown={(event) => {
+                            if (event.key === 'Enter' && !event.nativeEvent.isComposing) {
+                              event.preventDefault();
+                              event.currentTarget.blur();
+                            }
+                          }}
+                        />
+                        {fanIdError && (
+                          <span className="form-error" id={`fan-${fanIndex}-id-error`}>
+                            {fanIdError}
+                          </span>
+                        )}
+                      </label>
+                      <label className="compact-field">
+                        <span>显示昵称</span>
+                        <input
+                          value={fan.name}
+                          onChange={(event) =>
+                            updateFan(fanIndex, (current) => ({
+                              ...current,
+                              name: event.target.value,
+                            }))
+                          }
+                        />
+                      </label>
+                      <label className="compact-field">
+                        <span>账号 ID</span>
+                        <input
+                          value={fan.handle}
+                          onChange={(event) =>
+                            updateFan(fanIndex, (current) => ({
+                              ...current,
+                              handle: event.target.value,
+                            }))
+                          }
+                        />
+                      </label>
+                      <label className="compact-field">
+                        <span>头像路径</span>
+                        <input
+                          value={fan.avatar}
+                          onChange={(event) =>
+                            updateFan(fanIndex, (current) => ({
+                              ...current,
+                              avatar: event.target.value,
+                            }))
+                          }
+                        />
+                      </label>
+                      <label className="compact-field">
+                        <span>初始好感</span>
+                        <input
+                          type="number"
+                          min={0}
+                          max={100}
+                          value={fan.initialAffinity}
+                          onChange={(event) =>
+                            updateFan(fanIndex, (current) => ({
+                              ...current,
+                              initialAffinity: Number(event.target.value),
+                            }))
+                          }
+                        />
+                      </label>
+                      <label className="compact-field">
+                        <span>票力上限</span>
+                        <input
+                          type="number"
+                          min={0}
+                          value={fan.maxVotePower}
+                          onChange={(event) =>
+                            updateFan(fanIndex, (current) => ({
+                              ...current,
+                              maxVotePower: Number(event.target.value),
+                            }))
+                          }
+                        />
+                      </label>
+                    </div>
+
+                    <AutoGrowTextarea
+                      label="人物简介"
+                      value={fan.bio}
+                      onChange={(value) =>
+                        updateFan(fanIndex, (current) => ({ ...current, bio: value }))
+                      }
+                      softLimit={180}
+                      minRows={2}
+                    />
+
+                    <div className="core-fan-tags-editor">
+                      <div className="core-fan-subheading">
+                        <span>人物标签</span>
+                        <button
+                          type="button"
+                          className="tiny-button"
+                          aria-label={`为${fan.name}新增标签`}
+                          disabled={fan.tags.length >= 4}
+                          onClick={() =>
+                            updateFan(fanIndex, (current) => ({
+                              ...current,
+                              tags: [...current.tags, '新标签'],
+                            }))
+                          }
+                        >
+                          <Plus size={13} />
+                        </button>
+                      </div>
+                      <div className="core-fan-tag-list">
+                        {fan.tags.map((tag, tagIndex) => (
+                          <div className="core-fan-tag-row" key={tagIndex}>
+                            <label className="compact-field">
+                              <span className="sr-only">
+                                {fan.name} 标签 {tagIndex + 1}
+                              </span>
+                              <input
+                                maxLength={12}
+                                value={tag}
+                                onChange={(event) =>
+                                  updateFan(fanIndex, (current) => ({
+                                    ...current,
+                                    tags: current.tags.map((item, itemIndex) =>
+                                      itemIndex === tagIndex ? event.target.value : item,
+                                    ),
+                                  }))
+                                }
+                              />
+                            </label>
+                            <button
+                              type="button"
+                              className="tiny-button"
+                              aria-label={`删除标签 ${tag}`}
+                              disabled={fan.tags.length <= 1}
+                              onClick={() =>
+                                updateFan(fanIndex, (current) => ({
+                                  ...current,
+                                  tags: current.tags.filter(
+                                    (_, itemIndex) => itemIndex !== tagIndex,
+                                  ),
+                                }))
+                              }
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="core-fan-history-editor">
+                      <div className="core-fan-subheading">
+                        <span>过往聊天记录</span>
+                        <button
+                          type="button"
+                          className="tiny-button"
+                          aria-label={`为${fan.name}新增过往聊天`}
+                          disabled={fan.pastChats.length >= 8}
+                          onClick={() => addPastChat(fanIndex)}
+                        >
+                          <Plus size={13} />
+                        </button>
+                      </div>
+                      {fan.pastChats.length === 0 ? (
+                        <p className="compact-empty-state">
+                          这名粉丝尚无赛前聊天。适合刚刚出现、还没有关系基础的角色。
+                        </p>
+                      ) : (
+                        <div className="core-fan-history-list">
+                          {fan.pastChats.map((chat, chatIndex) => (
+                            <fieldset className="core-fan-history-card" key={chatIndex}>
+                              <legend>过往 {chatIndex + 1}</legend>
+                              <div className="core-fan-history-card__toolbar">
+                                <span>{chat.timeLabel}</span>
+                                <button
+                                  type="button"
+                                  className="tiny-button"
+                                  aria-label={`删除${fan.name}的过往聊天 ${chatIndex + 1}`}
+                                  onClick={() =>
+                                    updateFan(fanIndex, (current) => ({
+                                      ...current,
+                                      pastChats: current.pastChats.filter(
+                                        (_, itemIndex) => itemIndex !== chatIndex,
+                                      ),
+                                    }))
+                                  }
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                              </div>
+                              <div className="core-fan-history-card__grid">
+                                <label className="compact-field">
+                                  <span>记录 ID</span>
+                                  <input
+                                    value={chat.id}
+                                    onChange={(event) =>
+                                      updateFan(fanIndex, (current) => ({
+                                        ...current,
+                                        pastChats: current.pastChats.map((item, itemIndex) =>
+                                          itemIndex === chatIndex
+                                            ? { ...item, id: event.target.value }
+                                            : item,
+                                        ),
+                                      }))
+                                    }
+                                  />
+                                </label>
+                                <label className="compact-field">
+                                  <span>时间标签</span>
+                                  <input
+                                    maxLength={24}
+                                    value={chat.timeLabel}
+                                    onChange={(event) =>
+                                      updateFan(fanIndex, (current) => ({
+                                        ...current,
+                                        pastChats: current.pastChats.map((item, itemIndex) =>
+                                          itemIndex === chatIndex
+                                            ? { ...item, timeLabel: event.target.value }
+                                            : item,
+                                        ),
+                                      }))
+                                    }
+                                  />
+                                </label>
+                              </div>
+                              <AutoGrowTextarea
+                                label="粉丝当时发来的消息"
+                                value={chat.message}
+                                onChange={(value) =>
+                                  updateFan(fanIndex, (current) => ({
+                                    ...current,
+                                    pastChats: current.pastChats.map((item, itemIndex) =>
+                                      itemIndex === chatIndex ? { ...item, message: value } : item,
+                                    ),
+                                  }))
+                                }
+                                minRows={2}
+                              />
+                              <AutoGrowTextarea
+                                label="成员当时的回复"
+                                value={chat.reply}
+                                onChange={(value) =>
+                                  updateFan(fanIndex, (current) => ({
+                                    ...current,
+                                    pastChats: current.pastChats.map((item, itemIndex) =>
+                                      itemIndex === chatIndex ? { ...item, reply: value } : item,
+                                    ),
+                                  }))
+                                }
+                                minRows={2}
+                              />
+                            </fieldset>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </details>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="inspector-section">
+          <div className="section-heading">
+            <span>普通 NPC 与热点闲聊</span>
+            <button
+              type="button"
+              className="tiny-button"
+              aria-label="新增 NPC 话题轮次"
+              onClick={addBackgroundFlip}
+            >
+              <Plus size={14} />
+            </button>
+          </div>
+          <p className="section-help npc-editor-help">
+            相同 contactId 会聚合成一名 NPC
+            的多轮聊天；内容到达日期后自动进入“已回复”，玩家只阅读、不作答。姓名和全部气泡都支持模板变量。
+          </p>
+          <div className="npc-flip-editor-list">
+            {pack.backgroundFlips.map((flip, index) => (
+              <details className="npc-flip-editor" key={index}>
+                <summary>
+                  <span>{renderTemplateText(flip.fanName, templateVariables)}</span>
+                  <span className="npc-flip-editor__meta">
+                    第 {flip.day} 日 · {flip.reply !== undefined ? '自动一问一答' : 'NPC 闲聊'}
+                  </span>
+                </summary>
+                <div className="npc-flip-editor__body">
+                  <div className="npc-flip-editor__toolbar">
+                    <span>{flip.id}</span>
+                    <div>
+                      <button
+                        type="button"
+                        className="tiny-button"
+                        aria-label={`复制 ${flip.fanName} 为下一轮`}
+                        title="复制为同一 NPC 的下一轮"
+                        onClick={() => duplicateBackgroundFlip(index)}
+                      >
+                        <Copy size={13} />
+                      </button>
+                      <button
+                        type="button"
+                        className="tiny-button"
+                        aria-label={`删除 NPC 轮次 ${flip.id}`}
+                        title="删除该轮次，可使用撤销恢复"
+                        onClick={() =>
+                          onUpdate((current) => ({
+                            ...current,
+                            backgroundFlips: current.backgroundFlips.filter(
+                              (_, flipIndex) => flipIndex !== index,
+                            ),
+                          }))
+                        }
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="npc-flip-editor__grid">
+                    <label className="compact-field">
+                      <span>轮次 ID</span>
+                      <input
+                        value={flip.id}
+                        onChange={(event) =>
+                          updateBackgroundFlip(index, (current) => ({
+                            ...current,
+                            id: event.target.value,
+                          }))
+                        }
+                      />
+                    </label>
+                    <label className="compact-field">
+                      <span>稳定 contactId</span>
+                      <input
+                        value={flip.contactId ?? ''}
+                        onChange={(event) =>
+                          updateBackgroundFlip(index, (current) => ({
+                            ...current,
+                            contactId: event.target.value || undefined,
+                          }))
+                        }
+                      />
+                    </label>
+                    <label className="compact-field">
+                      <span>出现日</span>
+                      <input
+                        type="number"
+                        min={1}
+                        max={pack.config.totalDays}
+                        value={flip.day}
+                        onChange={(event) =>
+                          updateBackgroundFlip(index, (current) => ({
+                            ...current,
+                            day: Number(event.target.value) || 1,
+                          }))
+                        }
+                      />
+                    </label>
+                    <label className="compact-field">
+                      <span>互动类型</span>
+                      <select
+                        value={flip.reply !== undefined ? 'automatic' : 'chatter'}
+                        onChange={(event) =>
+                          updateBackgroundFlip(index, (current) =>
+                            event.target.value === 'chatter'
+                              ? {
+                                  ...current,
+                                  reply: undefined,
+                                  continuations: current.continuations ?? [],
+                                }
+                              : {
+                                  ...current,
+                                  reply: current.reply ?? '填写成员自动发出的回复。',
+                                  continuations: undefined,
+                                },
+                          )
+                        }
+                      >
+                        <option value="chatter">NPC 闲聊（玩家只读）</option>
+                        <option value="automatic">自动展示一问一答</option>
+                      </select>
+                    </label>
+                    <label className="compact-field">
+                      <span>NPC 昵称</span>
+                      <input
+                        value={flip.fanName}
+                        onChange={(event) =>
+                          updateBackgroundFlip(index, (current) => ({
+                            ...current,
+                            fanName: event.target.value,
+                          }))
+                        }
+                      />
+                    </label>
+                    <label className="compact-field">
+                      <span>属性标签</span>
+                      <input
+                        value={flip.tag}
+                        onChange={(event) =>
+                          updateBackgroundFlip(index, (current) => ({
+                            ...current,
+                            tag: event.target.value,
+                          }))
+                        }
+                      />
+                    </label>
+                    <label className="compact-field npc-flip-editor__avatar-field">
+                      <span>头像路径（可空）</span>
+                      <input
+                        value={flip.avatar ?? ''}
+                        onChange={(event) =>
+                          updateBackgroundFlip(index, (current) => ({
+                            ...current,
+                            avatar: event.target.value || undefined,
+                          }))
+                        }
+                      />
+                    </label>
+                  </div>
+
+                  <AutoGrowTextarea
+                    label="NPC 第一条消息"
+                    value={flip.message}
+                    onChange={(value) =>
+                      updateBackgroundFlip(index, (current) => ({ ...current, message: value }))
+                    }
+                    helpText="公开争议建议写明“双方说法冲突、尚无定论”，不要把指控写成事实。"
+                  />
+
+                  {flip.reply !== undefined ? (
+                    <AutoGrowTextarea
+                      label="成员自动回复"
+                      value={flip.reply}
+                      onChange={(value) =>
+                        updateBackgroundFlip(index, (current) => ({ ...current, reply: value }))
+                      }
+                    />
+                  ) : (
+                    <div className="npc-continuation-editor-list">
+                      {(flip.continuations ?? []).map((message, messageIndex) => (
+                        <fieldset className="npc-continuation-editor" key={messageIndex}>
+                          <legend>连续气泡 {messageIndex + 1}</legend>
+                          <div className="npc-continuation-editor__topline">
+                            <span>仍由同一 NPC 发出</span>
+                            <button
+                              type="button"
+                              className="tiny-button"
+                              aria-label={`删除 NPC 连续气泡 ${messageIndex + 1}`}
+                              onClick={() =>
+                                updateBackgroundFlip(index, (current) => ({
+                                  ...current,
+                                  continuations: current.continuations?.filter(
+                                    (_, itemIndex) => itemIndex !== messageIndex,
+                                  ),
+                                }))
+                              }
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
+                          <AutoGrowTextarea
+                            label={`NPC 连续消息 ${messageIndex + 1}`}
+                            value={message}
+                            onChange={(value) =>
+                              updateBackgroundFlip(index, (current) => ({
+                                ...current,
+                                continuations: current.continuations?.map((item, itemIndex) =>
+                                  itemIndex === messageIndex ? value : item,
+                                ),
+                              }))
+                            }
+                            minRows={2}
+                          />
+                        </fieldset>
+                      ))}
+                      <button
+                        type="button"
+                        className="ghost-button npc-continuation-add"
+                        disabled={(flip.continuations?.length ?? 0) >= 4}
+                        onClick={() =>
+                          updateBackgroundFlip(index, (current) => ({
+                            ...current,
+                            continuations: [
+                              ...(current.continuations ?? []),
+                              '填写 NPC 接着发来的下一条消息。',
+                            ],
+                          }))
+                        }
+                      >
+                        <Plus size={13} /> 新增 NPC 连续气泡
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </details>
+            ))}
+          </div>
+        </section>
+
         <VariableHints variables={templateVariables} />
       </form>
     </>
@@ -897,7 +1552,7 @@ function NodeInspector({
           id: `choice-${index}`,
           text: '新的预设回复',
           cost: { energy: 1, mindset: 1 },
-          effects: {},
+          effects: { affinity: { [node.fanId]: 0 }, popularity: 0 },
         },
       ],
     }));
@@ -1290,6 +1945,43 @@ function NodeInspector({
                   }
                 />
                 <label className="field">
+                  <span>当前粉丝好感变化</span>
+                  <input
+                    type="number"
+                    aria-label="当前粉丝好感变化"
+                    value={choice.effects.affinity?.[node.fanId] ?? 0}
+                    onChange={(event) =>
+                      updateChoice(choice.id, (current) => ({
+                        ...current,
+                        effects: {
+                          ...current.effects,
+                          affinity: {
+                            ...current.effects.affinity,
+                            [node.fanId]: Number(event.target.value),
+                          },
+                        },
+                      }))
+                    }
+                  />
+                </label>
+                <label className="field">
+                  <span>泛人气变化</span>
+                  <input
+                    type="number"
+                    aria-label="泛人气变化"
+                    value={choice.effects.popularity}
+                    onChange={(event) =>
+                      updateChoice(choice.id, (current) => ({
+                        ...current,
+                        effects: {
+                          ...current.effects,
+                          popularity: Number(event.target.value),
+                        },
+                      }))
+                    }
+                  />
+                </label>
+                <label className="field">
                   <span>精力消耗</span>
                   <input
                     type="number"
@@ -1304,7 +1996,7 @@ function NodeInspector({
                   />
                 </label>
                 <label className="field">
-                  <span>心态消耗</span>
+                  <span>心情消耗</span>
                   <input
                     type="number"
                     min={1}
@@ -1318,13 +2010,42 @@ function NodeInspector({
                   />
                 </label>
                 <label className="field full">
+                  <span>特殊结局</span>
+                  <select
+                    aria-label="特殊结局"
+                    aria-describedby={`choice-ending-help-${choiceIndex}`}
+                    value={choice.endingId ?? ''}
+                    onChange={(event) =>
+                      updateChoice(choice.id, (current) => ({
+                        ...current,
+                        endingId: event.target.value || undefined,
+                        nextNodeId: event.target.value ? undefined : current.nextNodeId,
+                        nextNodeTiming: event.target.value ? undefined : current.nextNodeTiming,
+                      }))
+                    }
+                  >
+                    <option value="">不触发特殊结局</option>
+                    {pack.earlyEndings.map((ending) => (
+                      <option key={ending.id} value={ending.id}>
+                        {ending.title} ({ending.id})
+                      </option>
+                    ))}
+                  </select>
+                  <small className="field-help" id={`choice-ending-help-${choiceIndex}`}>
+                    选择后不再连接后续节点；玩家看完结局会恢复到选择这条回复之前。
+                  </small>
+                </label>
+                <label className="field full">
                   <span>后续节点</span>
                   <select
+                    aria-label="后续节点"
+                    disabled={Boolean(choice.endingId)}
                     value={choice.nextNodeId ?? ''}
                     onChange={(event) =>
                       updateChoice(choice.id, (current) => ({
                         ...current,
                         nextNodeId: event.target.value || undefined,
+                        nextNodeTiming: event.target.value ? current.nextNodeTiming : undefined,
                       }))
                     }
                   >
@@ -1338,11 +2059,39 @@ function NodeInspector({
                       ))}
                   </select>
                 </label>
-                <JsonField<StoryEffects>
+                <label className="field full">
+                  <span>后续节点出现时机</span>
+                  <select
+                    aria-label="后续节点出现时机"
+                    aria-describedby={`choice-next-timing-help-${choiceIndex}`}
+                    disabled={Boolean(choice.endingId) || !choice.nextNodeId}
+                    value={choice.nextNodeTiming ?? 'day-start'}
+                    onChange={(event) =>
+                      updateChoice(choice.id, (current) => ({
+                        ...current,
+                        nextNodeTiming:
+                          event.target.value === 'immediate' ? 'immediate' : undefined,
+                      }))
+                    }
+                  >
+                    <option value="day-start">下一次日初检查（默认）</option>
+                    <option value="immediate">回复后立即出现</option>
+                  </select>
+                  <small className="field-help" id={`choice-next-timing-help-${choiceIndex}`}>
+                    立即出现仍要求目标节点的发布日期不晚于当前游戏日，并满足目标触发条件。
+                  </small>
+                </label>
+                <JsonField<StoryChoice['effects']>
                   label="效果 JSON"
                   value={choice.effects}
                   onCommit={(effects) =>
-                    updateChoice(choice.id, (current) => ({ ...current, effects: effects ?? {} }))
+                    updateChoice(choice.id, (current) => ({
+                      ...current,
+                      effects: {
+                        ...(effects ?? {}),
+                        popularity: effects?.popularity ?? 0,
+                      },
+                    }))
                   }
                 />
               </div>
@@ -1483,6 +2232,7 @@ export function App() {
       return {
         ...pack.globalVariables,
         idolName: previewProfile.idolName,
+        idolNickname: buildIdolNickname(previewProfile.idolName),
         teamName: '',
         teamShortName: '',
       };
@@ -1521,6 +2271,19 @@ export function App() {
       return next;
     });
   }, []);
+
+  const renameFanId = useCallback(
+    (previousId: string, nextId: string) => {
+      if (previousId === nextId) return;
+      commitPack((current) => renameFanReferences(current, previousId, nextId));
+      setVisibleFanIds((current) => {
+        const next = new Set(current);
+        if (next.delete(previousId)) next.add(nextId);
+        return next;
+      });
+    },
+    [commitPack],
+  );
 
   const replacePack = useCallback((nextPack: StoryPack, nextName: string) => {
     setPack(clonePack(nextPack));
@@ -1603,7 +2366,9 @@ export function App() {
             id: `${node.id}--${choice.id}--${choice.nextNodeId}`,
             source: node.id,
             target: choice.nextNodeId,
-            label: choice.text.length > 12 ? `${choice.text.slice(0, 12)}…` : choice.text,
+            label: `${choice.nextNodeTiming === 'immediate' ? '立即 · ' : ''}${
+              choice.text.length > 12 ? `${choice.text.slice(0, 12)}…` : choice.text
+            }`,
             type: 'smoothstep',
             markerEnd: { type: MarkerType.ArrowClosed, color: '#706f79' },
             style: { stroke: '#706f79', strokeWidth: 1.4 },
@@ -1753,7 +2518,7 @@ export function App() {
           id: 'reply-1',
           text: '在这里填写偶像的预设回复。',
           cost: { energy: 1, mindset: 1 },
-          effects: { affinity: { [fan.id]: 1 } },
+          effects: { affinity: { [fan.id]: 1 }, popularity: 0 },
         },
       ],
       onExpire: { affinity: { [fan.id]: -1 } },
@@ -1824,6 +2589,7 @@ export function App() {
           choices: node.choices.map((choice) => ({
             ...choice,
             nextNodeId: choice.nextNodeId === nodeId ? undefined : choice.nextNodeId,
+            nextNodeTiming: choice.nextNodeId === nodeId ? undefined : choice.nextNodeTiming,
           })),
           onExpire: node.onExpire
             ? {
@@ -2035,6 +2801,7 @@ export function App() {
               previewProfile={previewProfile}
               templateVariables={templateVariables}
               onUpdate={commitPack}
+              onRenameFanId={renameFanId}
               onPreviewProfileChange={setPreviewProfile}
             />
           )}

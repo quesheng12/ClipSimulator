@@ -14,7 +14,7 @@ import type {
   VoteTier,
 } from './types';
 
-const SAVE_VERSION = 2;
+const SAVE_VERSION = 4;
 
 const clamp = (value: number, min: number, max: number): number =>
   Math.min(max, Math.max(min, value));
@@ -161,6 +161,29 @@ function activateDayStartNodes(state: GameState, pack: StoryPack): GameState {
   };
 }
 
+function activateImmediateFollowUp(state: GameState, pack: StoryPack, nodeId: string): GameState {
+  const node = pack.nodes.find((candidate) => candidate.id === nodeId);
+  const alreadyProcessed =
+    state.pendingNodeIds.includes(nodeId) || Object.hasOwn(state.resolvedNodes, nodeId);
+  if (
+    !node ||
+    alreadyProcessed ||
+    node.postedDay > state.currentDay ||
+    !storyTriggerMet(node.trigger, state)
+  ) {
+    return state;
+  }
+
+  return {
+    ...state,
+    pendingNodeIds: unique([...state.pendingNodeIds, nodeId]),
+    activatedTurnByNodeId: {
+      ...state.activatedTurnByNodeId,
+      [nodeId]: state.activatedTurnByNodeId[nodeId] ?? state.turn,
+    },
+  };
+}
+
 export function createInitialGame(pack: StoryPack, mode: DisplayMode): GameState {
   const affinity = Object.fromEntries(pack.fans.map((fan) => [fan.id, fan.initialAffinity]));
   const initial: GameState = {
@@ -236,6 +259,9 @@ export function replyToNode(
   nextState = applyEffects(nextState, pack, choice.effects);
   if (choice.nextNodeId) {
     nextState.unlockedNodeIds = unique([...nextState.unlockedNodeIds, choice.nextNodeId]);
+    if (choice.nextNodeTiming === 'immediate') {
+      nextState = activateImmediateFollowUp(nextState, pack, choice.nextNodeId);
+    }
   }
 
   const feedback: ReplyFeedback = {
@@ -245,7 +271,16 @@ export function replyToNode(
     popularityDelta: choice.effects.popularity ?? 0,
     resourceCost: { ...choice.cost },
   };
-  return { ...nextState, lastFeedback: feedback };
+  const resolved = { ...nextState, lastFeedback: feedback };
+  if (choice.endingId) {
+    return {
+      ...resolved,
+      status: 'early-ending',
+      earlyEndingId: choice.endingId,
+      pendingNodeIds: [],
+    };
+  }
+  return resolved;
 }
 
 function applyTurnEvent(state: GameState, pack: StoryPack): GameState {

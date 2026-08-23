@@ -780,6 +780,309 @@ select:focus-visible {
   gap: 8px;
 }
 
+.npc-editor-help {
+  margin-bottom: 10px;
+}
+
+.core-fan-editor-help {
+  margin-bottom: 10px;
+}
+
+.core-fan-editor-list,
+.core-fan-history-list {
+  display: grid;
+  gap: 8px;
+}
+
+.core-fan-editor {
+  overflow: clip;
+  border: 1px solid var(--ed-border);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.core-fan-editor > summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  min-height: 52px;
+  padding: 8px 11px;
+  cursor: pointer;
+}
+
+.core-fan-editor > summary::marker {
+  color: var(--ed-dim);
+}
+
+.core-fan-editor > summary:hover {
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.core-fan-editor > summary:focus-visible {
+  outline: 2px solid var(--ed-purple);
+  outline-offset: -2px;
+}
+
+.core-fan-editor[open] > summary {
+  border-bottom: 1px solid var(--ed-border);
+}
+
+.core-fan-editor__identity {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 9px;
+  align-items: center;
+  min-width: 0;
+}
+
+.core-fan-editor__identity > span:last-child {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.core-fan-editor__identity strong,
+.core-fan-editor__identity small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.core-fan-editor__identity strong {
+  color: var(--ed-text);
+  font-size: 12px;
+}
+
+.core-fan-editor__identity small,
+.core-fan-editor__meta {
+  color: var(--ed-dim);
+  font-size: 9px;
+}
+
+.core-fan-editor__meta {
+  white-space: nowrap;
+}
+
+.core-fan-editor__avatar {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  overflow: hidden;
+  place-items: center;
+  border: 1px solid var(--ed-border);
+  border-radius: 50%;
+  background: #111115;
+  font-size: 16px;
+}
+
+.core-fan-editor__avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.core-fan-editor__body {
+  display: grid;
+  gap: 14px;
+  padding: 11px;
+}
+
+.core-fan-editor__grid,
+.core-fan-history-card__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.core-fan-tags-editor,
+.core-fan-history-editor {
+  display: grid;
+  gap: 8px;
+}
+
+.core-fan-subheading,
+.core-fan-history-card__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.core-fan-subheading > span {
+  color: var(--ed-muted);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.core-fan-tag-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 7px;
+}
+
+.core-fan-tag-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 28px;
+  gap: 6px;
+}
+
+.core-fan-history-card {
+  display: grid;
+  min-width: 0;
+  gap: 10px;
+  margin: 0;
+  padding: 10px;
+  border: 1px solid color-mix(in srgb, var(--ed-mint), transparent 66%);
+  border-radius: 10px;
+  background: rgba(65, 200, 176, 0.035);
+}
+
+.core-fan-history-card legend {
+  padding: 0 5px;
+  color: var(--ed-mint);
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.core-fan-history-card__toolbar > span {
+  color: var(--ed-dim);
+  font-size: 10px;
+}
+
+.npc-flip-editor-list {
+  display: grid;
+  gap: 8px;
+}
+
+.npc-flip-editor {
+  overflow: clip;
+  border: 1px solid var(--ed-border);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.npc-flip-editor > summary {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  min-height: 44px;
+  padding: 8px 11px;
+  color: var(--ed-text);
+  cursor: pointer;
+}
+
+.npc-flip-editor > summary::marker {
+  color: var(--ed-dim);
+}
+
+.npc-flip-editor > summary > span:first-child {
+  overflow: hidden;
+  font-size: 12px;
+  font-weight: 680;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.npc-flip-editor > summary:hover {
+  background: rgba(255, 255, 255, 0.035);
+}
+
+.npc-flip-editor > summary:focus-visible {
+  outline: 2px solid var(--ed-purple);
+  outline-offset: -2px;
+}
+
+.npc-flip-editor[open] > summary {
+  border-bottom: 1px solid var(--ed-border);
+}
+
+.npc-flip-editor__meta {
+  color: var(--ed-dim);
+  font-size: 9px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.npc-flip-editor__body {
+  display: grid;
+  gap: 12px;
+  padding: 11px;
+}
+
+.npc-flip-editor__toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.npc-flip-editor__toolbar > span {
+  overflow: hidden;
+  color: var(--ed-muted);
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.npc-flip-editor__toolbar > div {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 6px;
+}
+
+.npc-flip-editor__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.npc-flip-editor__avatar-field {
+  grid-column: 1 / -1;
+}
+
+.npc-continuation-editor-list {
+  display: grid;
+  gap: 9px;
+}
+
+.npc-continuation-editor {
+  display: grid;
+  min-width: 0;
+  gap: 10px;
+  margin: 0;
+  padding: 10px;
+  border: 1px solid color-mix(in srgb, var(--ed-purple), transparent 64%);
+  border-radius: 10px;
+  background: rgba(138, 108, 231, 0.045);
+}
+
+.npc-continuation-editor legend {
+  padding: 0 5px;
+  color: #c4b6ff;
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.npc-continuation-editor__topline {
+  display: flex;
+  justify-content: space-between;
+  gap: 7px;
+  align-items: center;
+}
+
+.npc-continuation-editor__topline > span {
+  color: var(--ed-dim);
+  font-size: 10px;
+}
+
+.npc-continuation-add {
+  justify-self: stretch;
+}
+
 .name-pool-editor {
   overflow: clip;
   border: 1px solid var(--ed-border);

@@ -1,6 +1,11 @@
 import type { PlayerProfile, StoryPack } from './types';
 
-export const RESERVED_TEMPLATE_VARIABLES = ['idolName', 'teamName', 'teamShortName'] as const;
+export const RESERVED_TEMPLATE_VARIABLES = [
+  'idolName',
+  'idolNickname',
+  'teamName',
+  'teamShortName',
+] as const;
 
 export type ReservedTemplateVariable = (typeof RESERVED_TEMPLATE_VARIABLES)[number];
 export type TemplateVariables = Readonly<Record<string, string>>;
@@ -18,6 +23,11 @@ export function isValidTemplateVariableName(name: string): boolean {
   return TEMPLATE_VARIABLE_NAME_PATTERN.test(name);
 }
 
+export function buildIdolNickname(idolName: string): string {
+  const lastCharacter = Array.from(idolName.trim()).at(-1) ?? '';
+  return lastCharacter.repeat(2);
+}
+
 export function buildTemplateVariables(pack: StoryPack, profile: PlayerProfile): TemplateVariables {
   const team = pack.profileSetup.teams.find((candidate) => candidate.id === profile.teamId);
   if (!team) {
@@ -27,6 +37,7 @@ export function buildTemplateVariables(pack: StoryPack, profile: PlayerProfile):
   return {
     ...pack.globalVariables,
     idolName: profile.idolName,
+    idolNickname: buildIdolNickname(profile.idolName),
     teamName: team.name,
     teamShortName: team.shortName,
   };
@@ -63,6 +74,12 @@ function transformVisibleStoryText(pack: StoryPack, transform: VisibleTextTransf
     fan.name = apply(fan.name, `fans.${fan.id}.name`);
     fan.handle = apply(fan.handle, `fans.${fan.id}.handle`);
     fan.bio = apply(fan.bio, `fans.${fan.id}.bio`);
+    fan.tags = fan.tags.map((tag, tagIndex) => apply(tag, `fans.${fan.id}.tags.${tagIndex}`));
+    for (const [chatIndex, chat] of fan.pastChats.entries()) {
+      chat.timeLabel = apply(chat.timeLabel, `fans.${fan.id}.pastChats.${chatIndex}.timeLabel`);
+      chat.message = apply(chat.message, `fans.${fan.id}.pastChats.${chatIndex}.message`);
+      chat.reply = apply(chat.reply, `fans.${fan.id}.pastChats.${chatIndex}.reply`);
+    }
     for (const [tierIndex, tier] of fan.voteTiers.entries()) {
       tier.label = apply(tier.label, `fans.${fan.id}.voteTiers.${tierIndex}.label`);
     }
@@ -78,11 +95,6 @@ function transformVisibleStoryText(pack: StoryPack, transform: VisibleTextTransf
     );
     for (const choice of node.choices) {
       choice.text = apply(choice.text, `nodes.${node.id}.choices.${choice.id}.text`, node.id);
-      choice.note = applyOptional(
-        choice.note,
-        `nodes.${node.id}.choices.${choice.id}.note`,
-        node.id,
-      );
     }
   }
 
@@ -95,7 +107,10 @@ function transformVisibleStoryText(pack: StoryPack, transform: VisibleTextTransf
     flip.fanName = apply(flip.fanName, `backgroundFlips.${flip.id}.fanName`);
     flip.tag = apply(flip.tag, `backgroundFlips.${flip.id}.tag`);
     flip.message = apply(flip.message, `backgroundFlips.${flip.id}.message`);
-    flip.reply = apply(flip.reply, `backgroundFlips.${flip.id}.reply`);
+    flip.reply = applyOptional(flip.reply, `backgroundFlips.${flip.id}.reply`);
+    flip.continuations = flip.continuations?.map((message, index) =>
+      apply(message, `backgroundFlips.${flip.id}.continuations.${index}`),
+    );
   }
 
   for (const ending of resolved.electionEndings) {
@@ -107,6 +122,9 @@ function transformVisibleStoryText(pack: StoryPack, transform: VisibleTextTransf
   for (const ending of resolved.earlyEndings) {
     ending.title = apply(ending.title, `earlyEndings.${ending.id}.title`);
     ending.description = apply(ending.description, `earlyEndings.${ending.id}.description`);
+    if (ending.image) {
+      ending.image.alt = apply(ending.image.alt, `earlyEndings.${ending.id}.image.alt`);
+    }
   }
 
   for (const achievement of resolved.achievements) {

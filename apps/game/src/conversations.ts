@@ -8,19 +8,23 @@ export interface ConversationParticipant {
   id: string;
   kind: ConversationKind;
   name: string;
-  handle: string;
+  handle?: string;
   avatar: string;
   accent: string;
-  tag?: string;
+  tags: string[];
   affinity?: number;
 }
 
 export interface ConversationExchange {
   id: string;
   day: number;
+  /** Authored marker for relationship history that predates the numbered run. */
+  timeLabel?: string;
   title?: string;
   incoming: string;
   outgoing?: string;
+  /** Consecutive bubbles sent by the same ordinary NPC after `incoming`. */
+  continuations?: string[];
   context?: string;
   tag?: string;
   status: ConversationExchangeStatus;
@@ -79,6 +83,7 @@ export function getCoreParticipant(
     handle: fan.handle,
     avatar: fan.avatar,
     accent: fan.accent,
+    tags: fan.tags,
     affinity: state.affinity[fan.id] ?? fan.initialAffinity,
   };
 }
@@ -97,10 +102,9 @@ export function getBackgroundParticipant(
     id: contactId,
     kind: 'background',
     name: latest.fanName,
-    handle: latest.tag,
     avatar: latest.avatar ?? backgroundAvatar(contactId),
     accent: backgroundAccent(contactId),
-    tag: latest.tag,
+    tags: [latest.tag],
   };
 }
 
@@ -115,7 +119,18 @@ export function getCoreConversationHistory(
   fanId: string,
   pendingNodeId?: string,
 ): ConversationExchange[] {
-  return pack.nodes
+  const fan = pack.fans.find((candidate) => candidate.id === fanId);
+  const pastChats: ConversationExchange[] = (fan?.pastChats ?? []).map((chat) => ({
+    id: `past:${fanId}:${chat.id}`,
+    day: 0,
+    timeLabel: chat.timeLabel,
+    incoming: chat.message,
+    outgoing: chat.reply,
+    status: 'replied',
+    choices: [],
+  }));
+
+  const reachedNodes = pack.nodes
     .map((node, index) => ({ node, index }))
     .filter(({ node }) => {
       if (node.fanId !== fanId) return false;
@@ -165,26 +180,34 @@ export function getCoreConversationHistory(
         choices: [...node.choices],
       };
     });
+
+  return [...pastChats, ...reachedNodes];
 }
 
 export function getBackgroundConversationHistory(
+  state: GameState,
   pack: StoryPack,
-  currentDay: number,
   contactId: string,
 ): ConversationExchange[] {
   return pack.backgroundFlips
     .map((flip, index) => ({ flip, index }))
-    .filter(({ flip }) => flip.day <= currentDay && getBackgroundContactId(flip) === contactId)
+    .filter(
+      ({ flip }) => flip.day <= state.currentDay && getBackgroundContactId(flip) === contactId,
+    )
     .sort((a, b) => a.flip.day - b.flip.day || a.index - b.index)
-    .map(({ flip }) => ({
-      id: flip.id,
-      day: flip.day,
-      incoming: flip.message,
-      outgoing: flip.reply,
-      tag: flip.tag,
-      status: 'automatic' as const,
-      choices: [],
-    }));
+    .map(
+      ({ flip }) =>
+        ({
+          id: flip.id,
+          day: flip.day,
+          incoming: flip.message,
+          outgoing: flip.reply,
+          continuations: [...(flip.continuations ?? [])],
+          tag: flip.tag,
+          status: 'automatic' as const,
+          choices: [],
+        }) satisfies ConversationExchange,
+    );
 }
 
 /** Core conversations always precede ordinary-fan conversations in the replied inbox. */
@@ -214,7 +237,7 @@ export function getRepliedConversations(state: GameState, pack: StoryPack): Repl
   ];
   const background = backgroundContactIds.flatMap((contactId): RepliedConversation[] => {
     const participant = getBackgroundParticipant(pack, state.currentDay, contactId);
-    const exchanges = getBackgroundConversationHistory(pack, state.currentDay, contactId);
+    const exchanges = getBackgroundConversationHistory(state, pack, contactId);
     const latestExchange = exchanges.at(-1);
     if (!participant || !latestExchange) return [];
     return [

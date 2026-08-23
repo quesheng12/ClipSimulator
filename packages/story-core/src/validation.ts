@@ -21,6 +21,27 @@ const profileNameSchema = z
   .refine((value) => value.trim().length > 0, '姓名去除首尾空格后不能为空')
   .refine((value) => value.trim().length <= 16, '姓名最多 16 个字符');
 
+const fanTagsSchema = z
+  .array(
+    z
+      .string()
+      .refine((value) => value.trim().length > 0, '粉丝标签去除首尾空格后不能为空')
+      .refine((value) => value.trim().length <= 12, '粉丝标签最多 12 个字符'),
+  )
+  .min(1, '每名核心粉丝至少需要一个标签')
+  .max(4, '每名核心粉丝最多使用四个标签')
+  .refine(
+    (tags) => new Set(tags.map((tag) => tag.trim())).size === tags.length,
+    '同一名核心粉丝不能使用重复标签',
+  );
+
+const coreFanPastChatSchema = z.object({
+  id: z.string().min(1),
+  timeLabel: z.string().min(1).max(24),
+  message: z.string().min(1),
+  reply: z.string().min(1),
+});
+
 const storyTriggerConditionSchema = z.discriminatedUnion('type', [
   z.object({ type: z.literal('flag-set'), flag: z.string().min(1) }),
   z.object({ type: z.literal('flag-unset'), flag: z.string().min(1) }),
@@ -67,12 +88,13 @@ const storyNodeSchema = z.object({
       z.object({
         id: z.string().min(1),
         text: z.string().min(1),
-        note: z.string().optional(),
         cost: resourcesSchema.refine((value) => value.energy >= 1 && value.mindset >= 1, {
-          message: '每个回复必须至少消耗 1 点精力和 1 点心态',
+          message: '每个回复必须至少消耗 1 点精力和 1 点心情',
         }),
-        effects: effectsSchema,
+        effects: effectsSchema.extend({ popularity: z.number().int() }),
         nextNodeId: z.string().min(1).optional(),
+        nextNodeTiming: z.enum(['day-start', 'immediate']).optional(),
+        endingId: z.string().min(1).optional(),
       }),
     )
     .min(1)
@@ -89,8 +111,30 @@ const storyNodeSchema = z.object({
     .optional(),
 });
 
+const backgroundFlipSchema = z
+  .object({
+    id: z.string().min(1),
+    contactId: z.string().min(1).optional(),
+    day: z.number().int().min(1),
+    fanName: z.string().min(1),
+    avatar: z.string().min(1).optional(),
+    tag: z.string().min(1),
+    message: z.string().min(1),
+    reply: z.string().min(1).optional(),
+    continuations: z.array(z.string().min(1)).min(1).max(4).optional(),
+  })
+  .superRefine((flip, context) => {
+    if (flip.reply && flip.continuations?.length) {
+      context.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: '普通翻牌不能同时使用成员自动回复 reply 和 NPC 连续消息 continuations',
+        path: ['reply'],
+      });
+    }
+  });
+
 export const storyPackSchema: z.ZodType<StoryPack> = z.object({
-  schemaVersion: z.literal(4),
+  schemaVersion: z.literal(14),
   id: z.string().min(1),
   title: z.string().min(1),
   description: z.string(),
@@ -148,6 +192,8 @@ export const storyPackSchema: z.ZodType<StoryPack> = z.object({
         name: z.string().min(1),
         handle: z.string().min(1),
         bio: z.string(),
+        tags: fanTagsSchema,
+        pastChats: z.array(coreFanPastChatSchema).max(8),
         avatar: z.string().min(1),
         accent: z.string().min(1),
         initialAffinity: z.number().int().min(0).max(100),
@@ -175,18 +221,7 @@ export const storyPackSchema: z.ZodType<StoryPack> = z.object({
       popularityDelta: z.number().int().optional(),
     }),
   ),
-  backgroundFlips: z.array(
-    z.object({
-      id: z.string().min(1),
-      contactId: z.string().min(1).optional(),
-      day: z.number().int().min(1),
-      fanName: z.string().min(1),
-      avatar: z.string().min(1).optional(),
-      tag: z.string().min(1),
-      message: z.string().min(1),
-      reply: z.string().min(1),
-    }),
-  ),
+  backgroundFlips: z.array(backgroundFlipSchema),
   electionEndings: z
     .array(
       z.object({
@@ -203,6 +238,12 @@ export const storyPackSchema: z.ZodType<StoryPack> = z.object({
       id: z.string().min(1),
       title: z.string().min(1),
       description: z.string().min(1),
+      image: z
+        .object({
+          src: z.string().min(1),
+          alt: z.string().min(1),
+        })
+        .optional(),
       trigger: z.object({
         takeoutCountAtLeast: z.number().int().min(1).optional(),
         allFlags: z.array(z.string().min(1)).optional(),
@@ -266,6 +307,11 @@ export function validateStoryPack(value: unknown): ValidationIssue[] {
       pack.nodes.map((node) => node.id),
       '节点',
       'nodes',
+    ),
+    ...duplicateIssues(
+      pack.backgroundFlips.map((flip) => flip.id),
+      '普通翻牌',
+      'backgroundFlips',
     ),
     ...duplicateIssues(
       pack.profileSetup.teams.map((team) => team.id),
@@ -377,6 +423,13 @@ export function validateStoryPack(value: unknown): ValidationIssue[] {
   }
 
   for (const fan of pack.fans) {
+    issues.push(
+      ...duplicateIssues(
+        fan.pastChats.map((chat) => chat.id),
+        `${fan.name} 的过往聊天`,
+        `fans.${fan.id}.pastChats`,
+      ),
+    );
     const maxConfiguredVotes = Math.max(...fan.voteTiers.map((tier) => tier.votes));
     if (maxConfiguredVotes > fan.maxVotePower) {
       issues.push({
@@ -442,6 +495,42 @@ export function validateStoryPack(value: unknown): ValidationIssue[] {
 
     const effectFanIds = new Set<string>();
     for (const choice of node.choices) {
+      if (choice.effects.affinity?.[node.fanId] === undefined) {
+        issues.push({
+          severity: 'error',
+          code: 'choice-missing-own-affinity',
+          message: `回复选项缺少当前粉丝 ${node.fanId} 的好感度结算数值`,
+          path: `nodes.${node.id}.choices.${choice.id}.effects.affinity.${node.fanId}`,
+          nodeId: node.id,
+        });
+      }
+      if (choice.endingId && !endingIds.has(choice.endingId)) {
+        issues.push({
+          severity: 'error',
+          code: 'missing-choice-ending',
+          message: `回复选项引用了不存在的特殊结局：${choice.endingId}`,
+          path: `nodes.${node.id}.choices.${choice.id}.endingId`,
+          nodeId: node.id,
+        });
+      }
+      if (choice.endingId && choice.nextNodeId) {
+        issues.push({
+          severity: 'error',
+          code: 'choice-ending-with-next-node',
+          message: '触发特殊结局的回复不能同时连接后续节点',
+          path: `nodes.${node.id}.choices.${choice.id}`,
+          nodeId: node.id,
+        });
+      }
+      if (choice.nextNodeTiming && !choice.nextNodeId) {
+        issues.push({
+          severity: 'error',
+          code: 'choice-timing-without-next-node',
+          message: '配置后续节点出现时机前，必须先连接一个后续节点',
+          path: `nodes.${node.id}.choices.${choice.id}.nextNodeTiming`,
+          nodeId: node.id,
+        });
+      }
       Object.keys(choice.effects.affinity ?? {}).forEach((id) => effectFanIds.add(id));
       Object.keys(choice.effects.voteBonus ?? {}).forEach((id) => effectFanIds.add(id));
     }
@@ -455,6 +544,17 @@ export function validateStoryPack(value: unknown): ValidationIssue[] {
           nodeId: node.id,
         });
       }
+    }
+  }
+
+  for (const flip of pack.backgroundFlips) {
+    if (flip.day > pack.config.totalDays) {
+      issues.push({
+        severity: 'error',
+        code: 'background-day-out-of-range',
+        message: `普通翻牌发布日期超出周目范围：第 ${flip.day} 日`,
+        path: `backgroundFlips.${flip.id}.day`,
+      });
     }
   }
 

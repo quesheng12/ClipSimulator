@@ -111,6 +111,23 @@ describe('story validation', () => {
     expect(validateStoryPack(withContactId)).toEqual([]);
   });
 
+  it('accepts read-only NPC chatter and rejects mixed outgoing/continuation modes', () => {
+    const readOnly = structuredClone(pack);
+    const readOnlyTopic = readOnly.backgroundFlips.find((flip) => flip.id === 'topic-idol-dog-01')!;
+    expect(readOnlyTopic.reply).toBeUndefined();
+    expect(readOnlyTopic.continuations).toHaveLength(2);
+    expect(validateStoryPack(readOnly)).toEqual([]);
+
+    const both = structuredClone(pack);
+    const topic = both.backgroundFlips.find((flip) => flip.id === 'topic-idol-dog-01')!;
+    topic.reply = '不应与 NPC 连续消息同时存在';
+    expect(
+      validateStoryPack(both).some(
+        (issue) => issue.code === 'schema' && issue.path?.includes('backgroundFlips'),
+      ),
+    ).toBe(true);
+  });
+
   it('reports missing targets and graph cycles', () => {
     const broken = structuredClone(pack);
     broken.nodes[0]!.choices[0]!.nextNodeId = 'not-a-node';
@@ -181,7 +198,7 @@ describe('story validation', () => {
     ).toBe(true);
   });
 
-  it('requires schema v4 and rejects duplicate or invalid profile names', () => {
+  it('requires schema v14 and rejects duplicate or invalid profile names', () => {
     const wrongVersion = structuredClone(pack) as StoryPack & { schemaVersion: number };
     wrongVersion.schemaVersion = 2;
     expect(
@@ -203,6 +220,106 @@ describe('story validation', () => {
     ];
     const invalidIssues = validateStoryPack(invalid);
     expect(invalidIssues.filter((issue) => issue.code === 'schema')).toHaveLength(2);
+  });
+
+  it('requires accessible alternative text when an early ending has an image', () => {
+    const invalid = structuredClone(pack);
+    invalid.earlyEndings[0]!.image!.alt = '';
+
+    expect(
+      validateStoryPack(invalid).some(
+        (issue) => issue.code === 'schema' && issue.path === 'earlyEndings.0.image.alt',
+      ),
+    ).toBe(true);
+  });
+
+  it('validates special endings referenced directly by reply choices', () => {
+    const valid = structuredClone(pack);
+    valid.nodes[0]!.choices[0]!.nextNodeId = undefined;
+    valid.nodes[0]!.choices[0]!.endingId = 'takeout-idol';
+    expect(validateStoryPack(valid)).toEqual([]);
+
+    const missing = structuredClone(valid);
+    missing.nodes[0]!.choices[0]!.endingId = 'missing-ending';
+    expect(validateStoryPack(missing).some((issue) => issue.code === 'missing-choice-ending')).toBe(
+      true,
+    );
+
+    const ambiguous = structuredClone(valid);
+    ambiguous.nodes[0]!.choices[0]!.nextNodeId = 'yuzu-02';
+    expect(
+      validateStoryPack(ambiguous).some((issue) => issue.code === 'choice-ending-with-next-node'),
+    ).toBe(true);
+  });
+
+  it('validates the appearance timing of downstream nodes', () => {
+    const immediate = structuredClone(pack);
+    immediate.nodes[0]!.choices[0]!.nextNodeTiming = 'immediate';
+    expect(validateStoryPack(immediate)).toEqual([]);
+
+    const missingTarget = structuredClone(immediate);
+    missingTarget.nodes[0]!.choices[0]!.nextNodeId = undefined;
+    expect(
+      validateStoryPack(missingTarget).some(
+        (issue) => issue.code === 'choice-timing-without-next-node',
+      ),
+    ).toBe(true);
+  });
+
+  it('requires explicit affinity and popularity settlements', () => {
+    const missingAffinity = structuredClone(pack);
+    const node = missingAffinity.nodes[0]!;
+    delete node.choices[0]!.effects.affinity![node.fanId];
+    expect(
+      validateStoryPack(missingAffinity).some(
+        (issue) => issue.code === 'choice-missing-own-affinity',
+      ),
+    ).toBe(true);
+
+    const missingPopularity = structuredClone(pack);
+    delete (missingPopularity.nodes[0]!.choices[0]!.effects as { popularity?: number }).popularity;
+    expect(
+      validateStoryPack(missingPopularity).some(
+        (issue) => issue.code === 'schema' && issue.path?.endsWith('effects.popularity'),
+      ),
+    ).toBe(true);
+  });
+
+  it('requires one to four unique, concise tags for every core fan', () => {
+    const missing = structuredClone(pack);
+    missing.fans[0]!.tags = [];
+    expect(
+      validateStoryPack(missing).some(
+        (issue) => issue.code === 'schema' && issue.path === 'fans.0.tags',
+      ),
+    ).toBe(true);
+
+    const duplicate = structuredClone(pack);
+    duplicate.fans[0]!.tags = ['高中生', '高中生'];
+    expect(
+      validateStoryPack(duplicate).some(
+        (issue) => issue.code === 'schema' && issue.path === 'fans.0.tags',
+      ),
+    ).toBe(true);
+  });
+
+  it('validates stable, editable past-chat records for core fans', () => {
+    const duplicate = structuredClone(pack);
+    duplicate.fans[0]!.pastChats[1]!.id = duplicate.fans[0]!.pastChats[0]!.id;
+    expect(
+      validateStoryPack(duplicate).some(
+        (issue) =>
+          issue.code === 'duplicate-id' && issue.path === `fans.${pack.fans[0]!.id}.pastChats`,
+      ),
+    ).toBe(true);
+
+    const missingReply = structuredClone(pack);
+    missingReply.fans[0]!.pastChats[0]!.reply = '';
+    expect(
+      validateStoryPack(missingReply).some(
+        (issue) => issue.code === 'schema' && issue.path === 'fans.0.pastChats.0.reply',
+      ),
+    ).toBe(true);
   });
 
   it('rejects invalid custom variables, reserved overrides, and unknown placeholders', () => {

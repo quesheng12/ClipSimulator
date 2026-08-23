@@ -6,6 +6,18 @@ const repliedGroup = (page: Page) => page.locator('.conversation-group--replied'
 const fixedTurnActions = (page: Page) => page.locator('.turn-actions--fixed');
 const DEFAULT_IDOL_NAME = '沈知夏';
 const ADAPTED_IDOL_NAMES = new Set(testStoryJson.profileSetup.namePools.adapted);
+const YUZU_FAN = testStoryJson.fans.find((fan) => fan.id === 'yuzu');
+const TAKEOUT_ENDING = testStoryJson.earlyEndings.find((ending) => ending.id === 'takeout-idol');
+
+if (!YUZU_FAN) {
+  throw new Error('The E2E story fixture must include the yuzu core fan.');
+}
+
+if (!TAKEOUT_ENDING?.image) {
+  throw new Error('The E2E story fixture must include an image for the takeout ending.');
+}
+
+const YUZU_DISPLAY_NAME = YUZU_FAN.name.replaceAll('{{idolName}}', DEFAULT_IDOL_NAME);
 
 async function selectTeam(page: Page, teamName: string) {
   await page.getByRole('combobox', { name: '所属队伍' }).click();
@@ -18,7 +30,7 @@ async function completeProfileSetup(page: Page, idolName = DEFAULT_IDOL_NAME) {
     '入团后的第一次总选 · 还剩 30 天',
   );
   await expect(page.locator('.profile-setup-card > p')).toHaveText(
-    '你是刚加入星河48的新人小偶像。面对粉丝发来的翻牌，你会怎么回复？',
+    `你是刚加入${testStoryJson.globalVariables.groupName}的新人小偶像。面对粉丝发来的翻牌，你会怎么回复？`,
   );
   await page.screenshot({ path: 'artifacts/playtest/game-profile-setup-mobile.png' });
   await page.getByRole('textbox', { name: '偶像姓名', exact: true }).fill(idolName);
@@ -55,6 +67,12 @@ test('first entry creates a persistent member profile that remains editable in s
   });
   const teamCombobox = page.getByRole('combobox', { name: '所属队伍' });
   await expect(page.locator('.team-picker__marks')).toHaveCount(0);
+  await expect(page.getByRole('radio')).toHaveCount(6);
+  await page.getByRole('radio', { name: '包里小猫' }).check();
+  await expect(page.locator('.profile-form__preview img')).toHaveAttribute(
+    'src',
+    '/assets/avatars/profile-kitten.webp',
+  );
   const onboardingScrollBeforeOpen = await page.evaluate(() => window.scrollY);
   await teamCombobox.click();
   const teamPopup = page.locator('.team-select-content');
@@ -98,6 +116,15 @@ test('first entry creates a persistent member profile that remains editable in s
   await enterProfileButton.click();
   await expect(page.getByRole('heading', { name: '顾星遥' })).toBeVisible();
   await expect(page.locator('.member-status')).toContainText('HII');
+  const hiiStatusColor = await page.locator('.member-status__team').evaluate((badge) => ({
+    background: getComputedStyle(badge).backgroundColor,
+    teamColor: getComputedStyle(badge).getPropertyValue('--team-color').trim().toUpperCase(),
+  }));
+  expect(hiiStatusColor.teamColor).toBe('#F29A61');
+  await expect(page.locator('.member-portrait > img')).toHaveAttribute(
+    'src',
+    '/assets/avatars/profile-kitten.webp',
+  );
 
   await page.getByRole('button', { name: '设置' }).click();
   await page.getByRole('textbox', { name: '偶像姓名', exact: true }).fill('许朝夕');
@@ -116,12 +143,23 @@ test('first entry creates a persistent member profile that remains editable in s
     .toBe(sheetScrollBeforeSettingsSelect);
   await page.keyboard.press('Escape');
   await expect(settingsTeamCombobox).toBeFocused();
+  await page.getByRole('radio', { name: '耳机兔兔' }).check();
   await selectTeam(page, 'Team X');
   await page.getByRole('button', { name: '保存成员资料' }).click();
   await expect(page.getByText('已保存')).toBeVisible();
   await page.getByRole('button', { name: '关闭' }).click();
   await expect(page.getByRole('heading', { name: '许朝夕' })).toBeVisible();
   await expect(page.locator('.member-status')).toContainText('X');
+  const xStatusColor = await page.locator('.member-status__team').evaluate((badge) => ({
+    background: getComputedStyle(badge).backgroundColor,
+    teamColor: getComputedStyle(badge).getPropertyValue('--team-color').trim().toUpperCase(),
+  }));
+  expect(xStatusColor.teamColor).toBe('#68B99A');
+  expect(xStatusColor.background).not.toBe(hiiStatusColor.background);
+  await expect(page.locator('.member-portrait > img')).toHaveAttribute(
+    'src',
+    '/assets/avatars/profile-bunny.webp',
+  );
 
   await page.reload();
   await expect(page.getByRole('heading', { name: '许朝夕' })).toBeVisible();
@@ -131,7 +169,20 @@ test('first entry creates a persistent member profile that remains editable in s
         JSON.parse(localStorage.getItem('clip-simulator:player-profile:v1') ?? '{}'),
       ),
     )
-    .toEqual({ idolName: '许朝夕', teamId: 'x' });
+    .toEqual({ idolName: '许朝夕', teamId: 'x', avatarId: 'bunny' });
+
+  await page.evaluate(() =>
+    localStorage.setItem(
+      'clip-simulator:player-profile:v1',
+      JSON.stringify({ idolName: '旧档成员', teamId: 'sii' }),
+    ),
+  );
+  await page.reload();
+  await expect(page.getByRole('heading', { name: '旧档成员' })).toBeVisible();
+  await expect(page.locator('.member-portrait > img')).toHaveAttribute(
+    'src',
+    '/assets/avatars/profile-cafe.webp',
+  );
 });
 
 test('standard mode shows a quiet inbox and keeps complete conversation history', async ({
@@ -204,12 +255,15 @@ test('standard mode shows a quiet inbox and keeps complete conversation history'
   await expect(messageList.getByRole('heading', { name: '未回复', exact: true })).toBeVisible();
   await expect(splitters).toHaveCount(1);
   await expect(splitters).toContainText('已回复');
-  await expect(messageList.getByRole('button', { name: /柚子汽水/ })).toHaveClass(
-    'conversation-row',
-  );
-  await expect(messageList.getByRole('button', { name: /柚子汽水/ })).toContainText(
-    '还有 7 天过期',
-  );
+  await expect(messageList.getByText('第 0 日', { exact: true })).toHaveCount(0);
+  const yuzuPendingRow = messageList
+    .locator('.conversation-group--pending')
+    .getByRole('button', { name: /柚子汽水/ });
+  await expect(yuzuPendingRow).toHaveClass('conversation-row');
+  await expect(yuzuPendingRow).toContainText('还有 7 天过期');
+  for (const tag of YUZU_FAN.tags) {
+    await expect(yuzuPendingRow.locator('.fan-tag-list')).toContainText(tag);
+  }
   await expect(repliedGroup(page).getByRole('button', { name: /奶茶去冰/ })).toHaveClass(
     'conversation-row',
   );
@@ -217,18 +271,21 @@ test('standard mode shows a quiet inbox and keeps complete conversation history'
   await page.waitForTimeout(300);
   await page.screenshot({ path: 'artifacts/playtest/game-workbench-mobile.png' });
 
-  await page.getByRole('button', { name: /柚子汽水/ }).click();
+  await yuzuPendingRow.click();
   await expect(page.getByRole('heading', { name: '选择一条回复' })).toBeVisible();
-  await expect(page.locator('.chat-row--fan .fan-message')).toContainText(
-    '第一次被翻到需要什么入河仪式吗',
-  );
+  for (const tag of YUZU_FAN.tags) {
+    await expect(page.locator('.reply-header .fan-tag-list')).toContainText(tag);
+  }
+  await expect(page.getByText('出道第 18 天', { exact: true })).toBeVisible();
+  await expect(page.getByText(/班主任问大家最近有什么开心的事/)).toBeVisible();
+  await expect(page.locator('.chat-row--fan .fan-message').last()).toContainText('今天正式放暑假');
   await expect(page.locator('.choice-card__cost').first()).toHaveAttribute(
     'aria-label',
-    /消耗 1 点精力，1 点心态/,
+    /消耗 1 点精力，1 点心情/,
   );
   await expect(page.locator('.choice-card__cost').first().locator('svg')).toHaveCount(2);
-  const longChoice = page.getByRole('button', { name: /我知道你刚来会有点紧张/ });
-  await expect(longChoice).toContainText('先按自己的节奏认识我');
+  const longChoice = page.getByRole('button', { name: /不秒回没关系，先陪妹妹去吧/ });
+  await expect(longChoice).toContainText('总选月每一份支持都很重要');
   await expect
     .poll(() =>
       longChoice.evaluate((card) => {
@@ -253,11 +310,13 @@ test('standard mode shows a quiet inbox and keeps complete conversation history'
     path: 'artifacts/playtest/game-reply-chat-mobile.png',
     fullPage: true,
   });
-  await page.getByRole('button', { name: /仪式就是/ }).click();
-  await expect(page.getByText('柚子汽水 好感 +10')).toBeVisible();
+  await page.getByRole('button', { name: /准假，不查秒回/ }).click();
+  await expect(page.getByText(`${YUZU_DISPLAY_NAME} · 好感变化`)).toBeVisible();
+  await expect(page.getByRole('heading', { name: '+10' })).toBeVisible();
+  await expect(page.locator('.reaction-ticket__change--positive')).toBeVisible();
   await page.waitForTimeout(300);
   await page.screenshot({
-    path: 'artifacts/playtest/game-reply-result-mobile.png',
+    path: 'artifacts/playtest/game-reply-settlement-mobile.png',
     fullPage: true,
   });
   await page.getByRole('button', { name: /回到工作台/ }).click();
@@ -272,10 +331,8 @@ test('standard mode shows a quiet inbox and keeps complete conversation history'
   await expect(page.getByText(/NPC/i)).toHaveCount(0);
 
   await coreRow.click();
-  await expect(
-    page.getByText('第一次被翻到需要什么入河仪式吗？我已经把昵称改得很像老粉了。'),
-  ).toBeVisible();
-  await expect(page.getByText(/仪式就是：从今天开始别把自己当外人，来Team NII/)).toBeVisible();
+  await expect(page.getByText(/今天正式放暑假/)).toBeVisible();
+  await expect(page.getByText(/暑假第一天的计划表本来就是拿来阵亡一次的/)).toBeVisible();
   await expect(page.getByRole('heading', { name: '选择一条回复' })).toHaveCount(0);
   await page.getByRole('button', { name: '返回翻牌消息' }).click();
   await expect(repliedGroup(page).getByRole('button', { name: /柚子汽水/ })).toBeVisible();
@@ -313,6 +370,25 @@ test('the single inbox list stays clear of the fixed turn actions', async ({ pag
   await expect(actions.getByRole('button', { name: /外卖/ })).toBeVisible();
   await expect(page.getByText(/本月已点/)).toHaveCount(0);
   await expect(page.locator('.game-header__countdown')).toHaveText('离总选结束还剩 29 天');
+
+  const takeoutAlignment = await actions.locator('.takeout-button').evaluate((button) => {
+    const icon = button.querySelector('svg');
+    const copy = button.querySelector(':scope > span');
+    const buttonRect = button.getBoundingClientRect();
+    const iconRect = icon?.getBoundingClientRect();
+    const copyRect = copy?.getBoundingClientRect();
+    if (!iconRect || !copyRect) return undefined;
+    const contentLeft = Math.min(iconRect.left, copyRect.left);
+    const contentRight = Math.max(iconRect.right, copyRect.right);
+    return {
+      justifyContent: getComputedStyle(button).justifyContent,
+      centerDelta: Math.abs(
+        (contentLeft + contentRight) / 2 - (buttonRect.left + buttonRect.right) / 2,
+      ),
+    };
+  });
+  expect(takeoutAlignment?.justifyContent).toBe('center');
+  expect(takeoutAlignment?.centerDelta).toBeLessThanOrEqual(1);
 
   const layout = await actions.evaluate((footer) => {
     const screen = document.querySelector<HTMLElement>('.inbox-screen');
@@ -385,6 +461,143 @@ test('the single inbox list stays clear of the fixed turn actions', async ({ pag
   await expect(actions.getByRole('button', { name: '进入总选', exact: true })).toBeVisible();
 });
 
+test('name-linked ordinary fans reveal read-only multi-round chatter over time', async ({
+  page,
+}) => {
+  await page.getByRole('button', { name: /翻牌.*待回复/ }).click();
+  await page.getByRole('button', { name: '几天后', exact: true }).click();
+
+  const pendingGroup = inboxMessageList(page).locator('.conversation-group--pending');
+  await expect(
+    pendingGroup.getByRole('button', { name: new RegExp(`${DEFAULT_IDOL_NAME}的狗`) }),
+  ).toHaveCount(0);
+
+  const firstTopicRow = repliedGroup(page).getByRole('button', {
+    name: new RegExp(`${DEFAULT_IDOL_NAME}的狗.*第 4 日`),
+  });
+  await expect(firstTopicRow).not.toContainText('话题菜单');
+  await firstTopicRow.click();
+  await expect(page.getByText(/计算器先申请退河了/)).toBeVisible();
+  await expect(page.getByText(/数学竞赛披了件MV外套/)).toBeVisible();
+  await expect(page.locator('.idol-message')).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: '选个角度聊聊' })).toHaveCount(0);
+
+  await page.getByRole('button', { name: '返回翻牌消息' }).click();
+
+  for (let turn = 0; turn < 4; turn += 1) {
+    await page.getByRole('button', { name: '几天后', exact: true }).click();
+  }
+  const nickname = `${Array.from(DEFAULT_IDOL_NAME).at(-1)?.repeat(2)}的狗（改名版）`;
+  const secondTopicRow = repliedGroup(page).getByRole('button', {
+    name: new RegExp(`${nickname}.*第 16 日`),
+  });
+  await expect(secondTopicRow).toBeVisible();
+  await secondTopicRow.click();
+  await expect(page.getByRole('heading', { name: nickname })).toBeVisible();
+  await expect(page.getByText(/400星梦值折0.3作品分/)).toBeVisible();
+  await expect(page.getByText(/EP公告还是大型阅读理解/)).toBeVisible();
+  await expect(page.getByText(/汪得量力而行/)).toBeVisible();
+});
+
+test('takeout shows a lightweight receipt with mood recovery', async ({ page }) => {
+  await page.getByRole('button', { name: /翻牌.*待回复/ }).click();
+  const actions = fixedTurnActions(page);
+  const takeoutButton = actions.getByRole('button', { name: /外卖/ });
+  await expect(takeoutButton).toContainText(/精力 \+3.*心情 \+3/);
+  await page.evaluate(() => {
+    Math.random = () => 0.3;
+  });
+  await takeoutButton.click();
+
+  const receipt = page.getByRole('dialog', { name: /点了一份/ });
+  await expect(receipt).toBeVisible();
+  const heading = receipt.getByRole('heading');
+  await expect(heading).toHaveText('点了一份麻辣烫');
+  await expect(receipt).toContainText('精力 +3');
+  await expect(receipt).toContainText('心情 +3');
+  const foodImage = receipt.getByRole('img');
+  await expect(foodImage).toHaveAttribute('src', '/assets/takeout/malatang-takeout.jpg');
+  await expect(foodImage).toHaveAttribute('alt', '装在单人外卖碗里的热汤和面食');
+  await expect
+    .poll(() => foodImage.evaluate((image: HTMLImageElement) => image.naturalWidth))
+    .toBeGreaterThan(0);
+  await expect(page.getByText('心态', { exact: true })).toHaveCount(0);
+  await expect(page.locator('.lucide-brain')).toHaveCount(0);
+  await page.screenshot({ path: 'artifacts/playtest/game-takeout-receipt-mobile.png' });
+
+  await page.keyboard.press('Escape');
+  await expect(receipt).toHaveCount(0);
+  await expect(actions.getByRole('button', { name: '几天后', exact: true })).toBeFocused();
+});
+
+test('statistics stay off-screen and mirror to a developer-only JSON file', async ({ page }) => {
+  const remoteEvents: Array<Record<string, any>> = [];
+  await page.route('**/api/statistics', async (route) => {
+    remoteEvents.push(route.request().postDataJSON());
+    await route.fulfill({ status: 204 });
+  });
+  await expect(page.getByText('统计数据', { exact: true })).toHaveCount(0);
+  await page.getByRole('button', { name: /翻牌.*待回复/ }).click();
+
+  const storedStatistics = await page.evaluate(() =>
+    JSON.parse(localStorage.getItem('clip-simulator:statistics:v1') ?? '{}'),
+  );
+  const packKey = `${testStoryJson.id}@${testStoryJson.contentVersion}`;
+  expect(storedStatistics.packs[packKey].totals.runsStarted).toBe(1);
+  expect(storedStatistics.packs[packKey].startedModes.standard).toBe(1);
+  expect(JSON.stringify(storedStatistics)).not.toContain(DEFAULT_IDOL_NAME);
+
+  const developerApi = await page.evaluate(() => {
+    const api = window.__CLIP_STATS__;
+    return {
+      filename: api?.filename,
+      canRead: typeof api?.read === 'function',
+      canReadFile: typeof api?.file === 'function',
+      canDownload: typeof api?.download === 'function',
+      enumerable: Object.keys(window).includes('__CLIP_STATS__'),
+    };
+  });
+  expect(developerApi).toEqual({
+    filename: 'clip-simulator-statistics.json',
+    canRead: true,
+    canReadFile: true,
+    canDownload: true,
+    enumerable: false,
+  });
+
+  await expect
+    .poll(() =>
+      page.evaluate(async () => {
+        const file = await window.__CLIP_STATS__?.file();
+        return file ? await file.text() : '';
+      }),
+    )
+    .toContain('"runsStarted": 1');
+
+  await expect.poll(() => remoteEvents.length).toBe(1);
+  expect(remoteEvents[0]).toMatchObject({
+    schemaVersion: 1,
+    event: 'run_started',
+    run: {
+      storyPackId: testStoryJson.id,
+      contentVersion: testStoryJson.contentVersion,
+      mode: 'standard',
+    },
+  });
+  expect(JSON.stringify(remoteEvents[0])).not.toContain(DEFAULT_IDOL_NAME);
+
+  await page.getByRole('button', { name: '返回主菜单' }).click();
+  await page.getByRole('button', { name: '设置' }).click();
+  await page.getByRole('button', { name: '放弃进度，从头开始' }).click();
+  await expect.poll(() => remoteEvents.length).toBe(3);
+  expect(remoteEvents[1]).toMatchObject({
+    event: 'run_finished',
+    run: { id: remoteEvents[0]?.run.id },
+    result: { outcome: 'abandoned' },
+  });
+  expect(remoteEvents[2]).toMatchObject({ event: 'run_started' });
+});
+
 test('multiple pending flips for one fan stay separately visible and actionable', async ({
   page,
 }) => {
@@ -402,7 +615,7 @@ test('multiple pending flips for one fan stay separately visible and actionable'
 
   const deadlineDayRow = page
     .locator('.conversation-group--pending')
-    .getByRole('button', { name: /第一次被翻到需要什么入河仪式吗/ });
+    .getByRole('button', { name: /今天正式放暑假/ });
   await expect(deadlineDayRow).toContainText('还有 3 天过期');
   await expect(deadlineDayRow.locator('time')).not.toHaveClass(
     /\bconversation-row__timing--urgent\b/,
@@ -429,14 +642,15 @@ test('multiple pending flips for one fan stay separately visible and actionable'
   const pendingGroup = page.locator('.conversation-group--pending');
   const yuzuRows = pendingGroup.getByRole('button', { name: /柚子汽水/ });
   const firstYuzu = pendingGroup.getByRole('button', {
-    name: /第一次被翻到需要什么入河仪式吗/,
+    name: /今天正式放暑假/,
   });
   const secondYuzu = pendingGroup.getByRole('button', {
-    name: /我算了一下，暑假少买几杯奶茶/,
+    name: /期末成绩出来了/,
   });
   await expect(yuzuRows).toHaveCount(2);
   await expect(firstYuzu).toContainText('还有 1 天过期');
-  await expect(secondYuzu).toContainText('还有 10 天过期');
+  await expect(secondYuzu).toContainText('期末成绩出来了');
+  await expect(secondYuzu).toContainText('还有 7 天过期');
   await expect(firstYuzu.locator('time')).toHaveClass(/\bconversation-row__timing--urgent\b/);
   await expect(secondYuzu.locator('time')).not.toHaveClass(/\bconversation-row__timing--urgent\b/);
   await expect
@@ -444,14 +658,14 @@ test('multiple pending flips for one fan stay separately visible and actionable'
     .toBe('rgb(185, 56, 84)');
 
   await firstYuzu.click();
-  await expect(page.getByText(/第一次被翻到需要什么入河仪式吗/)).toBeVisible();
-  await page.getByRole('button', { name: /仪式就是/ }).click();
+  await expect(page.getByText(/今天正式放暑假/)).toBeVisible();
+  await page.getByRole('button', { name: /准假，不查秒回/ }).click();
   await page.getByRole('button', { name: /回到工作台/ }).click();
 
   const remainingYuzu = pendingGroup.getByRole('button', { name: /柚子汽水/ });
   await expect(remainingYuzu).toHaveCount(1);
-  await expect(remainingYuzu).toContainText('我算了一下，暑假少买几杯奶茶');
-  await expect(remainingYuzu).toContainText('还有 10 天过期');
+  await expect(remainingYuzu).toContainText('期末成绩出来了');
+  await expect(remainingYuzu).toContainText('还有 7 天过期');
 });
 
 test('an expired inbox row keeps the exact flip preview and the chat names its deadline', async ({
@@ -477,7 +691,7 @@ test('an expired inbox row keeps the exact flip preview and the chat names its d
   await page.reload();
 
   const expiredRow = repliedGroup(page).getByRole('button', { name: /柚子汽水/ });
-  await expect(expiredRow).toContainText(`${DEFAULT_IDOL_NAME}，第一次被翻到`);
+  await expect(expiredRow).toContainText('今天正式放暑假');
   await expect(expiredRow).toContainText('已过期');
   await expect(expiredRow).not.toContainText('已错过回复期限');
 
@@ -491,14 +705,14 @@ test('an expired inbox row keeps the exact flip preview and the chat names its d
   });
 });
 
-test('realistic mode hides numeric affinity feedback', async ({ page }) => {
+test('realistic mode hides numeric affinity feedback', async ({ page }, testInfo) => {
   await page.getByRole('button', { name: '设置' }).click();
   await expect(page.getByRole('heading', { name: '营业设置' })).toBeVisible();
   const restartButton = page.getByRole('button', { name: '放弃进度，从头开始' });
   await expect(restartButton).toBeVisible();
   await expect(page.getByText('选择后仍可在设置中修改')).toHaveCount(0);
   await page.waitForTimeout(250);
-  await page.screenshot({ path: 'artifacts/playtest/game-member-pocket-settings-sheet.png' });
+  await page.screenshot({ path: testInfo.outputPath('game-member-pocket-settings-sheet.png') });
   await restartButton.scrollIntoViewIfNeeded();
   const restartNote = page.locator('.settings-restart-note');
   const [restartBox, noteBox] = await Promise.all([
@@ -506,7 +720,7 @@ test('realistic mode hides numeric affinity feedback', async ({ page }) => {
     restartNote.boundingBox(),
   ]);
   expect((restartBox?.y ?? 0) + (restartBox?.height ?? 0)).toBeLessThanOrEqual(noteBox?.y ?? 0);
-  await page.screenshot({ path: 'artifacts/playtest/game-settings-restart-mobile.png' });
+  await page.screenshot({ path: testInfo.outputPath('game-settings-restart-mobile.png') });
   await page.getByRole('button', { name: /拟真模式/ }).click();
   await expect(page.getByRole('button', { name: /拟真模式/ })).toHaveAttribute(
     'aria-pressed',
@@ -515,11 +729,14 @@ test('realistic mode hides numeric affinity feedback', async ({ page }) => {
   await page.getByRole('button', { name: '关闭' }).click();
   await page.reload();
   await page.getByRole('button', { name: /翻牌.*待回复/ }).click();
-  await page.getByRole('button', { name: /柚子汽水/ }).click();
-  await page.getByRole('button', { name: /仪式就是/ }).click();
+  await page
+    .locator('.conversation-group--pending')
+    .getByRole('button', { name: /柚子汽水/ })
+    .click();
+  await page.getByRole('button', { name: /准假，不查秒回/ }).click();
 
-  await expect(page.getByText('柚子汽水 好感 +10')).toHaveCount(0);
-  await expect(page.getByText('稳定支持')).toBeVisible();
+  await expect(page.getByRole('heading', { name: '+10' })).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: '上升' })).toBeVisible();
 });
 
 test('browser and in-game back controls preserve the inbox and completed replies', async ({
@@ -547,22 +764,25 @@ test('browser and in-game back controls preserve the inbox and completed replies
   await page.goForward();
   await expect(inboxMessageList(page)).toBeVisible();
 
-  await page.getByRole('button', { name: /柚子汽水/ }).click();
+  await page
+    .locator('.conversation-group--pending')
+    .getByRole('button', { name: /柚子汽水/ })
+    .click();
   await expect(page.getByRole('heading', { name: '选择一条回复' })).toBeVisible();
   await page.getByRole('button', { name: '返回翻牌消息' }).click();
   await expect(inboxMessageList(page)).toBeVisible();
 
   await page.goForward();
   await expect(page.getByRole('heading', { name: '选择一条回复' })).toBeVisible();
-  await page.getByRole('button', { name: /仪式就是/ }).click();
-  await expect(page.getByText('柚子汽水 好感 +10')).toBeVisible();
+  await page.getByRole('button', { name: /准假，不查秒回/ }).click();
+  await expect(page.getByRole('heading', { name: '+10' })).toBeVisible();
 
   await page.goBack();
   await expect(inboxMessageList(page)).toBeVisible();
   await expect(page.getByRole('heading', { name: '选择一条回复' })).toHaveCount(0);
 
   await page.goForward();
-  await expect(page.getByText('柚子汽水 好感 +10')).toBeVisible();
+  await expect(page.getByRole('heading', { name: '+10' })).toBeVisible();
   await page.getByRole('button', { name: /回到工作台/ }).click();
   await expect(repliedGroup(page).getByRole('button', { name: /柚子汽水/ })).toBeVisible();
 
@@ -586,18 +806,42 @@ test('the fourth takeout triggers the early ending', async ({ page }) => {
   await page.getByRole('button', { name: /翻牌.*待回复/ }).click();
   for (let order = 1; order <= 4; order += 1) {
     await fixedTurnActions(page).getByRole('button', { name: /外卖/ }).click();
+    await expect(page.getByRole('dialog', { name: /点了一份/ })).toBeVisible();
     if (order < 4) {
+      await page.getByRole('button', { name: '开吃' }).click();
       await fixedTurnActions(page).getByRole('button', { name: '几天后', exact: true }).click();
+    } else {
+      await expect(page.getByRole('heading', { name: '胖成一条蛆，耻辱退团' })).toHaveCount(0);
+      await page.getByRole('button', { name: '开吃' }).click();
     }
   }
 
-  await expect(page.getByRole('heading', { name: '被外卖软件签走了' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '胖成一条蛆，耻辱退团' })).toBeVisible();
+  const endingPost = page.getByRole('img', { name: TAKEOUT_ENDING.image.alt });
+  await expect(endingPost).toBeVisible();
+  await expect
+    .poll(() => endingPost.evaluate((image: HTMLImageElement) => image.naturalWidth))
+    .toBeGreaterThan(0);
   await expect(page.getByText(/提前结局/)).toBeVisible();
   await page.waitForTimeout(300);
   await page.screenshot({
     path: 'artifacts/playtest/game-takeout-ending-mobile.png',
     fullPage: true,
   });
+
+  await page.reload();
+  await expect(page.getByRole('heading', { name: '胖成一条蛆，耻辱退团' })).toBeVisible();
+  await expect(page.getByRole('button', { name: '回到上一回合' })).toBeEnabled();
+  await page.getByRole('button', { name: '回到上一回合' }).click();
+  await expect(page.getByRole('heading', { name: '翻牌消息' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '胖成一条蛆，耻辱退团' })).toHaveCount(0);
+  const restoredSave = await page.evaluate(() =>
+    JSON.parse(localStorage.getItem('clip-simulator:save:v1') ?? 'null'),
+  );
+  expect(restoredSave).toMatchObject({ status: 'playing', turn: 4, takeoutCount: 3 });
+  expect(
+    await page.evaluate(() => localStorage.getItem('clip-simulator:early-ending-checkpoint:v1')),
+  ).toBeNull();
 });
 
 test('keyboard controls operate conversation and fixed action buttons with reduced motion', async ({
@@ -622,7 +866,9 @@ test('keyboard controls operate conversation and fixed action buttons with reduc
   await page.keyboard.press('Enter');
   await expect(inboxMessageList(page)).toBeVisible();
 
-  const conversation = inboxMessageList(page).getByRole('button', { name: /柚子汽水/ });
+  const conversation = inboxMessageList(page)
+    .locator('.conversation-group--pending')
+    .getByRole('button', { name: /柚子汽水/ });
   await conversation.focus();
   await expect(conversation).toBeFocused();
   await page.keyboard.press('Enter');
@@ -635,9 +881,10 @@ test('keyboard controls operate conversation and fixed action buttons with reduc
   await expect(takeout).toBeFocused();
   await page.keyboard.press('Space');
   await expect(actions.locator('.takeout-button')).toBeDisabled();
+  await expect(page.getByRole('dialog', { name: /点了一份/ })).toBeVisible();
+  await page.keyboard.press('Escape');
 
   const daysLater = actions.getByRole('button', { name: '几天后', exact: true });
-  await daysLater.focus();
   await expect(daysLater).toBeFocused();
   await page.keyboard.press('Enter');
   await expect(page.locator('.game-header__countdown')).toHaveText('离总选结束还剩 26 天');

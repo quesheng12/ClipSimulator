@@ -49,18 +49,18 @@ describe('story engine', () => {
       'lighthouse-01',
     ]);
 
-    const replied = replyToNode(initial, concurrentPack, 'yuzu-parallel', 'parallel-welcome');
+    const replied = replyToNode(initial, concurrentPack, 'yuzu-parallel', 'parallel-play-along');
     expect(replied.pendingNodeIds).toContain('yuzu-01');
     expect(replied.pendingNodeIds).not.toContain('yuzu-parallel');
   });
 
   it('spends both resources, applies affection, and unlocks a dated follow-up', () => {
     const initial = createInitialGame(pack, 'standard');
-    const replied = replyToNode(initial, pack, 'yuzu-01', 'welcome');
+    const replied = replyToNode(initial, pack, 'yuzu-01', 'play-along');
 
     expect(replied.resources).toEqual({ energy: 7, mindset: 7 });
     expect(replied.affinity.yuzu).toBe(72);
-    expect(replied.resolvedNodes['yuzu-01']).toBe('welcome');
+    expect(replied.resolvedNodes['yuzu-01']).toBe('play-along');
     expect(replied.unlockedNodeIds).toContain('yuzu-02');
     expect(replied.pendingNodeIds).not.toContain('yuzu-02');
     expect(replied.replyHistory.at(-1)).toMatchObject({
@@ -73,6 +73,63 @@ describe('story engine', () => {
     const dayTen = advanceTurn(advanceTurn(advanceTurn(replied, pack), pack), pack);
     expect(dayTen.currentDay).toBe(10);
     expect(dayTen.pendingNodeIds).toContain('yuzu-02');
+  });
+
+  it('applies a manually authored popularity delta from any reply choice', () => {
+    const popularityPack = structuredClone(pack);
+    popularityPack.nodes.find((node) => node.id === 'yuzu-01')!.choices[0]!.effects.popularity = 7;
+    const initial = createInitialGame(popularityPack, 'standard');
+
+    const replied = replyToNode(initial, popularityPack, 'yuzu-01', 'play-along');
+
+    expect(replied.popularity).toBe(initial.popularity + 7);
+    expect(replied.lastFeedback?.popularityDelta).toBe(7);
+  });
+
+  it('can surface an eligible downstream flip immediately after its reply', () => {
+    const immediatePack = structuredClone(pack);
+    const choice = immediatePack.nodes.find((node) => node.id === 'yuzu-01')!.choices[0]!;
+    const followUp = immediatePack.nodes.find((node) => node.id === 'yuzu-02')!;
+    choice.nextNodeTiming = 'immediate';
+    followUp.postedDay = 1;
+    followUp.trigger = {
+      match: 'all',
+      conditions: [{ type: 'flag-set', flag: 'yuzu-life-noticed' }],
+    };
+
+    const initial = createInitialGame(immediatePack, 'standard');
+    expect(initial.pendingNodeIds).not.toContain('yuzu-02');
+
+    const replied = replyToNode(initial, immediatePack, 'yuzu-01', 'play-along');
+    expect(replied.pendingNodeIds).toContain('yuzu-02');
+    expect(replied.activatedTurnByNodeId['yuzu-02']).toBe(replied.turn);
+  });
+
+  it('keeps an immediate downstream flip unlocked until its authored date arrives', () => {
+    const futurePack = structuredClone(pack);
+    futurePack.nodes.find((node) => node.id === 'yuzu-01')!.choices[0]!.nextNodeTiming =
+      'immediate';
+
+    const initial = createInitialGame(futurePack, 'standard');
+    const replied = replyToNode(initial, futurePack, 'yuzu-01', 'play-along');
+
+    expect(replied.unlockedNodeIds).toContain('yuzu-02');
+    expect(replied.pendingNodeIds).not.toContain('yuzu-02');
+  });
+
+  it('opens a choice-authored special ending without continuing its story branch', () => {
+    const endingPack = structuredClone(pack);
+    const choice = endingPack.nodes.find((node) => node.id === 'yuzu-01')!.choices[0]!;
+    choice.nextNodeId = undefined;
+    choice.endingId = 'takeout-idol';
+
+    const initial = createInitialGame(endingPack, 'standard');
+    const ended = replyToNode(initial, endingPack, 'yuzu-01', choice.id);
+
+    expect(ended.status).toBe('early-ending');
+    expect(ended.earlyEndingId).toBe('takeout-idol');
+    expect(ended.resolvedNodes['yuzu-01']).toBe(choice.id);
+    expect(ended.pendingNodeIds).toEqual([]);
   });
 
   it('expires unanswered flips after their seven-day deadline', () => {

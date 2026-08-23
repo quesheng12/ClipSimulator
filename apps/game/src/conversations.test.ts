@@ -6,6 +6,7 @@ import {
   getBackgroundConversationHistory,
   getBackgroundParticipant,
   getCoreConversationHistory,
+  getCoreParticipant,
   getRepliedConversations,
 } from './conversations';
 
@@ -15,23 +16,33 @@ describe('conversation selectors', () => {
   it('never exposes an unreached branch and restores the selected reply', () => {
     const initial = createInitialGame(pack, 'standard');
     const pending = getCoreConversationHistory(initial, pack, 'yuzu', 'yuzu-01');
+    const pastIds = pack.fans
+      .find((fan) => fan.id === 'yuzu')!
+      .pastChats.map((chat) => `past:yuzu:${chat.id}`);
 
-    expect(pending.map((exchange) => exchange.id)).toEqual(['yuzu-01']);
-    expect(pending[0]?.status).toBe('pending');
-    expect(pending[0]?.choices.map((choice) => choice.id)).toEqual([
-      'welcome',
-      'playful',
-      'generic',
+    expect(pending.map((exchange) => exchange.id)).toEqual([...pastIds, 'yuzu-01']);
+    expect(pending.at(-1)?.status).toBe('pending');
+    expect(pending.at(-1)?.choices.map((choice) => choice.id)).toEqual([
+      'play-along',
+      'summer-wishes',
+      'assign-data-work',
     ]);
+    expect(pending[0]).toMatchObject({
+      timeLabel: '出道第 18 天',
+      status: 'replied',
+    });
+    expect(getCoreParticipant(initial, pack, 'yuzu')?.tags).toEqual(
+      pack.fans.find((fan) => fan.id === 'yuzu')?.tags,
+    );
 
-    const replied = replyToNode(initial, pack, 'yuzu-01', 'welcome');
+    const replied = replyToNode(initial, pack, 'yuzu-01', 'play-along');
     const history = getCoreConversationHistory(replied, pack, 'yuzu');
 
-    expect(history.map((exchange) => exchange.id)).toEqual(['yuzu-01']);
+    expect(history.map((exchange) => exchange.id)).toEqual([...pastIds, 'yuzu-01']);
     expect(history.some((exchange) => exchange.id === 'yuzu-02')).toBe(false);
-    expect(history[0]).toMatchObject({
+    expect(history.at(-1)).toMatchObject({
       status: 'replied',
-      selectedChoiceId: 'welcome',
+      selectedChoiceId: 'play-along',
       outgoing: pack.nodes.find((node) => node.id === 'yuzu-01')?.choices[0]?.text,
       choices: [],
     });
@@ -39,7 +50,7 @@ describe('conversation selectors', () => {
 
   it('keeps every core conversation above ordinary fans and sorts each group by recency', () => {
     let state = createInitialGame(pack, 'standard');
-    state = replyToNode(state, pack, 'yuzu-01', 'welcome');
+    state = replyToNode(state, pack, 'yuzu-01', 'play-along');
     state = replyToNode(state, pack, 'lighthouse-01', 'together');
     state = advanceTurn(state, pack);
     state = replyToNode(state, pack, 'salt-01', 'gentle-boundary');
@@ -96,7 +107,8 @@ describe('conversation selectors', () => {
       },
     ];
 
-    const history = getBackgroundConversationHistory(groupedPack, 2, 'milk-tea-fan');
+    const state = { ...createInitialGame(groupedPack, 'standard'), currentDay: 2 };
+    const history = getBackgroundConversationHistory(state, groupedPack, 'milk-tea-fan');
     const participant = getBackgroundParticipant(groupedPack, 2, 'milk-tea-fan');
 
     expect(history.map((exchange) => exchange.id)).toEqual(['tea-01', 'tea-02']);
@@ -105,8 +117,37 @@ describe('conversation selectors', () => {
       id: 'milk-tea-fan',
       kind: 'background',
       name: '奶茶半糖',
-      tag: '冒泡',
+      tags: ['冒泡'],
     });
+  });
+
+  it('reveals read-only NPC chatter directly in replied history as days advance', () => {
+    const initial = createInitialGame(pack, 'standard');
+    let state = advanceTurn(initial, pack);
+    const flip = pack.backgroundFlips.find((candidate) => candidate.id === 'topic-idol-dog-01')!;
+    const contactId = flip.contactId!;
+    const firstHistory = getBackgroundConversationHistory(state, pack, contactId);
+
+    expect(firstHistory.at(-1)).toMatchObject({
+      id: flip.id,
+      status: 'automatic',
+    });
+    expect(firstHistory.at(-1)?.outgoing).toBeUndefined();
+    expect(firstHistory.at(-1)?.continuations).toHaveLength(2);
+    expect(
+      getRepliedConversations(state, pack).some(
+        (conversation) => conversation.participant.id === contactId,
+      ),
+    ).toBe(true);
+
+    for (let turn = 0; turn < 4; turn += 1) state = advanceTurn(state, pack);
+    const laterHistory = getBackgroundConversationHistory(state, pack, contactId);
+
+    expect(laterHistory.map((exchange) => exchange.id)).toEqual([
+      'topic-idol-dog-01',
+      'topic-idol-dog-02',
+    ]);
+    expect(laterHistory.every((exchange) => exchange.outgoing === undefined)).toBe(true);
   });
 
   it('renders expired history without a reply and can append the current pending choices', () => {
@@ -114,15 +155,18 @@ describe('conversation selectors', () => {
     state = advanceTurn(advanceTurn(advanceTurn(state, pack), pack), pack);
 
     const history = getCoreConversationHistory(state, pack, 'yuzu', 'yuzu-02');
+    const pastIds = pack.fans
+      .find((fan) => fan.id === 'yuzu')!
+      .pastChats.map((chat) => `past:yuzu:${chat.id}`);
 
-    expect(history.map((exchange) => exchange.id)).toEqual(['yuzu-01', 'yuzu-02']);
-    expect(history[0]).toMatchObject({ status: 'expired', choices: [] });
-    expect(history[0]?.outgoing).toBeUndefined();
-    expect(history[1]?.status).toBe('pending');
-    expect(history[1]?.choices.map((choice) => choice.id)).toEqual([
-      'life-first',
-      'thank-votes',
-      'push-more',
+    expect(history.map((exchange) => exchange.id)).toEqual([...pastIds, 'yuzu-01', 'yuzu-02']);
+    expect(history.at(-2)).toMatchObject({ status: 'expired', choices: [] });
+    expect(history.at(-2)?.outgoing).toBeUndefined();
+    expect(history.at(-1)?.status).toBe('pending');
+    expect(history.at(-1)?.choices.map((choice) => choice.id)).toEqual([
+      'notice-details',
+      'gentle-congrats',
+      'pivot-to-election',
     ]);
   });
 });
