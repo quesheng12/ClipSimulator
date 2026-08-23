@@ -63,7 +63,7 @@ describe('story templates', () => {
     source.nodes[0]!.choices[0]!.effects.setFlags = ['{{idolName}}-flag'];
     source.backgroundFlips[0]!.contactId = '{{idolName}}-contact';
     const topicFlip = source.backgroundFlips.find((flip) => flip.id === 'topic-idol-dog-01')!;
-    topicFlip.continuations![0] = '{{idolNickname}}会继续聊这个。';
+    topicFlip.reply = '{{idolNickname}}会继续聊这个。';
     source.fans[0]!.avatar = '{{idolName}}.png';
     source.fans[0]!.tags[0] = '{{idolNickname}}单推';
     source.fans[0]!.pastChats[0]!.message = '{{idolName}}，这是过去的消息。';
@@ -80,9 +80,9 @@ describe('story templates', () => {
     expect(resolved.nodes[0]!.choices[0]!.nextNodeId).toBe('{{idolName}}-next');
     expect(resolved.nodes[0]!.choices[0]!.effects.setFlags).toEqual(['{{idolName}}-flag']);
     expect(resolved.backgroundFlips[0]!.contactId).toBe('{{idolName}}-contact');
-    expect(
-      resolved.backgroundFlips.find((flip) => flip.id === 'topic-idol-dog-01')!.continuations![0],
-    ).toBe('遥遥会继续聊这个。');
+    expect(resolved.backgroundFlips.find((flip) => flip.id === 'topic-idol-dog-01')!.reply).toBe(
+      '遥遥会继续聊这个。',
+    );
     expect(resolved.fans[0]!.avatar).toBe('{{idolName}}.png');
     expect(resolved.fans[0]!.tags[0]).toBe('遥遥单推');
     expect(resolved.fans[0]!.pastChats[0]).toMatchObject({

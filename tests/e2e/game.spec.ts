@@ -461,7 +461,7 @@ test('the single inbox list stays clear of the fixed turn actions', async ({ pag
   await expect(actions.getByRole('button', { name: '进入总选', exact: true })).toBeVisible();
 });
 
-test('name-linked ordinary fans reveal read-only multi-round chatter over time', async ({
+test('name-linked ordinary fans reveal read-only question-and-answer chatter over time', async ({
   page,
 }) => {
   await page.getByRole('button', { name: /翻牌.*待回复/ }).click();
@@ -479,7 +479,8 @@ test('name-linked ordinary fans reveal read-only multi-round chatter over time',
   await firstTopicRow.click();
   await expect(page.getByText(/计算器先申请退河了/)).toBeVisible();
   await expect(page.getByText(/数学竞赛披了件MV外套/)).toBeVisible();
-  await expect(page.locator('.idol-message')).toHaveCount(0);
+  await expect(page.getByText(/计算器比我先退河/)).toBeVisible();
+  await expect(page.locator('.idol-message')).toHaveCount(1);
   await expect(page.getByRole('heading', { name: '选个角度聊聊' })).toHaveCount(0);
 
   await page.getByRole('button', { name: '返回翻牌消息' }).click();
@@ -496,7 +497,7 @@ test('name-linked ordinary fans reveal read-only multi-round chatter over time',
   await expect(page.getByRole('heading', { name: nickname })).toBeVisible();
   await expect(page.getByText(/400星梦值折0.3作品分/)).toBeVisible();
   await expect(page.getByText(/EP公告还是大型阅读理解/)).toBeVisible();
-  await expect(page.getByText(/汪得量力而行/)).toBeVisible();
+  await expect(page.getByText(/汪得量力而行/).first()).toBeVisible();
 });
 
 test('takeout shows a lightweight receipt with mood recovery', async ({ page }) => {

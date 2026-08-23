@@ -200,10 +200,14 @@ test('edits and copies a name-linked ordinary NPC topic round', async ({ page })
   const topic = page.locator('details.npc-flip-editor').filter({ hasText: '曹可恬的狗' }).first();
   await topic.locator('summary').click();
   await expect(topic.getByLabel('稳定 contactId')).toHaveValue('idol-dog');
-  await expect(topic.getByLabel('互动类型')).toHaveValue('chatter');
-  await expect(topic.getByLabel(/NPC 连续消息/)).toHaveCount(2);
+  await expect(topic.getByLabel('互动类型')).toHaveValue('automatic');
+  await expect(topic.getByLabel('成员自动回复')).toBeVisible();
+  await topic.getByLabel('互动类型').selectOption('chatter');
+  await expect(topic.getByLabel(/NPC 连续消息/)).toHaveCount(0);
   await topic.getByRole('button', { name: '新增 NPC 连续气泡' }).click();
-  await expect(topic.getByLabel(/NPC 连续消息/)).toHaveCount(3);
+  await expect(topic.getByLabel(/NPC 连续消息/)).toHaveCount(1);
+  await topic.getByRole('button', { name: '新增 NPC 连续气泡' }).click();
+  await expect(topic.getByLabel(/NPC 连续消息/)).toHaveCount(2);
 
   await topic.getByLabel('NPC 昵称', { exact: true }).fill('{{idolName}}的小狗');
   const editedTopic = page

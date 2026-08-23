@@ -121,7 +121,7 @@ describe('conversation selectors', () => {
     });
   });
 
-  it('reveals read-only NPC chatter directly in replied history as days advance', () => {
+  it('reveals ordinary-fan question-and-answer chatter directly in replied history as days advance', () => {
     const initial = createInitialGame(pack, 'standard');
     let state = advanceTurn(initial, pack);
     const flip = pack.backgroundFlips.find((candidate) => candidate.id === 'topic-idol-dog-01')!;
@@ -132,8 +132,8 @@ describe('conversation selectors', () => {
       id: flip.id,
       status: 'automatic',
     });
-    expect(firstHistory.at(-1)?.outgoing).toBeUndefined();
-    expect(firstHistory.at(-1)?.continuations).toHaveLength(2);
+    expect(firstHistory.at(-1)?.outgoing).toBe(flip.reply);
+    expect(firstHistory.at(-1)?.continuations).toEqual([]);
     expect(
       getRepliedConversations(state, pack).some(
         (conversation) => conversation.participant.id === contactId,
@@ -147,7 +147,7 @@ describe('conversation selectors', () => {
       'topic-idol-dog-01',
       'topic-idol-dog-02',
     ]);
-    expect(laterHistory.every((exchange) => exchange.outgoing === undefined)).toBe(true);
+    expect(laterHistory.every((exchange) => exchange.outgoing !== undefined)).toBe(true);
   });
 
   it('renders expired history without a reply and can append the current pending choices', () => {

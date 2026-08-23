@@ -114,13 +114,13 @@ describe('story validation', () => {
   it('accepts read-only NPC chatter and rejects mixed outgoing/continuation modes', () => {
     const readOnly = structuredClone(pack);
     const readOnlyTopic = readOnly.backgroundFlips.find((flip) => flip.id === 'topic-idol-dog-01')!;
-    expect(readOnlyTopic.reply).toBeUndefined();
-    expect(readOnlyTopic.continuations).toHaveLength(2);
+    readOnlyTopic.reply = undefined;
+    readOnlyTopic.continuations = ['这到底是作品赛、应援赛，还是数学竞赛披了件MV外套？'];
     expect(validateStoryPack(readOnly)).toEqual([]);
 
     const both = structuredClone(pack);
     const topic = both.backgroundFlips.find((flip) => flip.id === 'topic-idol-dog-01')!;
-    topic.reply = '不应与 NPC 连续消息同时存在';
+    topic.continuations = ['不应与成员回复同时存在'];
     expect(
       validateStoryPack(both).some(
         (issue) => issue.code === 'schema' && issue.path?.includes('backgroundFlips'),
