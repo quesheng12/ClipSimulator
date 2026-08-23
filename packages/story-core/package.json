@@ -1,0 +1,19 @@
+{
+  "name": "@clip/story-core",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    "./types": "./src/types.ts",
+    "./engine": "./src/engine.ts",
+    "./profile-names": "./src/profile-names.ts",
+    "./validation": "./src/validation.ts",
+    "./templates": "./src/templates.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "zod": "^4.4.3"
+  }
+}

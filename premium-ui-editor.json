@@ -1,0 +1,22 @@
+{
+  "profile": "product-admin",
+  "sourceRoots": ["apps/editor/src", "packages/story-core/src"],
+  "locale": "zh-CN",
+  "canonicalMap": "UX-CONTRACT.md",
+  "requiredCapabilities": ["Select/Listbox", "Date", "Form", "Scrollbar", "Toast", "CRUD"],
+  "ownership": {
+    "Select/Listbox": "native",
+    "Date": "typed"
+  },
+  "requiredCommands": ["format", "typecheck", "unit", "build"],
+  "commands": {
+    "format": "npm run format:check",
+    "typecheck": "npm run typecheck",
+    "unit": "npm run test",
+    "build": "npm run build"
+  },
+  "evidence": {
+    "crudFullFlow": "tests/e2e/editor.spec.ts",
+    "failurePaths": "tests/e2e/game.spec.ts"
+  }
+}

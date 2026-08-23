@@ -1,0 +1,1273 @@
+{
+  "schemaVersion": 4,
+  "id": "core-fans-demo",
+  "title": "总选前的三十天",
+  "description": "{{groupName}}总选月的五名核心粉丝、二十二个剧情节点，以及一次由连续延迟回复触发的告别。",
+  "contentVersion": "0.4.0",
+  "profileSetup": {
+    "namePools": {
+      "adapted": [
+        "曹可恬",
+        "蒋夏雨",
+        "刘静阳",
+        "刘诗桐",
+        "李庭",
+        "芦欣怡",
+        "柳雨程",
+        "刘增妍",
+        "宁珂",
+        "盛悦",
+        "田舒丽",
+        "由苗",
+        "闫明君",
+        "杨欣渝",
+        "张蕾蕾",
+        "张茜",
+        "周桐玥",
+        "柏心妤",
+        "胡晓惠",
+        "黄子怡",
+        "金莹月",
+        "李继纯",
+        "雷雨霄",
+        "潘莹琪",
+        "青玉雯",
+        "沈昕",
+        "唐程晨",
+        "徐嘉琳",
+        "叶帆",
+        "杨雨馨",
+        "周香",
+        "钟雅男",
+        "朱怡心",
+        "郑兆暄",
+        "陈嘉宜",
+        "陈雨希",
+        "龚辰美",
+        "郭晓莹",
+        "蒋舒庭",
+        "康楚奕",
+        "李嘉恩",
+        "林淑晴",
+        "刘思语",
+        "阙嘉慧",
+        "覃柯萌",
+        "谭思惠",
+        "温若琪",
+        "应子言",
+        "郑柯玮",
+        "陈霖",
+        "金泓妍",
+        "蒋欣茹",
+        "林嘉怡",
+        "刘晓涵",
+        "李梓忻",
+        "马欣雨",
+        "宋欣冉",
+        "武博菡",
+        "王瑞琦",
+        "熊紫艺",
+        "杨冰仪",
+        "禹嘉蔚",
+        "闫楠",
+        "杨秋雅",
+        "杨烨",
+        "钟郭菲阳",
+        "朱虹柔",
+        "张琼羽",
+        "朱蕊缘",
+        "曾欣妍"
+      ],
+      "original": []
+    },
+    "teams": [
+      {
+        "id": "sii",
+        "name": "Team SII",
+        "shortName": "SII",
+        "mark": "S",
+        "color": "#78C8F2"
+      },
+      {
+        "id": "nii",
+        "name": "Team NII",
+        "shortName": "NII",
+        "mark": "N",
+        "color": "#8E6AD8"
+      },
+      {
+        "id": "hii",
+        "name": "Team HII",
+        "shortName": "HII",
+        "mark": "H",
+        "color": "#F29A61"
+      },
+      {
+        "id": "x",
+        "name": "Team X",
+        "shortName": "X",
+        "mark": "X",
+        "color": "#68B99A"
+      }
+    ]
+  },
+  "globalVariables": {
+    "cityName": "星湾",
+    "groupName": "星河48"
+  },
+  "config": {
+    "totalDays": 30,
+    "turnDays": 3,
+    "maxTurns": 10,
+    "resources": {
+      "max": { "energy": 10, "mindset": 10 },
+      "initial": { "energy": 8, "mindset": 8 },
+      "recoveryPerTurn": { "energy": 5, "mindset": 5 }
+    },
+    "takeout": {
+      "recovery": { "energy": 3, "mindset": 3 },
+      "maxPerTurn": 1,
+      "triggerCount": 4,
+      "endingId": "takeout-idol"
+    },
+    "popularity": {
+      "initial": 45,
+      "min": 0,
+      "max": 100,
+      "voteTiers": [
+        { "minPopularity": 0, "votes": 40, "label": "查无此人" },
+        { "minPopularity": 30, "votes": 100, "label": "有点眼熟" },
+        { "minPopularity": 50, "votes": 210, "label": "房间常客" },
+        { "minPopularity": 70, "votes": 320, "label": "最近很有梗" },
+        { "minPopularity": 90, "votes": 420, "label": "出圈预备役" }
+      ]
+    }
+  },
+  "fans": [
+    {
+      "id": "yuzu",
+      "name": "柚子汽水",
+      "handle": "@{{idolName}}今天也要开心",
+      "bio": "暑假会立刻回复你的高中生，把能给的十几票看得很认真。",
+      "avatar": "/assets/avatars/fan-yuzu.webp",
+      "accent": "#E8952F",
+      "initialAffinity": 62,
+      "maxVotePower": 20,
+      "voteTiers": [
+        { "minAffinity": 0, "votes": 0, "label": "安静离开" },
+        { "minAffinity": 25, "votes": 5, "label": "偶尔想起你" },
+        { "minAffinity": 50, "votes": 10, "label": "攒下零花钱" },
+        { "minAffinity": 75, "votes": 15, "label": "暑假的全力" },
+        { "minAffinity": 90, "votes": 20, "label": "二十票也全部给你" }
+      ]
+    },
+    {
+      "id": "salt",
+      "name": "只对你特别",
+      "handle": "@第三次只是偶遇",
+      "bio": "把正常营业理解成特殊感情，也把私人行程说成巧合。",
+      "avatar": "/assets/avatars/fan-salt.webp",
+      "accent": "#7457C8",
+      "initialAffinity": 45,
+      "maxVotePower": 80,
+      "voteTiers": [
+        { "minAffinity": 0, "votes": 0, "label": "匿名回踩" },
+        { "minAffinity": 25, "votes": 10, "label": "盯着你的动态" },
+        { "minAffinity": 50, "votes": 30, "label": "索取更多回复" },
+        { "minAffinity": 75, "votes": 55, "label": "自认特别的人" },
+        { "minAffinity": 90, "votes": 80, "label": "危险的全情投入" }
+      ]
+    },
+    {
+      "id": "lighthouse",
+      "name": "夜航灯塔",
+      "handle": "@应援会还缺两个人",
+      "bio": "从你出道起一直在线，却开始怀疑应援会是否吞掉了自己的生活。",
+      "avatar": "/assets/avatars/fan-lighthouse.webp",
+      "accent": "#2E9F93",
+      "initialAffinity": 58,
+      "maxVotePower": 900,
+      "voteTiers": [
+        { "minAffinity": 0, "votes": 0, "label": "退出应援" },
+        { "minAffinity": 25, "votes": 100, "label": "只做个人支持" },
+        { "minAffinity": 50, "votes": 350, "label": "维持基本业务" },
+        { "minAffinity": 75, "votes": 650, "label": "重新组织动员" },
+        { "minAffinity": 90, "votes": 900, "label": "全栈应援会" }
+      ]
+    },
+    {
+      "id": "battery",
+      "name": "隔壁第一排",
+      "handle": "@她是首推你是例外",
+      "bio": "隔壁家单推王，常来看你，也总会先提起自己的首推。",
+      "avatar": "/assets/avatars/fan-battery.webp",
+      "accent": "#F04F72",
+      "initialAffinity": 36,
+      "maxVotePower": 1800,
+      "voteTiers": [
+        { "minAffinity": 0, "votes": 0, "label": "只回隔壁" },
+        { "minAffinity": 25, "votes": 80, "label": "路过支持" },
+        { "minAffinity": 50, "votes": 400, "label": "稳定二推" },
+        { "minAffinity": 75, "votes": 1000, "label": "认真分票" },
+        { "minAffinity": 90, "votes": 1800, "label": "把选择交给你" }
+      ]
+    },
+    {
+      "id": "patron",
+      "name": "过路看一眼",
+      "handle": "@不做长期承诺",
+      "bio": "见过很多小偶像的冷静神豪，只为值得的情绪价值停留。",
+      "avatar": "/assets/avatars/fan-callsticks.webp",
+      "accent": "#5278B9",
+      "initialAffinity": 20,
+      "maxVotePower": 3000,
+      "voteTiers": [
+        { "minAffinity": 0, "votes": 0, "label": "已经看下一个" },
+        { "minAffinity": 25, "votes": 100, "label": "随手支持" },
+        { "minAffinity": 50, "votes": 600, "label": "继续观察" },
+        { "minAffinity": 75, "votes": 1600, "label": "值得加码" },
+        { "minAffinity": 90, "votes": 3000, "label": "新人王级支持" }
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "id": "yuzu-01",
+      "fanId": "yuzu",
+      "title": "入河仪式",
+      "postedDay": 1,
+      "replyWindowDays": 7,
+      "content": {
+        "text": "{{idolName}}，第一次被翻到需要什么入河仪式吗？我已经把昵称改得很像老粉了。",
+        "context": "保留两人最早的聊天记忆，用一条旧式翻牌建立她一路陪到总选月的氛围。"
+      },
+      "choices": [
+        {
+          "id": "welcome",
+          "text": "仪式就是：从今天开始别把自己当外人，来{{teamName}}也别紧张。",
+          "cost": { "energy": 1, "mindset": 1 },
+          "effects": { "affinity": { "yuzu": 10 }, "setFlags": ["yuzu-welcomed"] },
+          "nextNodeId": "yuzu-02"
+        },
+        {
+          "id": "playful",
+          "text": "先交一份三百字入河感想，我明天检查。",
+          "cost": { "energy": 1, "mindset": 1 },
+          "effects": { "affinity": { "yuzu": 6 } },
+          "nextNodeId": "yuzu-02"
+        },
+        {
+          "id": "generic",
+          "text": "我知道你刚来会有点紧张，也可能暂时分不清那些只有老粉才懂的梗。别急着把自己装得很熟。\n\n先按自己的节奏认识我，也认识这里的人。能来看看、愿意说句话，就已经算入河了。以后哪天累了，也不用为了证明喜欢硬撑。",
+          "cost": { "energy": 1, "mindset": 1 },
+          "effects": { "affinity": { "yuzu": 2 } },
+          "nextNodeId": "yuzu-02"
+        }
+      ],
+      "onExpire": { "affinity": { "yuzu": -8 }, "nextNodeId": "yuzu-02" },
+      "editor": { "y": 0 }
+    },
+    {
+      "id": "yuzu-02",
+      "fanId": "yuzu",
+      "title": "十二票",
+      "postedDay": 10,
+      "replyWindowDays": 7,
+      "content": {
+        "text": "我算了一下，暑假少买几杯奶茶，应该能给你投十二票。是不是有点少呀？别人好像随手就能投好多。"
+      },
+      "choices": [
+        {
+          "id": "life-first",
+          "text": "十二票不是你的大小。先好好吃饭、好好上学，能来陪我就已经很好了。",
+          "cost": { "energy": 2, "mindset": 2 },
+          "effects": { "affinity": { "yuzu": 12 }, "setFlags": ["yuzu-life-first"] },
+          "nextNodeId": "yuzu-03"
+        },
+        {
+          "id": "thank-votes",
+          "text": "一点都不少，我会把你的十二票认真收好。",
+          "cost": { "energy": 1, "mindset": 1 },
+          "effects": { "affinity": { "yuzu": 7 } },
+          "nextNodeId": "yuzu-03"
+        },
+        {
+          "id": "push-more",
+          "text": "现在十二票，月底说不定还能再努力一下？我相信你。",
+          "cost": { "energy": 1, "mindset": 1 },
+          "effects": {
+            "affinity": { "yuzu": -12 },
+            "popularity": -3,
+            "setFlags": ["yuzu-pressured"]
+          },
+          "nextNodeId": "yuzu-03"
+        }
+      ],
+      "onExpire": { "affinity": { "yuzu": -8 }, "nextNodeId": "yuzu-03" },
+      "editor": { "y": 0 }
+    },
+    {
+      "id": "yuzu-03",
+      "fanId": "yuzu",
+      "title": "半分钟和一整天",
+      "postedDay": 19,
+      "replyWindowDays": 7,
+      "content": {
+        "text": "今天握手只有两张券，我出来以后才发现自己紧张到只说了半句话。不过我在场馆站到散场，又远远看到你好几次！你有一次是不是往我这边挥手了？"
+      },
+      "choices": [
+        {
+          "id": "remember-wave",
+          "text": "是往你那边。我记得你今天头发上那个黄色发夹，半句话也有被我听见。",
+          "cost": { "energy": 3, "mindset": 1 },
+          "effects": { "affinity": { "yuzu": 13 }, "setFlags": ["yuzu-remembered"] },
+          "nextNodeId": "yuzu-04"
+        },
+        {
+          "id": "gentle-thanks",
+          "text": "看到你啦，站一天很累吧？回去早点休息，下次不用这么紧张。",
+          "cost": { "energy": 1, "mindset": 1 },
+          "effects": { "affinity": { "yuzu": 7 } },
+          "nextNodeId": "yuzu-04"
+        },
+        {
+          "id": "template-reply",
+          "text": "谢谢你来看公演，下次见！",
+          "cost": { "energy": 1, "mindset": 1 },
+          "effects": { "affinity": { "yuzu": 1 } },
+          "nextNodeId": "yuzu-04"
+        }
+      ],
+      "onExpire": { "affinity": { "yuzu": -10 }, "nextNodeId": "yuzu-04" },
+      "editor": { "y": 0 }
+    },
+    {
+      "id": "yuzu-04",
+      "fanId": "yuzu",
+      "title": "开学以后",
+      "postedDay": 28,
+      "replyWindowDays": 7,
+      "content": {
+        "text": "明天要开学啦。高三可能会很忙，以后不能每次都秒回你，也不一定常来看公演了。你总选要加油呀，我会把攒下来的票都投掉的。"
+      },
+      "choices": [
+        {
+          "id": "remember-you",
+          "text": "你先去过好自己的高三。不能秒回也没关系，我会记得那个每次都亮起来的头像。",
+          "cost": { "energy": 3, "mindset": 2 },
+          "effects": { "affinity": { "yuzu": 15 }, "setFlags": ["yuzu-stays"] }
+        },
+        {
+          "id": "study-well",
+          "text": "学习加油，照顾好自己。有空再见，我不会给你点名。",
+          "cost": { "energy": 1, "mindset": 1 },
+          "effects": { "affinity": { "yuzu": 8 }, "setFlags": ["yuzu-studies"] }
+        },
+        {
+          "id": "votes-first",
+          "text": "好，那记得先把票投完，之后就安心学习。",
+          "cost": { "energy": 1, "mindset": 1 },
+          "effects": { "affinity": { "yuzu": -10 } }
+        }
+      ],
+      "onExpire": { "affinity": { "yuzu": -15 }, "setFlags": ["yuzu-left"] },
+      "editor": { "y": 0 }
+    },
+    {
+      "id": "salt-01",
+      "fanId": "salt",
+      "title": "超出粉丝的感情",
+      "postedDay": 4,
+      "replyWindowDays": 7,
+      "content": {
+        "text": "我最近一直在想……我好像对你产生了超出粉丝的感情。你每次回复我的时候，我都会觉得我们之间应该不只是普通偶像和粉丝吧？"
+      },
+      "choices": [
+        {
+          "id": "gentle-boundary",
+          "text": "谢谢你喜欢我，但我的回复是偶像对粉丝的回应。我们只能、也应该停在这个边界里。",
+          "cost": { "energy": 2, "mindset": 4 },
+          "effects": { "affinity": { "salt": -4 }, "setFlags": ["stalker-boundary"] },
+          "nextNodeId": "salt-02"
+        },
+        {
+          "id": "reassure-special",
+          "text": "你当然很特别呀，我也会期待看到你的消息。",
+          "cost": { "energy": 2, "mindset": 3 },
+          "effects": { "affinity": { "salt": 10 }, "setFlags": ["stalker-encouraged"] },
+          "nextNodeId": "salt-02"
+        },
+        {
+          "id": "hard-stop",
+          "text": "这种话让我不舒服，以后不要再说了。",
+          "cost": { "energy": 1, "mindset": 5 },
+          "effects": { "affinity": { "salt": -12 }, "setFlags": ["stalker-boundary"] },
+          "nextNodeId": "salt-02"
+        }
+      ],
+      "onExpire": { "affinity": { "salt": -5 }, "nextNodeId": "salt-02" },
+      "editor": { "y": 240 }
+    },
+    {
+      "id": "salt-02",
+      "fanId": "salt",
+      "title": "火锅店的巧合",
+      "postedDay": 10,
+      "replyWindowDays": 7,
+      "content": {
+        "text": "刚才火锅店那个真的是你吧？没想到会这么巧！我怕打扰你就没过去，只在隔壁桌看了一会儿。你是不是也看到我了？"
+      },
+      "choices": [
+        {
+          "id": "ask-source",
+          "text": "你怎么知道我在那里？那不是公开行程。请不要再跟着我，也不要在私人时间观察我。",
+          "cost": { "energy": 2, "mindset": 5 },
+          "effects": { "affinity": { "salt": -10 }, "setFlags": ["stalker-documented"] },
+          "nextNodeId": "salt-03"
+        },
+        {
+          "id": "tell-organizer",
+          "text": "我看到了，而且有点害怕。我会把这次情况告诉应援会和公司，请你不要再出现。",
+          "cost": { "energy": 3, "mindset": 5 },
+          "effects": {
+            "affinity": { "salt": -12, "lighthouse": 5 },
+            "setFlags": ["stalker-documented", "organizer-knows"]
+          },
+          "nextNodeId": "salt-03"
+        },
+        {
+          "id": "brush-off",
+          "text": "原来真的是你，好巧。下次在外面不用等我啦。",
+          "cost": { "energy": 1, "mindset": 3 },
+          "effects": { "affinity": { "salt": 6 } },
+          "nextNodeId": "salt-03"
+        }
+      ],
+      "onExpire": { "affinity": { "salt": -6 }, "nextNodeId": "salt-03" },
+      "editor": { "y": 240 }
+    },
+    {
+      "id": "salt-03",
+      "fanId": "salt",
+      "title": "商场里的第二次",
+      "postedDay": 16,
+      "replyWindowDays": 7,
+      "content": {
+        "text": "今天商场又遇到你了。你走得好快，我喊了两声都没回头。别紧张，我只是担心你一个人逛街不安全，所以想离你近一点。"
+      },
+      "choices": [
+        {
+          "id": "official-report",
+          "text": "让我不安全的正是这种跟踪。我已经保存记录并上报公司，以后不要接近我的私人行程。",
+          "cost": { "energy": 2, "mindset": 6 },
+          "effects": { "affinity": { "salt": -18 }, "setFlags": ["stalker-official"] },
+          "nextNodeId": "salt-04"
+        },
+        {
+          "id": "ask-organizer-help",
+          "text": "这不是偶遇。我会把记录交给夜航灯塔和公司，只通过正式渠道处理。",
+          "cost": { "energy": 3, "mindset": 5 },
+          "effects": {
+            "affinity": { "salt": -15, "lighthouse": 8 },
+            "setFlags": ["stalker-official", "organizer-knows"]
+          },
+          "nextNodeId": "salt-04"
+        },
+        {
+          "id": "cold-down",
+          "text": "我不讨论私人行程。之后这类消息我不会再回复。",
+          "cost": { "energy": 1, "mindset": 4 },
+          "effects": { "affinity": { "salt": -8 }, "setFlags": ["stalker-cold"] },
+          "nextNodeId": "salt-04"
+        },
+        {
+          "id": "appease-again",
+          "text": "我只是没听见。谢谢你担心，不过下次别跟这么近。",
+          "cost": { "energy": 3, "mindset": 6 },
+          "effects": { "affinity": { "salt": 8 }, "setFlags": ["stalker-appeased"] },
+          "nextNodeId": "salt-04"
+        }
+      ],
+      "onExpire": { "affinity": { "salt": -7 }, "nextNodeId": "salt-04" },
+      "editor": { "y": 240 }
+    },
+    {
+      "id": "salt-04",
+      "fanId": "salt",
+      "title": "你是不是要拉黑我",
+      "postedDay": 22,
+      "replyWindowDays": 2,
+      "content": {
+        "text": "你最近为什么这么冷淡？是不是夜航灯塔和你说了什么，还准备把我拉黑？我为你做了这么多，你不能一句话都不给我。"
+      },
+      "choices": [
+        {
+          "id": "block-officially",
+          "text": "这是最后一次回复。你的跟踪已经越过底线，之后公司会按安全事件处理。",
+          "cost": { "energy": 2, "mindset": 6 },
+          "effects": {
+            "affinity": { "salt": -20 },
+            "setFlags": ["stalker-blocked", "stalker-official"]
+          }
+        },
+        {
+          "id": "trust-core-fans",
+          "text": "我会停止联系，也会把证据交给可信任的人。大家只做事实澄清，不会公开你的私人信息。",
+          "cost": { "energy": 4, "mindset": 5 },
+          "effects": {
+            "affinity": { "salt": -18, "lighthouse": 8 },
+            "setFlags": ["stalker-blocked", "stalker-supported", "organizer-knows"]
+          }
+        },
+        {
+          "id": "silent-block",
+          "text": "我不会再讨论这件事。请停止接近我的私人生活。",
+          "cost": { "energy": 1, "mindset": 4 },
+          "effects": { "affinity": { "salt": -12 }, "setFlags": ["stalker-cold"] }
+        },
+        {
+          "id": "keep-appeasing",
+          "text": "没有人说你不好，我只是最近太忙了。别多想，我看到消息还是会回的。",
+          "cost": { "energy": 4, "mindset": 7 },
+          "effects": { "affinity": { "salt": 10 }, "setFlags": ["stalker-appeased"] }
+        }
+      ],
+      "onExpire": {
+        "affinity": { "salt": -15 },
+        "setFlags": ["stalker-ignored"]
+      },
+      "editor": { "y": 240 }
+    },
+    {
+      "id": "salt-smear",
+      "fanId": "salt",
+      "title": "心碎 bot 的投稿",
+      "postedDay": 25,
+      "replyWindowDays": 4,
+      "trigger": {
+        "match": "any",
+        "conditions": [
+          { "type": "flag-set", "flag": "stalker-blocked" },
+          { "type": "flag-set", "flag": "stalker-cold" },
+          { "type": "flag-set", "flag": "stalker-ignored" }
+        ]
+      },
+      "content": {
+        "text": "你在心碎 bot 看见一篇长投稿。她把普通翻牌写成你主动暧昧，把火锅店和商场的跟踪删成了“偶遇”，最后说你利用完粉丝就让饭头封口。营销号已经开始搬运。",
+        "public": true
+      },
+      "choices": [
+        {
+          "id": "evidence-with-fans",
+          "text": "把整理好的时间线交给夜航灯塔，请她约束粉丝只做事实澄清，不开盒、不围攻。",
+          "cost": { "energy": 4, "mindset": 5 },
+          "effects": {
+            "affinity": { "salt": -10, "lighthouse": 8 },
+            "popularity": 12,
+            "setFlags": ["stalker-smear-answered", "fan-circle-united"]
+          }
+        },
+        {
+          "id": "official-statement",
+          "text": "由公司发布简短声明并保留证据，不回应她对关系的每一处情绪化描述。",
+          "cost": { "energy": 2, "mindset": 4 },
+          "effects": {
+            "affinity": { "salt": -8 },
+            "popularity": 5,
+            "setFlags": ["stalker-smear-contained"]
+          }
+        },
+        {
+          "id": "angry-live",
+          "text": "直播里逐句反驳，告诉所有人她到底有多逆天。",
+          "cost": { "energy": 2, "mindset": 6 },
+          "effects": { "affinity": { "salt": -15 }, "popularity": -8 }
+        }
+      ],
+      "onExpire": { "popularity": -12, "setFlags": ["stalker-smear-spread"] },
+      "editor": { "y": 300 }
+    },
+    {
+      "id": "lighthouse-01",
+      "fanId": "lighthouse",
+      "title": "易拉宝今晚定稿",
+      "postedDay": 1,
+      "replyWindowDays": 7,
+      "content": {
+        "text": "易拉宝第三版在群文件里，call 词我也按新歌重排了。今晚能不能把总选目标一起定一下？再拖，直播业务和 PK 集资会全撞到一周。"
+      },
+      "choices": [
+        {
+          "id": "together",
+          "text": "今晚一起过，但先列最重要的三件。别把所有活都默认成你的。",
+          "cost": { "energy": 3, "mindset": 2 },
+          "effects": { "affinity": { "lighthouse": 11 }, "setFlags": ["organizer-shared-work"] },
+          "nextNodeId": "lighthouse-02"
+        },
+        {
+          "id": "trust-her",
+          "text": "规则你比我熟，先按你的判断做，我负责把目标想清楚。",
+          "cost": { "energy": 1, "mindset": 1 },
+          "effects": { "affinity": { "lighthouse": 5 } },
+          "nextNodeId": "lighthouse-02"
+        },
+        {
+          "id": "leave-it-all",
+          "text": "这些杂事你决定就好，定稿了告诉我。",
+          "cost": { "energy": 1, "mindset": 1 },
+          "effects": { "affinity": { "lighthouse": -7 }, "setFlags": ["organizer-overloaded"] },
+          "nextNodeId": "lighthouse-02"
+        }
+      ],
+      "onExpire": { "affinity": { "lighthouse": -8 }, "nextNodeId": "lighthouse-02" },
+      "editor": { "y": 480 }
+    },
+    {
+      "id": "lighthouse-02",
+      "fanId": "lighthouse",
+      "title": "大粉还没表态",
+      "postedDay": 7,
+      "replyWindowDays": 7,
+      "content": {
+        "text": "现在最大的问题不是散票，是几个有票力的人都没表态。你今晚直播要不要把目标说得更明确一点？不是让你媚大粉，但至少得让人看见你真的想往上走。"
+      },
+      "choices": [
+        {
+          "id": "clear-goal",
+          "text": "我会说清楚为什么想争，也会告诉大家不要超过自己的生活。你帮我看看措辞。",
+          "cost": { "energy": 3, "mindset": 3 },
+          "effects": { "affinity": { "lighthouse": 10 }, "popularity": 5 },
+          "nextNodeId": "lighthouse-03"
+        },
+        {
+          "id": "target-whales",
+          "text": "普通粉丝先别催，你把几个大粉的情况单独发我，我来想办法。",
+          "cost": { "energy": 2, "mindset": 3 },
+          "effects": {
+            "affinity": { "lighthouse": 4 },
+            "popularity": -3,
+            "setFlags": ["idol-targets-whales"]
+          },
+          "nextNodeId": "lighthouse-03"
+        },
+        {
+          "id": "avoid-goal",
+          "text": "我还是不喊目标了，万一没做到会很难看。",
+          "cost": { "energy": 1, "mindset": 2 },
+          "effects": { "affinity": { "lighthouse": -7 } },
+          "nextNodeId": "lighthouse-03"
+        }
+      ],
+      "onExpire": { "affinity": { "lighthouse": -7 }, "nextNodeId": "lighthouse-03" },
+      "editor": { "y": 480 }
+    },
+    {
+      "id": "lighthouse-03",
+      "fanId": "lighthouse",
+      "title": "我不知道还要不要继续",
+      "postedDay": 13,
+      "replyWindowDays": 7,
+      "content": {
+        "text": "我想认真抱怨一次。做应援会真的太花时间了。白天上班，晚上改图、对账、催文案，周末本来答应陪家里人，最后又在场馆盯物料。最近朋友约我，我第一反应都是先看有没有你的行程。\n\n我当然是真心想帮你，可我也开始觉得自己的生活被挤没了。我不知道总选以后还要不要继续做下去。"
+      },
+      "choices": [
+        {
+          "id": "reduce-work",
+          "text": "谢谢你终于告诉我。先砍业务、分权限，做不完就不做。你不是因为能干活才值得我记住。",
+          "cost": { "energy": 4, "mindset": 4 },
+          "effects": { "affinity": { "lighthouse": 15 }, "setFlags": ["organizer-rests"] },
+          "nextNodeId": "lighthouse-04-rest"
+        },
+        {
+          "id": "ask-her-stay",
+          "text": "可我现在真的离不开你。再陪我拼完这次好不好？总选以后我一定让你好好休息。",
+          "cost": { "energy": 2, "mindset": 4 },
+          "effects": { "affinity": { "lighthouse": 3 }, "setFlags": ["organizer-guilt-stays"] },
+          "nextNodeId": "lighthouse-04-guilt"
+        },
+        {
+          "id": "respect-choice",
+          "text": "你可以停下来。就算不做饭头、不给我管业务，我们这大半年也不会因此作废。",
+          "cost": { "energy": 3, "mindset": 3 },
+          "effects": { "affinity": { "lighthouse": 10 }, "setFlags": ["organizer-free-choice"] },
+          "nextNodeId": "lighthouse-04-choice"
+        }
+      ],
+      "onExpire": {
+        "affinity": { "lighthouse": -12 },
+        "setFlags": ["organizer-unheard"],
+        "nextNodeId": "lighthouse-04-choice"
+      },
+      "editor": { "y": 480 }
+    },
+    {
+      "id": "lighthouse-04-rest",
+      "fanId": "lighthouse",
+      "title": "第一次按时下班",
+      "postedDay": 22,
+      "replyWindowDays": 7,
+      "content": {
+        "text": "我把对账和切片分出去了，易拉宝也不做第四版了。昨天第一次在十二点前睡。少做两项业务，应援会没有塌，我也没有。最后一周，我们把真正重要的目标确认一下吧。"
+      },
+      "choices": [
+        {
+          "id": "healthy-goal",
+          "text": "目标往前一步，前提是没有人拿生活填进去。你帮我守住这条线。",
+          "cost": { "energy": 2, "mindset": 3 },
+          "effects": {
+            "affinity": { "lighthouse": 14 },
+            "popularity": 5,
+            "voteBonus": { "lighthouse": 180 },
+            "setFlags": ["organizer-healthy"]
+          }
+        },
+        {
+          "id": "all-in-again",
+          "text": "既然状态回来了，最后一周还是尽量把能开的业务都开起来。",
+          "cost": { "energy": 1, "mindset": 2 },
+          "effects": { "affinity": { "lighthouse": -8 }, "voteBonus": { "lighthouse": 80 } }
+        }
+      ],
+      "onExpire": { "affinity": { "lighthouse": -8 } },
+      "editor": { "y": 420 }
+    },
+    {
+      "id": "lighthouse-04-guilt",
+      "fanId": "lighthouse",
+      "title": "先把这次撑完",
+      "postedDay": 22,
+      "replyWindowDays": 7,
+      "content": {
+        "text": "好，我答应陪你把这次撑完。只是这几天我有时会突然很烦，看到群消息都不想点开。你别担心，业务不会掉，我总选以后再想自己还留不留下。"
+      },
+      "choices": [
+        {
+          "id": "notice-cost",
+          "text": "我后悔用“离不开你”留你了。现在就减，不用等总选结束才准休息。",
+          "cost": { "energy": 3, "mindset": 4 },
+          "effects": { "affinity": { "lighthouse": 9 }, "voteBonus": { "lighthouse": 80 } }
+        },
+        {
+          "id": "finish-first",
+          "text": "最后几天了，我们先别想那么多。等结果出来，我好好谢谢你。",
+          "cost": { "energy": 1, "mindset": 2 },
+          "effects": { "affinity": { "lighthouse": -6 }, "voteBonus": { "lighthouse": 150 } }
+        }
+      ],
+      "onExpire": { "affinity": { "lighthouse": -10 } },
+      "editor": { "y": 500 }
+    },
+    {
+      "id": "lighthouse-04-choice",
+      "fanId": "lighthouse",
+      "title": "不当饭头以后",
+      "postedDay": 22,
+      "replyWindowDays": 7,
+      "content": {
+        "text": "我把应援会账号交出去了。说不难受是假的，但今天下班后我和朋友吃了饭，三个小时没看群。最后这点个人票我还是会给你——不是因为我是饭头，只是因为我还喜欢你。"
+      },
+      "choices": [
+        {
+          "id": "fan-not-labor",
+          "text": "谢谢你还愿意以自己的名字留下。以后来见我，不需要先证明自己做了多少事。",
+          "cost": { "energy": 3, "mindset": 3 },
+          "effects": { "affinity": { "lighthouse": 15 }, "setFlags": ["organizer-remains-fan"] }
+        },
+        {
+          "id": "ask-return-later",
+          "text": "先休息吧。以后应援会缺人的时候，我还能再问问你吗？",
+          "cost": { "energy": 1, "mindset": 2 },
+          "effects": { "affinity": { "lighthouse": -5 } }
+        }
+      ],
+      "onExpire": { "affinity": { "lighthouse": -10 } },
+      "editor": { "y": 580 }
+    },
+    {
+      "id": "battery-01",
+      "fanId": "battery",
+      "title": "她昨晚说了什么",
+      "postedDay": 4,
+      "replyWindowDays": 7,
+      "content": {
+        "text": "小遥昨晚 MC 说最近排练总走神，你当时就在旁边吧？她是不是遇到什么事了？不用说秘密，给我一点能放心的小逸事就好。"
+      },
+      "choices": [
+        {
+          "id": "public-anecdote",
+          "text": "秘密不能讲。能讲的是她散场后还在练那段动作，最后把我们全留下来陪她数拍子。",
+          "cost": { "energy": 2, "mindset": 2 },
+          "effects": { "affinity": { "battery": 7 }, "setFlags": ["king-safe-anecdote"] },
+          "nextNodeId": "battery-02"
+        },
+        {
+          "id": "no-other-idol",
+          "text": "我不太想在自己的翻牌里聊其他成员私下的事。你如果想认识我，我们聊点属于我们的？",
+          "cost": { "energy": 2, "mindset": 3 },
+          "effects": { "affinity": { "battery": -3 }, "setFlags": ["king-boundary"] },
+          "nextNodeId": "battery-02"
+        },
+        {
+          "id": "share-secret",
+          "text": "她最近确实和老师吵过一次，你别往外说。其实她比台上看起来更在意名次。",
+          "cost": { "energy": 1, "mindset": 2 },
+          "effects": {
+            "affinity": { "battery": 12 },
+            "popularity": -3,
+            "setFlags": ["king-secret-leaked"]
+          },
+          "nextNodeId": "battery-02"
+        }
+      ],
+      "onExpire": { "affinity": { "battery": -5 }, "nextNodeId": "battery-02" },
+      "editor": { "y": 720 }
+    },
+    {
+      "id": "battery-02",
+      "fanId": "battery",
+      "title": "也看了你几次",
+      "postedDay": 10,
+      "replyWindowDays": 7,
+      "content": {
+        "text": "说起来，我最近看小遥的时候也会看到你。上周公演你第三首转身那一下挺亮的。握手那天你还记得我说“隔壁第一排借你半分钟”吗？"
+      },
+      "choices": [
+        {
+          "id": "own-memory",
+          "text": "记得。你说完还自己看表，怕多占一秒。下次那半分钟不用向隔壁借，算我们自己的。",
+          "cost": { "energy": 3, "mindset": 2 },
+          "effects": { "affinity": { "battery": 12 }, "setFlags": ["king-own-story"] },
+          "nextNodeId": "battery-03"
+        },
+        {
+          "id": "compete",
+          "text": "终于看到我了？那第三首以后多看我几眼，说不定比看她更值。",
+          "cost": { "energy": 2, "mindset": 2 },
+          "effects": { "affinity": { "battery": 8 }, "setFlags": ["king-poached"] },
+          "nextNodeId": "battery-03"
+        },
+        {
+          "id": "polite",
+          "text": "谢谢你注意到，下次公演也欢迎来看。",
+          "cost": { "energy": 1, "mindset": 1 },
+          "effects": { "affinity": { "battery": 2 } },
+          "nextNodeId": "battery-03"
+        }
+      ],
+      "onExpire": { "affinity": { "battery": -6 }, "nextNodeId": "battery-03" },
+      "editor": { "y": 720 }
+    },
+    {
+      "id": "battery-03",
+      "fanId": "battery",
+      "title": "和首推闹掰了",
+      "postedDay": 16,
+      "replyWindowDays": 7,
+      "content": {
+        "text": "我和小遥闹得很难看。她说我总拿付出要求回应，可能她说得对。现在我连她的直播都不想点开。你别劝我回去，也别笑我，我只是突然不知道这些年算什么。"
+      },
+      "choices": [
+        {
+          "id": "comfort-without-poaching",
+          "text": "这些年不会因为一次争吵作废。你先难过，不急着决定推谁，也不用马上把票交给另一个人证明什么。",
+          "cost": { "energy": 4, "mindset": 4 },
+          "effects": { "affinity": { "battery": 14 }, "setFlags": ["king-not-exploited"] },
+          "nextNodeId": "battery-04"
+        },
+        {
+          "id": "invite-transfer",
+          "text": "那就来我这里吧。至少我不会让你觉得这些年的付出没人看见。",
+          "cost": { "energy": 3, "mindset": 3 },
+          "effects": {
+            "affinity": { "battery": 12 },
+            "voteBonus": { "battery": 300 },
+            "setFlags": ["king-heartbreak-transfer"]
+          },
+          "nextNodeId": "battery-04"
+        },
+        {
+          "id": "use-secret",
+          "text": "我早就觉得她不够珍惜你。还有些事我之前没说……你想听的话，我都可以告诉你。",
+          "cost": { "energy": 2, "mindset": 3 },
+          "effects": {
+            "affinity": { "battery": 16 },
+            "popularity": -8,
+            "voteBonus": { "battery": 500 },
+            "setFlags": ["king-more-secrets"]
+          },
+          "nextNodeId": "battery-04"
+        }
+      ],
+      "onExpire": { "affinity": { "battery": -8 }, "nextNodeId": "battery-04" },
+      "editor": { "y": 720 }
+    },
+    {
+      "id": "battery-04",
+      "fanId": "battery",
+      "title": "今年的票给谁",
+      "postedDay": 25,
+      "replyWindowDays": 7,
+      "content": {
+        "text": "票都在手里了。我还是会想起她，但也确实很想看你往前走。你希望我怎么投？别给我标准答案，我想听你真正想要什么。"
+      },
+      "choices": [
+        {
+          "id": "honest-ask",
+          "text": "我当然想要你的票，也想让你留下。但我希望这是因为你真的看见了我，不是为了报复谁。",
+          "cost": { "energy": 3, "mindset": 4 },
+          "effects": { "affinity": { "battery": 14 }, "voteBonus": { "battery": 450 } }
+        },
+        {
+          "id": "respect-split",
+          "text": "按你自己的心分。二推也可以是真心，我不会把没转推当成失败。",
+          "cost": { "energy": 2, "mindset": 3 },
+          "effects": { "affinity": { "battery": 10 }, "voteBonus": { "battery": 180 } }
+        },
+        {
+          "id": "demand-choice",
+          "text": "我希望你全投我。既然她让你失望了，就别再给她留。",
+          "cost": { "energy": 1, "mindset": 2 },
+          "effects": {
+            "affinity": { "battery": 5 },
+            "voteBonus": { "battery": 700 },
+            "popularity": -5
+          }
+        }
+      ],
+      "onExpire": { "affinity": { "battery": -10 } },
+      "editor": { "y": 720 }
+    },
+    {
+      "id": "patron-01",
+      "fanId": "patron",
+      "title": "第三回合的一句哈喽",
+      "postedDay": 7,
+      "replyWindowDays": 12,
+      "content": {
+        "text": "哈喽，今天公演跳得挺好的，来跟你打个招呼。",
+        "context": "冷静神豪第一次出现。消息极短，但标签显示他的票力足以影响新人王。"
+      },
+      "choices": [
+        {
+          "id": "specific",
+          "text": "谢谢你来打招呼。今天第二首我差点没踩稳，后面那段是憋着一口气跳完的，被你看到“挺好”就值了。",
+          "cost": { "energy": 2, "mindset": 2 },
+          "effects": { "affinity": { "patron": 9 }, "setFlags": ["patron-specific"] },
+          "nextNodeId": "patron-02"
+        },
+        {
+          "id": "full-enthusiasm",
+          "text": "你好！没想到你会注意到我，看到这条真的特别特别开心！今天为了公演练了很久，如果你愿意的话以后也多来看看我，我还有很多想让你看到的东西。谢谢你专门来和我说话！",
+          "cost": { "energy": 5, "mindset": 4 },
+          "effects": { "affinity": { "patron": 12 }, "setFlags": ["patron-full-service"] },
+          "nextNodeId": "patron-02"
+        },
+        {
+          "id": "generic-thanks",
+          "text": "谢谢支持，我会继续努力的。",
+          "cost": { "energy": 1, "mindset": 1 },
+          "effects": { "affinity": { "patron": -4 } },
+          "nextNodeId": "patron-02"
+        }
+      ],
+      "onExpire": { "affinity": { "patron": -12 }, "setFlags": ["patron-first-expired"] },
+      "editor": { "y": 960 }
+    },
+    {
+      "id": "patron-02",
+      "fanId": "patron",
+      "title": "第二次试探",
+      "postedDay": 19,
+      "replyWindowDays": 10,
+      "content": {
+        "text": "今天 MC 也还行。上次你说想让我多看看，我就又坐了一场。你平时都是这么认真回每个人，还是那天刚好心情好？"
+      },
+      "choices": [
+        {
+          "id": "calm-honesty",
+          "text": "不是每条都能写那么多，但那天你的消息让我想认真接住。今天你真的又来了，我也会记住。",
+          "cost": { "energy": 3, "mindset": 3 },
+          "effects": { "affinity": { "patron": 13 }, "voteBonus": { "patron": 250 } }
+        },
+        {
+          "id": "promise-service",
+          "text": "只要是你发来的，我都会认真回。你愿意多看我一场，我当然要让你每次都觉得值得。",
+          "cost": { "energy": 5, "mindset": 5 },
+          "effects": {
+            "affinity": { "patron": 15 },
+            "voteBonus": { "patron": 450 },
+            "setFlags": ["patron-service-promised"]
+          }
+        },
+        {
+          "id": "play-it-cool",
+          "text": "刚好心情好吧，你也不用想太多。",
+          "cost": { "energy": 1, "mindset": 1 },
+          "effects": { "affinity": { "patron": -10 } }
+        }
+      ],
+      "onExpire": { "affinity": { "patron": -15 }, "setFlags": ["patron-second-expired"] },
+      "editor": { "y": 960 }
+    },
+    {
+      "id": "patron-goodbye",
+      "fanId": "patron",
+      "title": "不用勉强回复了",
+      "postedDay": 25,
+      "replyWindowDays": 4,
+      "trigger": {
+        "match": "all",
+        "conditions": [
+          {
+            "type": "consecutive-replies-delayed-at-least",
+            "fanId": "patron",
+            "count": 2,
+            "turns": 2
+          }
+        ]
+      },
+      "content": {
+        "text": "这两次好像都在不合适的时候打扰你了。你不用勉强抽空回复，我看得出来你有更想维护的人。就这样吧，祝你总选顺利。",
+        "context": "仅当最近连续两次给神豪的回复都至少晚了两个回合时，在下一次日初触发。"
+      },
+      "choices": [
+        {
+          "id": "let-go",
+          "text": "对不起让你等了这么久。谢谢你来看过我，也祝你之后能遇到更合适的舞台。",
+          "cost": { "energy": 2, "mindset": 2 },
+          "effects": { "affinity": { "patron": -5 }, "setFlags": ["patron-left"] }
+        },
+        {
+          "id": "explain-busy",
+          "text": "不是不在意你，是这段时间我真的顾不过来。解释不是挽留，但我不想让你以为那两次认真回复都是假的。",
+          "cost": { "energy": 3, "mindset": 4 },
+          "effects": {
+            "affinity": { "patron": 3 },
+            "voteBonus": { "patron": 80 },
+            "setFlags": ["patron-left"]
+          }
+        },
+        {
+          "id": "desperate-chase",
+          "text": "别走，我今晚可以把之前没说完的都补给你。你想聊多久都可以。",
+          "cost": { "energy": 5, "mindset": 5 },
+          "effects": { "affinity": { "patron": -8 }, "setFlags": ["patron-left"] }
+        }
+      ],
+      "onExpire": { "affinity": { "patron": -12 }, "setFlags": ["patron-left"] },
+      "editor": { "y": 960 }
+    }
+  ],
+  "turnEvents": [
+    {
+      "id": "rehearsal-night",
+      "turn": 5,
+      "title": "凌晨联排",
+      "description": "总选曲联排拖到凌晨。今天醒来时，灵魂比外卖先迟到。",
+      "recoveryDelta": { "energy": -1, "mindset": -2 }
+    },
+    {
+      "id": "mc-trending",
+      "turn": 8,
+      "title": "MC小范围出圈",
+      "description": "昨晚{{groupName}}的MC片段传遍{{cityName}}，房间里多了不少没见过的名字。",
+      "recoveryDelta": { "mindset": 1 },
+      "popularityDelta": 5
+    },
+    {
+      "id": "election-sprint",
+      "turn": 10,
+      "title": "总选冲刺",
+      "description": "最后三天，所有人都在问同一个问题：今年能到哪里？",
+      "recoveryDelta": { "energy": -1, "mindset": -1 }
+    }
+  ],
+  "backgroundFlips": [
+    {
+      "id": "npc-01",
+      "contactId": "milk-tea-ice",
+      "day": 1,
+      "fanName": "奶茶去冰",
+      "avatar": "/assets/avatars/fan-milktea.webp",
+      "tag": "冒泡",
+      "message": "今天吃了吗？",
+      "reply": "吃了，吃的是经纪人的画饼。"
+    },
+    {
+      "id": "npc-02",
+      "contactId": "back-row-microscope",
+      "day": 1,
+      "fanName": "后排显微镜",
+      "avatar": "/assets/avatars/fan-salt.webp",
+      "tag": "初识",
+      "message": "你第三首是不是鞋带开了？",
+      "reply": "那是舞美的一部分。"
+    },
+    {
+      "id": "npc-03",
+      "contactId": "subway-champion",
+      "day": 4,
+      "fanName": "赶地铁冠军",
+      "avatar": "/assets/avatars/fan-subway.webp",
+      "tag": "铁粉",
+      "message": "散场五分钟赶上末班车，夸我。",
+      "reply": "你比我们的换装还快。"
+    },
+    {
+      "id": "npc-04",
+      "contactId": "repo-writer",
+      "day": 7,
+      "fanName": "不会写repo",
+      "avatar": "/assets/avatars/fan-desk.webp",
+      "tag": "萌新",
+      "message": "周报写不出来怎么办？",
+      "reply": "把‘进行中’写得真诚一点。"
+    },
+    {
+      "id": "npc-05",
+      "contactId": "pocket-loading",
+      "day": 10,
+      "fanName": "口袋加载中",
+      "avatar": "/assets/avatars/fan-battery.webp",
+      "tag": "冒泡",
+      "message": "我这里卡住了。",
+      "reply": "别急，我的人生进度条也一样。"
+    },
+    {
+      "id": "npc-06",
+      "contactId": "cold-joke-support",
+      "day": 13,
+      "fanName": "冷笑话售后",
+      "avatar": "/assets/avatars/fan-yuzu.webp",
+      "tag": "初识",
+      "message": "今天MC好冷。",
+      "reply": "售后不退，只能下次换新梗。"
+    },
+    {
+      "id": "npc-07",
+      "contactId": "call-stick",
+      "day": 16,
+      "fanName": "红蓝打call棒",
+      "avatar": "/assets/avatars/fan-callsticks.webp",
+      "tag": "铁粉",
+      "message": "拿错队色了怎么办？",
+      "reply": "挥快一点，别人看不清。下次记得认准{{teamShortName}}。"
+    },
+    {
+      "id": "npc-08",
+      "contactId": "office-diver",
+      "day": 19,
+      "fanName": "工位潜水员",
+      "avatar": "/assets/avatars/fan-desk.webp",
+      "tag": "潜水",
+      "message": "老板在背后还能看直播吗？",
+      "reply": "能，但这条不能翻。"
+    },
+    {
+      "id": "npc-09",
+      "contactId": "sleep-tomorrow",
+      "day": 22,
+      "fanName": "明天一定早睡",
+      "avatar": "/assets/avatars/fan-lighthouse.webp",
+      "tag": "冒泡",
+      "message": "你怎么还没睡？",
+      "reply": "这句话我们互相撤回。"
+    },
+    {
+      "id": "npc-10",
+      "contactId": "vote-calculator",
+      "day": 25,
+      "fanName": "票仓计算器",
+      "avatar": "/assets/avatars/fan-callsticks.webp",
+      "tag": "铁粉",
+      "message": "我算了一晚上票。",
+      "reply": "先算算今晚睡几个小时。"
+    },
+    {
+      "id": "npc-11",
+      "contactId": "last-train",
+      "day": 28,
+      "fanName": "最后一班车",
+      "avatar": "/assets/avatars/fan-subway.webp",
+      "tag": "初识",
+      "message": "总选见！",
+      "reply": "总选见。别忘了先吃饭。"
+    }
+  ],
+  "electionEndings": [
+    {
+      "id": "rank-rookie",
+      "minVotes": 4300,
+      "rankLabel": "新人王",
+      "title": "新人王是{{idolName}}",
+      "description": "名字被念出来时，你先想到的不是那张最高的票仓标签，而是这三十天里每一次决定把谁放在前面。"
+    },
+    {
+      "id": "rank-breakout",
+      "minVotes": 2600,
+      "rankLabel": "年度黑马",
+      "title": "这一次，{{idolName}}被念得很响",
+      "description": "灯光落下来以前，你先看见了台下几张熟悉的脸。原来{{cityName}}的三十天真的可以改变一些事。"
+    },
+    {
+      "id": "rank-stage",
+      "minVotes": 1400,
+      "rankLabel": "汇报舞台成员",
+      "title": "往前站了一步",
+      "description": "不是传说里的奇迹，但你的名字出现在了更靠前的位置。每一条回复都有了回声。"
+    },
+    {
+      "id": "rank-next-year",
+      "minVotes": 0,
+      "rankLabel": "明年再来",
+      "title": "这次先记在备忘录里",
+      "description": "票数不够漂亮，但故事没有被清零。只是下一次营业前，你需要先学会照顾自己。"
+    }
+  ],
+  "earlyEndings": [
+    {
+      "id": "takeout-idol",
+      "title": "被外卖软件签走了",
+      "description": "经纪人打开房门时，只看见四张外卖单和一个失去响应的小偶像。总选没赶上，但骑手一致给了五星好评。",
+      "trigger": { "takeoutCountAtLeast": 4 }
+    }
+  ],
+  "achievements": [
+    {
+      "id": "no-takeout",
+      "title": "自带便当",
+      "description": "整轮游戏没有点过外卖。",
+      "condition": { "takeoutCountAtMost": 0 }
+    },
+    {
+      "id": "three-orders",
+      "title": "平台年度会员",
+      "description": "在危险边缘点了三次外卖。",
+      "condition": { "takeoutCountAtLeast": 3 }
+    },
+    {
+      "id": "popular-room",
+      "title": "今晚房间有点挤",
+      "description": "结算时泛人气达到70。",
+      "condition": { "popularityAtLeast": 70 }
+    },
+    {
+      "id": "everyone-stays",
+      "title": "一个都没掉队",
+      "description": "所有核心粉丝好感度都达到70。",
+      "condition": { "allFansAffinityAtLeast": 70 }
+    },
+    {
+      "id": "organizer-has-a-life",
+      "title": "应援会也要下班",
+      "description": "让饭头第一次按时下班。",
+      "condition": { "allFlags": ["organizer-healthy"] }
+    },
+    {
+      "id": "facts-not-doxxing",
+      "title": "只说能证明的事",
+      "description": "面对回踩时用证据澄清，并阻止粉圈开盒围攻。",
+      "condition": { "allFlags": ["stalker-smear-answered", "fan-circle-united"] }
+    }
+  ]
+}
