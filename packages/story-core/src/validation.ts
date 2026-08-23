@@ -612,7 +612,8 @@ export function validateStoryPack(value: unknown): ValidationIssue[] {
     }
   }
 
-  const decisions = pack.nodes.length;
+  // 节奏警告只统计无触发条件的基线节点；条件节点按支线/旗帜出现，不拉长单周目基线。
+  const decisions = pack.nodes.filter((node) => !node.trigger).length;
   if (decisions > 28) {
     issues.push({
       severity: 'warning',

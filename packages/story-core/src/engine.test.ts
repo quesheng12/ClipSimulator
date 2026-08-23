@@ -199,6 +199,18 @@ describe('story engine', () => {
     expect(dayTen.pendingNodeIds).toContain('expired-trigger-test');
   });
 
+  it('surfaces cross-fan echo nodes when the referenced flags are set', () => {
+    let state = createInitialGame(pack, 'standard');
+    state = { ...state, flags: ['organizer-overloaded', 'stalker-blocked'] };
+
+    for (let step = 0; step < 9; step += 1) state = advanceTurn(state, pack);
+
+    expect(state.currentDay).toBe(28);
+    expect(state.pendingNodeIds).toContain('patron-lighthouse-warn');
+    expect(state.pendingNodeIds).toContain('yuzu-smear-worry');
+    expect(state.pendingNodeIds).not.toContain('patron-lighthouse-praise');
+  });
+
   it('triggers the patron goodbye after two consecutive replies delayed by two turns', () => {
     let state = createInitialGame(pack, 'standard');
     state = advanceTurn(advanceTurn(state, pack), pack);
