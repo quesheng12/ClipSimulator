@@ -890,3 +890,48 @@ test('keyboard controls operate conversation and fixed action buttons with reduc
   await page.keyboard.press('Enter');
   await expect(page.locator('.game-header__countdown')).toHaveText('离总选结束还剩 26 天');
 });
+
+test('a mid-session reload with an outdated save restarts cleanly and stays usable', async ({
+  page,
+}) => {
+  // 先正常回一条，产生已回复会话
+  await page.getByRole('button', { name: /翻牌.*待回复/ }).click();
+  await inboxMessageList(page)
+    .locator('.conversation-group--pending')
+    .getByRole('button', { name: /柚子汽水/ })
+    .click();
+  await page.getByRole('button', { name: /准假，不查秒回/ }).click();
+  await page.getByRole('button', { name: /回到工作台/ }).click();
+
+  // 模拟内容包升级：存档版本落后 → 加载时应静默重开
+  await page.evaluate(() => {
+    const key = 'clip-simulator:save:v1';
+    const state = JSON.parse(localStorage.getItem(key) as string) as { contentVersion: string };
+    state.contentVersion = '0.8.0';
+    localStorage.setItem(key, JSON.stringify(state));
+  });
+  await page.reload();
+
+  // 重开后主页与翻牌入口仍可用
+  await expect(page.getByRole('heading', { name: DEFAULT_IDOL_NAME })).toBeVisible();
+  await page.getByRole('button', { name: /翻牌.*待回复/ }).click();
+  await expect(
+    inboxMessageList(page)
+      .locator('.conversation-group--pending')
+      .getByRole('button', { name: /柚子汽水/ }),
+  ).toBeVisible();
+
+  // 回一条 → 已回复行可点 → 返回按钮可点
+  await inboxMessageList(page)
+    .locator('.conversation-group--pending')
+    .getByRole('button', { name: /柚子汽水/ })
+    .click();
+  await page.getByRole('button', { name: /准假，不查秒回/ }).click();
+  await page.getByRole('button', { name: /回到工作台/ }).click();
+  await repliedGroup(page)
+    .getByRole('button', { name: /柚子汽水/ })
+    .click();
+  await expect(page.getByRole('heading', { name: '选择一条回复' })).toHaveCount(0);
+  await page.getByRole('button', { name: '返回翻牌消息' }).click();
+  await expect(inboxMessageList(page)).toBeVisible();
+});
