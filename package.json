@@ -18,6 +18,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "validate:content": "tsx scripts/validate-content.ts",
+    "check:flavor": "tsx scripts/check-ai-flavor.ts",
     "format": "prettier --write .",
     "format:check": "prettier --check ."
   },

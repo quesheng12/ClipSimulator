@@ -26,6 +26,7 @@ npm run dev:editor
 
 ```powershell
 npm run validate:content
+npm run check:flavor
 npm run typecheck
 npm test
 npm run build
@@ -47,5 +48,6 @@ npm run test:e2e
 - [游戏机制规范](docs/GAME_MECHANICS_SPEC.md)
 - [剧情数据格式](docs/STORY_DATA_FORMAT.md)
 - [核心粉丝人设档案](docs/CORE_FAN_PERSONAS.md)
+- [剧情文案文风指南（去 AI 味）](docs/WRITING_STYLE.md)
 - [视觉设计系统](DESIGN.md)
 - [交互契约](UX-CONTRACT.md)
