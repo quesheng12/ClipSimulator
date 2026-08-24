@@ -1014,16 +1014,15 @@ function ConversationRow({
       <span className="conversation-row__body">
         <span className="conversation-row__topline">
           <strong>{participant.name}</strong>
-          <time className={timingUrgent ? 'conversation-row__timing--urgent' : undefined}>
-            {timing}
-          </time>
         </span>
         <FanTags tags={participant.tags} compact />
         <span className="conversation-row__preview">{preview}</span>
-        {meta && <span className="conversation-row__meta">{meta}</span>}
       </span>
       <span className="conversation-row__end">
-        <ChevronRight size={17} aria-hidden="true" />
+        <time className={timingUrgent ? 'conversation-row__timing--urgent' : undefined}>
+          {timing}
+        </time>
+        {meta && <span className="conversation-row__meta">{meta}</span>}
       </span>
     </button>
   );
@@ -1067,28 +1066,29 @@ function WorkbenchScreen({
 
   return (
     <main className="game-screen inbox-screen">
-      <header className="game-header">
-        <button type="button" className="icon-button" onClick={onMenu} aria-label="返回主菜单">
-          <ChevronLeft size={21} aria-hidden="true" />
-        </button>
-        <div>
-          <span>
-            {profile.idolName} · {team.shortName}
-          </span>
-          <h1>翻牌消息</h1>
+      <header className="game-header game-header--inbox">
+        <div className="game-header__main">
+          <button type="button" className="icon-button" onClick={onMenu} aria-label="返回主菜单">
+            <ChevronLeft size={21} aria-hidden="true" />
+          </button>
+          <div>
+            <span>
+              {profile.idolName} · {team.shortName}
+            </span>
+            <h1>翻牌消息</h1>
+          </div>
+          <span className="game-header__countdown">离总选结束还剩 {electionDaysRemaining} 天</span>
         </div>
-        <span className="game-header__countdown">离总选结束还剩 {electionDaysRemaining} 天</span>
+        <section className="inbox-summary" aria-label="当前营业状态">
+          <strong>Day {state.currentDay}</strong>
+          <span>
+            <BatteryCharging size={15} aria-hidden="true" /> 精力 {state.resources.energy}
+          </span>
+          <span>
+            <Smile size={15} aria-hidden="true" /> 心情 {state.resources.mindset}
+          </span>
+        </section>
       </header>
-
-      <section className="inbox-summary" aria-label="当前营业状态">
-        <strong>Day {state.currentDay}</strong>
-        <span>
-          <BatteryCharging size={16} aria-hidden="true" /> 精力 {state.resources.energy}
-        </span>
-        <span>
-          <Smile size={16} aria-hidden="true" /> 心情 {state.resources.mindset}
-        </span>
-      </section>
 
       {event && (
         <section className="turn-event" aria-label="本回合事件">
@@ -1102,10 +1102,7 @@ function WorkbenchScreen({
 
       <section className="inbox-message-list" aria-label="翻牌消息列表">
         <header className="conversation-group-heading">
-          <div>
-            <span>待处理</span>
-            <h2>未回复</h2>
-          </div>
+          <h2>未回复</h2>
           <strong aria-label={`${pendingNodes.length} 条未回复`}>{pendingNodes.length}</strong>
         </header>
 
