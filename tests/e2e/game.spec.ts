@@ -286,6 +286,8 @@ test('standard mode shows a quiet inbox and keeps complete conversation history'
   await expect(page.locator('.choice-card__cost').first().locator('svg')).toHaveCount(2);
   const longChoice = page.getByRole('button', { name: /不秒回没关系，先陪妹妹去吧/ });
   await expect(longChoice).toContainText('总选月我最近真的很需要你们一直在线');
+  // 打开待回复翻牌后，选项区应直接出现在视口内，无需手动滚到底
+  await expect(page.locator('.choice-section')).toBeInViewport();
   await expect
     .poll(() =>
       longChoice.evaluate((card) => {

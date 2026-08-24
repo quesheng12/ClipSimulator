@@ -1235,9 +1235,15 @@ function ConversationScreen({
   onReply?: (choice: StoryChoice) => void;
 }) {
   const timelineEndRef = useRef<HTMLDivElement>(null);
+  const choiceSectionRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    timelineEndRef.current?.scrollIntoView({ block: 'end' });
+    // 有待回复节点时直接露出选项区；仅浏览历史时才滚动到聊天末尾。
+    if (activeNode && onReply) {
+      choiceSectionRef.current?.scrollIntoView({ block: 'end' });
+    } else {
+      timelineEndRef.current?.scrollIntoView({ block: 'end' });
+    }
   }, [activeNode?.id, exchanges.length, exchanges.at(-1)?.selectedChoiceId]);
 
   return (
@@ -1315,7 +1321,11 @@ function ConversationScreen({
       </section>
 
       {activeNode && onReply ? (
-        <section className="choice-section reply-options" aria-labelledby="choice-title">
+        <section
+          ref={choiceSectionRef}
+          className="choice-section reply-options"
+          aria-labelledby="choice-title"
+        >
           <div className="choice-section__heading">
             <div>
               <span>候选消息</span>
