@@ -239,7 +239,9 @@ function normalizeNavigation(navigation: NavigationState, state?: GameState): Na
   if (navigation.view.name === 'conversation') {
     const conversationView = navigation.view;
     if (conversationView.kind === 'core') {
-      const fanExists = storyPack.fans.some((fan) => fan.id === conversationView.participantId);
+      const fan = storyPack.fans.find(
+        (candidate) => candidate.id === conversationView.participantId,
+      );
       const replyNode = conversationView.replyNodeId
         ? storyPack.nodes.find((node) => node.id === conversationView.replyNodeId)
         : undefined;
@@ -252,7 +254,11 @@ function normalizeNavigation(navigation: NavigationState, state?: GameState): Na
           node.fanId === conversationView.participantId &&
           Object.prototype.hasOwnProperty.call(state.resolvedNodes, node.id),
       );
-      if (!fanExists || (conversationView.replyNodeId ? !validPending : !hasAnsweredHistory)) {
+      const hasPastHistory = (fan?.pastChats.length ?? 0) > 0;
+      if (
+        !fan ||
+        (conversationView.replyNodeId ? !validPending : !hasAnsweredHistory && !hasPastHistory)
+      ) {
         return fallback({ name: 'workbench' });
       }
     } else {

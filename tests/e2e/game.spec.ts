@@ -935,3 +935,37 @@ test('a mid-session reload with an outdated save restarts cleanly and stays usab
   await page.getByRole('button', { name: '返回翻牌消息' }).click();
   await expect(inboxMessageList(page)).toBeVisible();
 });
+
+test('day-one replied rows for past-chat-only core fans open their history', async ({ page }) => {
+  await page.getByRole('button', { name: /翻牌.*待回复/ }).click();
+
+  // Mico_ 第一天只有赛前旧聊天，没有可回复节点
+  const micoRow = repliedGroup(page).getByRole('button', { name: /Mico_/ });
+  await expect(micoRow).toBeVisible();
+  await micoRow.click();
+  await expect(page.getByRole('heading', { name: 'Mico_' })).toBeVisible();
+  await expect(page.getByText('四个月前', { exact: true })).toBeVisible();
+  await expect(page.getByText(/你还记得上次握手我说的名字吗/)).toBeVisible();
+  await expect(page.locator('.choice-section')).toHaveCount(0);
+  await page.getByRole('button', { name: '返回翻牌消息' }).click();
+  await expect(inboxMessageList(page)).toBeVisible();
+
+  // 椰子饼蛋挞酱第 1 天有待回复翻牌，从待回复行打开，聊天里同样应包含赛前旧聊天
+  await inboxMessageList(page)
+    .locator('.conversation-group--pending')
+    .getByRole('button', { name: /椰子饼蛋挞酱/ })
+    .click();
+  await expect(page.getByRole('heading', { name: '椰子饼蛋挞酱' })).toBeVisible();
+  await expect(page.getByText('出道公演后', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: '返回翻牌消息' }).click();
+  await expect(inboxMessageList(page)).toBeVisible();
+
+  // Blaze火同样只有旧聊天
+  await repliedGroup(page)
+    .getByRole('button', { name: /Blaze火/ })
+    .click();
+  await expect(page.getByRole('heading', { name: 'Blaze火' })).toBeVisible();
+  await expect(page.getByText('四个月前', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: '返回翻牌消息' }).click();
+  await expect(inboxMessageList(page)).toBeVisible();
+});
