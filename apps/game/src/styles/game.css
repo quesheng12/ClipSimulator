@@ -2716,13 +2716,17 @@
   letter-spacing: 0.12em;
 }
 .election-hero strong {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   justify-self: center;
   margin-top: 0.8rem;
-  padding: 0.25rem 0.65rem;
+  padding: 0.3rem 0.65rem;
   color: #3c3040;
   background: #ffd775;
   border-radius: var(--radius-pill);
   font-size: 0.72rem;
+  line-height: 1.2;
 }
 .election-hero h1 {
   margin: 0.55rem 0 0;
