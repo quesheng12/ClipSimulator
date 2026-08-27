@@ -334,7 +334,7 @@ test('standard mode shows a quiet inbox and keeps complete conversation history'
 
   await coreRow.click();
   await expect(page.getByText(/今天正式放暑假/)).toBeVisible();
-  await expect(page.getByText(/暑假第一天的计划表本来就是拿来阵亡一次的/)).toBeVisible();
+  await expect(page.getByText(/暑假第一天的计划表本来就是用来阵亡一次的/)).toBeVisible();
   await expect(page.getByRole('heading', { name: '选择一条回复' })).toHaveCount(0);
   await page.getByRole('button', { name: '返回翻牌消息' }).click();
   await expect(repliedGroup(page).getByRole('button', { name: /柚子汽水/ })).toBeVisible();
