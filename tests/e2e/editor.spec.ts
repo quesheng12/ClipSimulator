@@ -149,7 +149,7 @@ test('edits global profile data and previews template variables with long-text g
   await expect(preview).toContainText('员员！今天正式放暑假');
 
   const longReply = page.getByLabel('回复文字').nth(2);
-  await expect(longReply).toHaveValue(/不秒回没关系，先陪妹妹去吧/);
+  await expect(longReply).toHaveValue(/今晚直播记得来支持下我的业务/);
   await expect
     .poll(() => longReply.evaluate((field) => Math.round(field.getBoundingClientRect().height)))
     .toBeGreaterThan(60);

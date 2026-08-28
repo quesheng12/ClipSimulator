@@ -311,7 +311,7 @@ v14 内容包必须设置 `"schemaVersion": 14`，并提供以下顶层字段：
 {
   "id": "takeout-idol",
   "title": "胖成一条蛆，耻辱退团",
-  "description": "第四份外卖送到时，经纪人也送来了退团通知。",
+  "description": "第四份外卖送到时，公司也送来了退团通知。",
   "image": {
     "src": "/assets/endings/takeout-shame-post.png",
     "alt": "JBS48超话投稿截图：用外卖满减、舞台和胖成一条蛆的梗轻松吐槽，右下角配有嫌弃猫表情。"

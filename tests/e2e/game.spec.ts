@@ -284,8 +284,8 @@ test('standard mode shows a quiet inbox and keeps complete conversation history'
     /消耗 1 点精力，1 点心情/,
   );
   await expect(page.locator('.choice-card__cost').first().locator('svg')).toHaveCount(2);
-  const longChoice = page.getByRole('button', { name: /不秒回没关系，先陪妹妹去吧/ });
-  await expect(longChoice).toContainText('总选月我最近真的很需要你们一直在线');
+  const longChoice = page.getByRole('button', { name: /今晚直播记得来支持下我的业务/ });
+  await expect(longChoice).toContainText('总选月我最近真的很需要你们');
   // 打开待回复翻牌后，选项区应直接出现在视口内，无需手动滚到底
   await expect(page.locator('.choice-section')).toBeInViewport();
   await expect
@@ -312,7 +312,7 @@ test('standard mode shows a quiet inbox and keeps complete conversation history'
     path: 'artifacts/playtest/game-reply-chat-mobile.png',
     fullPage: true,
   });
-  await page.getByRole('button', { name: /准假，不查秒回/ }).click();
+  await page.getByRole('button', { name: /计划表本来就是用来放弃的/ }).click();
   await expect(page.getByText(`${YUZU_DISPLAY_NAME} · 好感变化`)).toBeVisible();
   await expect(page.getByRole('heading', { name: '+10' })).toBeVisible();
   await expect(page.locator('.reaction-ticket__change--positive')).toBeVisible();
@@ -334,14 +334,14 @@ test('standard mode shows a quiet inbox and keeps complete conversation history'
 
   await coreRow.click();
   await expect(page.getByText(/今天正式放暑假/)).toBeVisible();
-  await expect(page.getByText(/暑假第一天的计划表本来就是用来阵亡一次的/)).toBeVisible();
+  await expect(page.getByText(/计划表本来就是用来放弃的/)).toBeVisible();
   await expect(page.getByRole('heading', { name: '选择一条回复' })).toHaveCount(0);
   await page.getByRole('button', { name: '返回翻牌消息' }).click();
   await expect(repliedGroup(page).getByRole('button', { name: /柚子汽水/ })).toBeVisible();
 
   await ordinaryRow.click();
   await expect(page.getByText('今天吃了吗？')).toBeVisible();
-  await expect(page.getByText('吃了，吃的是经纪人的画饼。')).toBeVisible();
+  await expect(page.getByText('吃了，吃的是公司的画饼。')).toBeVisible();
   await expect(page.getByRole('heading', { name: '选择一条回复' })).toHaveCount(0);
   await expect(page.locator('.choice-section')).toHaveCount(0);
   await expect(page.getByText('当前没有待回复的翻牌')).toBeVisible();
@@ -662,7 +662,7 @@ test('multiple pending flips for one fan stay separately visible and actionable'
 
   await firstYuzu.click();
   await expect(page.getByText(/今天正式放暑假/)).toBeVisible();
-  await page.getByRole('button', { name: /准假，不查秒回/ }).click();
+  await page.getByRole('button', { name: /计划表本来就是用来放弃的/ }).click();
   await page.getByRole('button', { name: /回到工作台/ }).click();
 
   const remainingYuzu = pendingGroup.getByRole('button', { name: /柚子汽水/ });
@@ -736,7 +736,7 @@ test('realistic mode hides numeric affinity feedback', async ({ page }, testInfo
     .locator('.conversation-group--pending')
     .getByRole('button', { name: /柚子汽水/ })
     .click();
-  await page.getByRole('button', { name: /准假，不查秒回/ }).click();
+  await page.getByRole('button', { name: /计划表本来就是用来放弃的/ }).click();
 
   await expect(page.getByRole('heading', { name: '+10' })).toHaveCount(0);
   await expect(page.getByRole('heading', { name: '上升' })).toBeVisible();
@@ -777,7 +777,7 @@ test('browser and in-game back controls preserve the inbox and completed replies
 
   await page.goForward();
   await expect(page.getByRole('heading', { name: '选择一条回复' })).toBeVisible();
-  await page.getByRole('button', { name: /准假，不查秒回/ }).click();
+  await page.getByRole('button', { name: /计划表本来就是用来放弃的/ }).click();
   await expect(page.getByRole('heading', { name: '+10' })).toBeVisible();
 
   await page.goBack();
@@ -798,7 +798,7 @@ test('browser and in-game back controls preserve the inbox and completed replies
 
   await page.goForward();
   await expect(page.getByText('奶茶去冰', { exact: true })).toBeVisible();
-  await expect(page.getByText('吃了，吃的是经纪人的画饼。')).toBeVisible();
+  await expect(page.getByText('吃了，吃的是公司的画饼。')).toBeVisible();
   await expect(page.getByRole('heading', { name: '选择一条回复' })).toHaveCount(0);
   await page.goBack();
   await expect(inboxMessageList(page)).toBeVisible();
@@ -902,7 +902,7 @@ test('a mid-session reload with an outdated save restarts cleanly and stays usab
     .locator('.conversation-group--pending')
     .getByRole('button', { name: /柚子汽水/ })
     .click();
-  await page.getByRole('button', { name: /准假，不查秒回/ }).click();
+  await page.getByRole('button', { name: /计划表本来就是用来放弃的/ }).click();
   await page.getByRole('button', { name: /回到工作台/ }).click();
 
   // 模拟内容包升级：存档版本落后 → 加载时应静默重开
@@ -928,7 +928,7 @@ test('a mid-session reload with an outdated save restarts cleanly and stays usab
     .locator('.conversation-group--pending')
     .getByRole('button', { name: /柚子汽水/ })
     .click();
-  await page.getByRole('button', { name: /准假，不查秒回/ }).click();
+  await page.getByRole('button', { name: /计划表本来就是用来放弃的/ }).click();
   await page.getByRole('button', { name: /回到工作台/ }).click();
   await repliedGroup(page)
     .getByRole('button', { name: /柚子汽水/ })
@@ -938,17 +938,20 @@ test('a mid-session reload with an outdated save restarts cleanly and stays usab
   await expect(inboxMessageList(page)).toBeVisible();
 });
 
-test('day-one replied rows for past-chat-only core fans open their history', async ({ page }) => {
+test('day-one rows for core fans open their history with or without a pending flip', async ({
+  page,
+}) => {
   await page.getByRole('button', { name: /翻牌.*待回复/ }).click();
 
-  // Mico_ 第一天只有赛前旧聊天，没有可回复节点
-  const micoRow = repliedGroup(page).getByRole('button', { name: /Mico_/ });
-  await expect(micoRow).toBeVisible();
-  await micoRow.click();
+  // Mico_ 第 1 天已有待回复翻牌，从待回复行打开：赛前旧聊天和回复选项都应出现
+  await inboxMessageList(page)
+    .locator('.conversation-group--pending')
+    .getByRole('button', { name: /Mico_/ })
+    .click();
   await expect(page.getByRole('heading', { name: 'Mico_' })).toBeVisible();
   await expect(page.getByText('四个月前', { exact: true })).toBeVisible();
   await expect(page.getByText(/你还记得上次握手我说的名字吗/)).toBeVisible();
-  await expect(page.locator('.choice-section')).toHaveCount(0);
+  await expect(page.locator('.choice-section')).toHaveCount(1);
   await page.getByRole('button', { name: '返回翻牌消息' }).click();
   await expect(inboxMessageList(page)).toBeVisible();
 
@@ -962,7 +965,7 @@ test('day-one replied rows for past-chat-only core fans open their history', asy
   await page.getByRole('button', { name: '返回翻牌消息' }).click();
   await expect(inboxMessageList(page)).toBeVisible();
 
-  // Blaze火同样只有旧聊天
+  // Blaze火第 1 天只有旧聊天，走已回复区
   await repliedGroup(page)
     .getByRole('button', { name: /Blaze火/ })
     .click();

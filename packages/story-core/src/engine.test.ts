@@ -22,6 +22,7 @@ describe('story engine', () => {
     expect({ ...standard, mode: 'realistic' }).toEqual(realistic);
     expect(getPendingNodes(standard, pack).map((node) => node.id)).toEqual([
       'yuzu-01',
+      'salt-01',
       'lighthouse-01',
     ]);
   });
@@ -46,6 +47,7 @@ describe('story engine', () => {
     expect(getPendingNodes(initial, concurrentPack).map((node) => node.id)).toEqual([
       'yuzu-parallel',
       'yuzu-01',
+      'salt-01',
       'lighthouse-01',
     ]);
 
@@ -193,8 +195,9 @@ describe('story engine', () => {
       triggerPack,
     );
 
+    // 第 10 天过期的翻牌：yuzu-01、salt-01、lighthouse-01、battery-01
     expect(Object.values(dayTen.resolvedNodes).filter((value) => value === 'expired')).toHaveLength(
-      2,
+      4,
     );
     expect(dayTen.pendingNodeIds).toContain('expired-trigger-test');
   });

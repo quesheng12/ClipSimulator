@@ -71,8 +71,8 @@ describe('conversation selectors', () => {
         .slice(firstBackgroundIndex)
         .every((conversation) => conversation.participant.kind === 'background'),
     ).toBe(true);
-    expect(conversations[0]?.participant.id).toBe('salt');
-    expect(conversations[0]?.latestDay).toBe(4);
+    expect(conversations[0]?.participant.id).toBe('yuzu');
+    expect(conversations[0]?.latestDay).toBe(1);
   });
 
   it('groups ordinary messages by contactId, tracks renamed contacts, and hides future entries', () => {
