@@ -30,7 +30,7 @@ async function completeProfileSetup(page: Page, idolName = DEFAULT_IDOL_NAME) {
     '入团后的第一次总选 · 还剩 30 天',
   );
   await expect(page.locator('.profile-setup-card > p')).toHaveText(
-    `你是刚加入${testStoryJson.globalVariables.groupName}的新人小偶像。面对粉丝发来的翻牌，你会怎么回复？`,
+    `你是刚加入${testStoryJson.globalVariables.groupName}的 18 岁新人小偶像。面对粉丝发来的翻牌，你会怎么回复？`,
   );
   await page.screenshot({ path: 'artifacts/playtest/game-profile-setup-mobile.png' });
   await page.getByRole('textbox', { name: '偶像姓名', exact: true }).fill(idolName);
