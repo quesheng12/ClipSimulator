@@ -178,16 +178,14 @@
   grid-auto-flow: column;
   gap: 0.5rem;
   overflow-x: auto;
-  padding: 0.12rem 0.12rem 0.42rem;
+  padding: 0.12rem 0.12rem 0.24rem;
   scroll-snap-type: x proximity;
 }
 
 .profile-avatar-option {
   position: relative;
   display: grid;
-  gap: 0.25rem;
   justify-items: center;
-  color: var(--color-muted);
   cursor: pointer;
   scroll-snap-align: start;
 }
@@ -267,26 +265,6 @@
 
 .profile-avatar-option:hover .profile-avatar-option__image {
   transform: translateY(-1px);
-}
-
-.profile-avatar-option > small {
-  width: 100%;
-  overflow: hidden;
-  font-size: 0.57rem;
-  text-align: center;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.profile-avatar-option:has(> input:checked) {
-  color: var(--color-ink);
-  font-weight: 750;
-}
-
-.profile-avatar-field__hint {
-  color: var(--color-muted);
-  font-size: 0.61rem;
-  line-height: 1.45;
 }
 
 .profile-field {
@@ -1313,10 +1291,6 @@
 .profile-form--compact .profile-form__preview > span {
   width: 36px;
   height: 36px;
-}
-
-.profile-form--compact .profile-avatar-field__hint {
-  display: none;
 }
 
 .profile-form--compact .profile-avatar-options {

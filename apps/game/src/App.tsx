@@ -465,6 +465,7 @@ function ProfileForm({
                 type="radio"
                 name={`${idPrefix}-avatar`}
                 value={avatar.id}
+                aria-label={avatar.label}
                 checked={avatar.id === selectedAvatar.id}
                 onChange={() => setAvatarId(avatar.id)}
               />
@@ -474,11 +475,9 @@ function ProfileForm({
                   <Check size={12} strokeWidth={3} />
                 </span>
               </span>
-              <small>{avatar.label}</small>
             </label>
           ))}
         </div>
-        <small className="profile-avatar-field__hint">也可以用宠物或玩偶，当作你的口袋头像。</small>
       </fieldset>
 
       <div className="profile-field">
@@ -570,7 +569,7 @@ function ProfileSetupScreen({
           入团后的第一次总选 · 还剩 {pack.config.totalDays} 天
         </span>
         <h1 id="profile-setup-title">先写下你的成员资料</h1>
-        <p>你是刚加入{groupName}的 18 岁新人小偶像。面对粉丝发来的翻牌，你会怎么回复？</p>
+        <p>你是刚加入{groupName}的新人小偶像。面对粉丝发来的翻牌，你会怎么回复？</p>
         <ProfileForm
           pack={pack}
           idPrefix="onboarding"

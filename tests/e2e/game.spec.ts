@@ -31,7 +31,7 @@ async function completeProfileSetup(page: Page, idolName = DEFAULT_IDOL_NAME) {
     '入团后的第一次总选 · 还剩 30 天',
   );
   await expect(page.locator('.profile-setup-card > p')).toHaveText(
-    `你是刚加入${testStoryJson.globalVariables.groupName}的 18 岁新人小偶像。面对粉丝发来的翻牌，你会怎么回复？`,
+    `你是刚加入${testStoryJson.globalVariables.groupName}的新人小偶像。面对粉丝发来的翻牌，你会怎么回复？`,
   );
   await page.screenshot({ path: 'artifacts/playtest/game-profile-setup-mobile.png' });
   await page.getByRole('textbox', { name: '偶像姓名', exact: true }).fill(idolName);
@@ -68,7 +68,14 @@ test('first entry creates a persistent member profile that remains editable in s
   });
   const teamCombobox = page.getByRole('combobox', { name: '所属队伍' });
   await expect(page.locator('.team-picker__marks')).toHaveCount(0);
-  await expect(page.getByRole('radio')).toHaveCount(6);
+  const avatarRadios = page.getByRole('radio');
+  await expect(avatarRadios).toHaveCount(6);
+  const avatarNames = ['包里小猫', '歪头小狗', '耳机兔兔', '窗边侧颜', '抱抱小羊', '春日回头'];
+  for (const [index, avatarName] of avatarNames.entries()) {
+    await expect(avatarRadios.nth(index)).toHaveAccessibleName(avatarName);
+  }
+  await expect(page.locator('.profile-avatar-option > small')).toHaveCount(0);
+  await expect(page.locator('.profile-avatar-field__hint')).toHaveCount(0);
   await page.getByRole('radio', { name: '包里小猫' }).check();
   await expect(page.locator('.profile-form__preview img')).toHaveAttribute(
     'src',
