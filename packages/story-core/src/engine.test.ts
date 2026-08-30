@@ -301,14 +301,23 @@ describe('story engine', () => {
     expect(turnFive.seenTurnEventIds).toContain('rehearsal-night');
   });
 
-  it('allows one takeout per turn and ends the run on the fourth order', () => {
+  it('allows two takeouts per turn and ends the run on the fourth order', () => {
     let state = createInitialGame(pack, 'standard');
-    for (let order = 1; order <= 4; order += 1) {
-      state = orderTakeout(state, pack);
-      if (order < 4) state = advanceTurn(state, pack);
-    }
 
-    expect(state.takeoutCount).toBe(4);
+    // 同一回合前两次都成功
+    state = orderTakeout(state, pack);
+    expect(state.takeoutCount).toBe(1);
+    state = orderTakeout(state, pack);
+    expect(state.takeoutCount).toBe(2);
+
+    // 第三次被本回合上限拒绝
+    state = orderTakeout(state, pack);
+    expect(state.takeoutCount).toBe(2);
+
+    // 新回合重置次数，第四份外卖触发坏结局
+    state = advanceTurn(state, pack);
+    state = orderTakeout(state, pack);
+    state = orderTakeout(state, pack);
     expect(state.status).toBe('early-ending');
     expect(state.earlyEndingId).toBe('takeout-idol');
   });

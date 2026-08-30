@@ -560,7 +560,8 @@ test('takeout shows a lightweight receipt with mood recovery', async ({ page }) 
 
   await page.keyboard.press('Escape');
   await expect(receipt).toHaveCount(0);
-  await expect(actions.getByRole('button', { name: '几天后', exact: true })).toBeFocused();
+  // 一回合能点两次，外卖按钮仍可用，焦点回到它身上
+  await expect(takeoutButton).toBeFocused();
 });
 
 test('statistics stay off-screen and mirror to a developer-only JSON file', async ({ page }) => {
@@ -912,6 +913,11 @@ test('keyboard controls operate conversation and fixed action buttons with reduc
   const takeout = actions.getByRole('button', { name: /外卖/ });
   await takeout.focus();
   await expect(takeout).toBeFocused();
+  await page.keyboard.press('Space');
+  await expect(page.getByRole('dialog', { name: /点了一份/ })).toBeVisible();
+  await page.keyboard.press('Escape');
+  // 一回合可以点两次，第二次之后按钮才禁用
+  await takeout.focus();
   await page.keyboard.press('Space');
   await expect(actions.locator('.takeout-button')).toBeDisabled();
   await expect(page.getByRole('dialog', { name: /点了一份/ })).toBeVisible();

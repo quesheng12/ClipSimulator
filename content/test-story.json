@@ -138,7 +138,7 @@
         "energy": 3,
         "mindset": 3
       },
-      "maxPerTurn": 1,
+      "maxPerTurn": 2,
       "triggerCount": 4,
       "endingId": "takeout-idol"
     },
