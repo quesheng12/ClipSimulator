@@ -57,7 +57,6 @@ const storyTriggerConditionSchema = z.discriminatedUnion('type', [
     type: z.literal('first-nodes-replied-on-time'),
     fanId: z.string().min(1),
     count: z.number().int().min(1),
-    maxDelayTurns: z.number().int().min(0).optional(),
   }),
 ]);
 

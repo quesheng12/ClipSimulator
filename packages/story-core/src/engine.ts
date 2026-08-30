@@ -56,10 +56,9 @@ function storyTriggerMet(
           .filter(({ node }) => node.fanId === condition.fanId)
           .sort((a, b) => a.node.postedDay - b.node.postedDay || a.index - b.index);
         const firstNodes = lineNodes.slice(0, condition.count).map(({ node }) => node);
-        const maxDelay = condition.maxDelayTurns ?? 0;
         return firstNodes.every((node) => {
           const entry = state.replyHistory.find((candidate) => candidate.nodeId === node.id);
-          return entry !== undefined && entry.delayTurns <= maxDelay;
+          return entry !== undefined && entry.delayTurns === 0;
         });
       }
     }

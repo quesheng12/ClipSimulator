@@ -1775,7 +1775,6 @@ function NodeInspector({
                                       type,
                                       fanId: pack.fans[0]?.id ?? 'fan-id',
                                       count: 2,
-                                      maxDelayTurns: 0,
                                     }
                                   : { type, count: 1 },
                           );
@@ -1860,24 +1859,7 @@ function NodeInspector({
                               }
                             />
                           </label>
-                        ) : (
-                          <label className="compact-field">
-                            <span className="sr-only">触发条件 {index + 1} 允许延迟回合</span>
-                            <input
-                              type="number"
-                              min={0}
-                              aria-label={`触发条件 ${index + 1} 允许延迟回合`}
-                              value={condition.maxDelayTurns ?? 0}
-                              onChange={(event) =>
-                                updateTriggerCondition(index, (current) =>
-                                  current.type === 'first-nodes-replied-on-time'
-                                    ? { ...current, maxDelayTurns: Number(event.target.value) }
-                                    : current,
-                                )
-                              }
-                            />
-                          </label>
-                        )}
+                        ) : null}
                       </div>
                     ) : (
                       <label className="compact-field">

@@ -227,7 +227,6 @@ describe('story engine', () => {
             type: 'first-nodes-replied-on-time' as const,
             fanId: 'yuzu',
             count: 1,
-            maxDelayTurns: 0,
           },
         ],
       },
