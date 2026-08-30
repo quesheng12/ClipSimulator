@@ -2163,12 +2163,13 @@
 .conversation-row__preview {
   display: -webkit-box;
   overflow: hidden;
-  color: #3d3845;
+  color: #6f697a;
   font-size: 0.8rem;
   line-height: 1.45;
+  opacity: 0.72;
   overflow-wrap: anywhere;
   -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 1;
 }
 
 .conversation-row__end {
