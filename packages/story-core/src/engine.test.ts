@@ -60,7 +60,7 @@ describe('story engine', () => {
     const initial = createInitialGame(pack, 'standard');
     const replied = replyToNode(initial, pack, 'yuzu-01', 'play-along');
 
-    expect(replied.resources).toEqual({ energy: 7, mindset: 7 });
+    expect(replied.resources).toEqual({ energy: 6, mindset: 5 });
     expect(replied.affinity.yuzu).toBe(72);
     expect(replied.resolvedNodes['yuzu-01']).toBe('play-along');
     expect(replied.unlockedNodeIds).toContain('yuzu-02');
@@ -212,6 +212,54 @@ describe('story engine', () => {
     expect(state.pendingNodeIds).toContain('patron-lighthouse-warn');
     expect(state.pendingNodeIds).toContain('yuzu-smear-worry');
     expect(state.pendingNodeIds).not.toContain('patron-lighthouse-praise');
+  });
+
+  it('activates a node when the first n nodes of a fan line are replied on time', () => {
+    const source = pack.nodes.find((node) => node.id === 'yuzu-01')!;
+    const triggerNode = {
+      ...structuredClone(source),
+      id: 'prompt-trigger-test',
+      postedDay: 4,
+      trigger: {
+        match: 'all' as const,
+        conditions: [
+          {
+            type: 'first-nodes-replied-on-time' as const,
+            fanId: 'yuzu',
+            count: 1,
+            maxDelayTurns: 0,
+          },
+        ],
+      },
+      choices: source.choices.map((choice) => ({
+        ...structuredClone(choice),
+        id: `prompt-${choice.id}`,
+        nextNodeId: undefined,
+      })),
+      onExpire: undefined,
+    };
+    const triggerPack: StoryPack = { ...pack, nodes: [...pack.nodes, triggerNode] };
+
+    // 当回合回复：delayTurns 0 → 触发
+    const prompt = replyToNode(
+      createInitialGame(triggerPack, 'standard'),
+      triggerPack,
+      'yuzu-01',
+      'play-along',
+    );
+    expect(prompt.replyHistory.at(-1)?.delayTurns).toBe(0);
+    expect(advanceTurn(prompt, triggerPack).pendingNodeIds).toContain('prompt-trigger-test');
+
+    // 延迟一个回合回复：delayTurns 1 → 不触发
+    const delayed = replyToNode(
+      advanceTurn(createInitialGame(triggerPack, 'standard'), triggerPack),
+      triggerPack,
+      'yuzu-01',
+      'play-along',
+    );
+    expect(delayed.replyHistory.at(-1)?.delayTurns).toBe(1);
+    const delayedDaySeven = advanceTurn(advanceTurn(delayed, triggerPack), triggerPack);
+    expect(delayedDaySeven.pendingNodeIds).not.toContain('prompt-trigger-test');
   });
 
   it('triggers the patron goodbye after two consecutive replies delayed by two turns', () => {

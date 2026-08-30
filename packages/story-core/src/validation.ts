@@ -53,6 +53,12 @@ const storyTriggerConditionSchema = z.discriminatedUnion('type', [
     count: z.number().int().min(1),
     turns: z.number().int().min(1),
   }),
+  z.object({
+    type: z.literal('first-nodes-replied-on-time'),
+    fanId: z.string().min(1),
+    count: z.number().int().min(1),
+    maxDelayTurns: z.number().int().min(0).optional(),
+  }),
 ]);
 
 const storyTriggerSchema = z
@@ -460,7 +466,8 @@ export function validateStoryPack(value: unknown): ValidationIssue[] {
     }
     for (const condition of node.trigger?.conditions ?? []) {
       if (
-        condition.type === 'consecutive-replies-delayed-at-least' &&
+        (condition.type === 'consecutive-replies-delayed-at-least' ||
+          condition.type === 'first-nodes-replied-on-time') &&
         !fanIds.has(condition.fanId)
       ) {
         issues.push({

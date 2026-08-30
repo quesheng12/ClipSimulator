@@ -278,10 +278,12 @@ test('standard mode shows a quiet inbox and keeps complete conversation history'
   }
   await expect(page.getByText('出道第 18 天', { exact: true })).toBeVisible();
   await expect(page.getByText(/班主任问大家最近有什么开心的事/)).toBeVisible();
-  await expect(page.locator('.chat-row--fan .fan-message').last()).toContainText('今天正式放暑假');
+  await expect(page.locator('.chat-row--fan .fan-message').last()).toContainText(
+    '今天我正式放暑假啦',
+  );
   await expect(page.locator('.choice-card__cost').first()).toHaveAttribute(
     'aria-label',
-    /消耗 1 点精力，1 点心情/,
+    /消耗 2 点精力，3 点心情/,
   );
   await expect(page.locator('.choice-card__cost').first().locator('svg')).toHaveCount(2);
   const longChoice = page.getByRole('button', { name: /今晚直播记得来支持下我的业务/ });
@@ -312,7 +314,7 @@ test('standard mode shows a quiet inbox and keeps complete conversation history'
     path: 'artifacts/playtest/game-reply-chat-mobile.png',
     fullPage: true,
   });
-  await page.getByRole('button', { name: /计划表本来就是用来放弃的/ }).click();
+  await page.getByRole('button', { name: /多多饭撒/ }).click();
   await expect(page.getByText(`${YUZU_DISPLAY_NAME} · 好感变化`)).toBeVisible();
   await expect(page.getByRole('heading', { name: '+10' })).toBeVisible();
   await expect(page.locator('.reaction-ticket__change--positive')).toBeVisible();
@@ -333,8 +335,8 @@ test('standard mode shows a quiet inbox and keeps complete conversation history'
   await expect(page.getByText(/NPC/i)).toHaveCount(0);
 
   await coreRow.click();
-  await expect(page.getByText(/今天正式放暑假/)).toBeVisible();
-  await expect(page.getByText(/计划表本来就是用来放弃的/)).toBeVisible();
+  await expect(page.getByText(/今天我正式放暑假啦/)).toBeVisible();
+  await expect(page.getByText(/多多饭撒/)).toBeVisible();
   await expect(page.getByRole('heading', { name: '选择一条回复' })).toHaveCount(0);
   await page.getByRole('button', { name: '返回翻牌消息' }).click();
   await expect(repliedGroup(page).getByRole('button', { name: /柚子汽水/ })).toBeVisible();
@@ -618,7 +620,7 @@ test('multiple pending flips for one fan stay separately visible and actionable'
 
   const deadlineDayRow = page
     .locator('.conversation-group--pending')
-    .getByRole('button', { name: /今天正式放暑假/ });
+    .getByRole('button', { name: /今天我正式放暑假啦/ });
   await expect(deadlineDayRow).toContainText('还有 3 天过期');
   await expect(deadlineDayRow.locator('time')).not.toHaveClass(
     /\bconversation-row__timing--urgent\b/,
@@ -645,7 +647,7 @@ test('multiple pending flips for one fan stay separately visible and actionable'
   const pendingGroup = page.locator('.conversation-group--pending');
   const yuzuRows = pendingGroup.getByRole('button', { name: /柚子汽水/ });
   const firstYuzu = pendingGroup.getByRole('button', {
-    name: /今天正式放暑假/,
+    name: /今天我正式放暑假啦/,
   });
   const secondYuzu = pendingGroup.getByRole('button', {
     name: /期末成绩出来了/,
@@ -661,8 +663,8 @@ test('multiple pending flips for one fan stay separately visible and actionable'
     .toBe('rgb(185, 56, 84)');
 
   await firstYuzu.click();
-  await expect(page.getByText(/今天正式放暑假/)).toBeVisible();
-  await page.getByRole('button', { name: /计划表本来就是用来放弃的/ }).click();
+  await expect(page.getByText(/今天我正式放暑假啦/)).toBeVisible();
+  await page.getByRole('button', { name: /多多饭撒/ }).click();
   await page.getByRole('button', { name: /回到工作台/ }).click();
 
   const remainingYuzu = pendingGroup.getByRole('button', { name: /柚子汽水/ });
@@ -694,7 +696,7 @@ test('an expired inbox row keeps the exact flip preview and the chat names its d
   await page.reload();
 
   const expiredRow = repliedGroup(page).getByRole('button', { name: /柚子汽水/ });
-  await expect(expiredRow).toContainText('今天正式放暑假');
+  await expect(expiredRow).toContainText('今天我正式放暑假啦');
   await expect(expiredRow).toContainText('已过期');
   await expect(expiredRow).not.toContainText('已错过回复期限');
 
@@ -736,7 +738,7 @@ test('realistic mode hides numeric affinity feedback', async ({ page }, testInfo
     .locator('.conversation-group--pending')
     .getByRole('button', { name: /柚子汽水/ })
     .click();
-  await page.getByRole('button', { name: /计划表本来就是用来放弃的/ }).click();
+  await page.getByRole('button', { name: /多多饭撒/ }).click();
 
   await expect(page.getByRole('heading', { name: '+10' })).toHaveCount(0);
   await expect(page.getByRole('heading', { name: '上升' })).toBeVisible();
@@ -777,7 +779,7 @@ test('browser and in-game back controls preserve the inbox and completed replies
 
   await page.goForward();
   await expect(page.getByRole('heading', { name: '选择一条回复' })).toBeVisible();
-  await page.getByRole('button', { name: /计划表本来就是用来放弃的/ }).click();
+  await page.getByRole('button', { name: /多多饭撒/ }).click();
   await expect(page.getByRole('heading', { name: '+10' })).toBeVisible();
 
   await page.goBack();
@@ -902,7 +904,7 @@ test('a mid-session reload with an outdated save restarts cleanly and stays usab
     .locator('.conversation-group--pending')
     .getByRole('button', { name: /柚子汽水/ })
     .click();
-  await page.getByRole('button', { name: /计划表本来就是用来放弃的/ }).click();
+  await page.getByRole('button', { name: /多多饭撒/ }).click();
   await page.getByRole('button', { name: /回到工作台/ }).click();
 
   // 模拟内容包升级：存档版本落后 → 加载时应静默重开
@@ -928,7 +930,7 @@ test('a mid-session reload with an outdated save restarts cleanly and stays usab
     .locator('.conversation-group--pending')
     .getByRole('button', { name: /柚子汽水/ })
     .click();
-  await page.getByRole('button', { name: /计划表本来就是用来放弃的/ }).click();
+  await page.getByRole('button', { name: /多多饭撒/ }).click();
   await page.getByRole('button', { name: /回到工作台/ }).click();
   await repliedGroup(page)
     .getByRole('button', { name: /柚子汽水/ })

@@ -21,7 +21,11 @@ const clamp = (value: number, min: number, max: number): number =>
 
 const unique = (values: string[]): string[] => [...new Set(values)];
 
-function storyTriggerMet(trigger: StoryTrigger | undefined, state: GameState): boolean {
+function storyTriggerMet(
+  trigger: StoryTrigger | undefined,
+  state: GameState,
+  pack: StoryPack,
+): boolean {
   if (!trigger) return true;
   const expiredFlipCount = Object.values(state.resolvedNodes).filter(
     (resolution) => resolution === 'expired',
@@ -45,6 +49,18 @@ function storyTriggerMet(trigger: StoryTrigger | undefined, state: GameState): b
           recentReplies.length === condition.count &&
           recentReplies.every((entry) => entry.delayTurns >= condition.turns)
         );
+      }
+      case 'first-nodes-replied-on-time': {
+        const lineNodes = pack.nodes
+          .map((node, index) => ({ node, index }))
+          .filter(({ node }) => node.fanId === condition.fanId)
+          .sort((a, b) => a.node.postedDay - b.node.postedDay || a.index - b.index);
+        const firstNodes = lineNodes.slice(0, condition.count).map(({ node }) => node);
+        const maxDelay = condition.maxDelayTurns ?? 0;
+        return firstNodes.every((node) => {
+          const entry = state.replyHistory.find((candidate) => candidate.nodeId === node.id);
+          return entry !== undefined && entry.delayTurns <= maxDelay;
+        });
       }
     }
   });
@@ -147,7 +163,7 @@ function activateDayStartNodes(state: GameState, pack: StoryPack): GameState {
       if (processed.has(node.id)) return false;
       if (node.postedDay > nextState.currentDay) return false;
       if (incoming.has(node.id) && !unlocked.has(node.id)) return false;
-      return storyTriggerMet(node.trigger, nextState);
+      return storyTriggerMet(node.trigger, nextState, pack);
     })
     .sort((a, b) => a.postedDay - b.postedDay || a.id.localeCompare(b.id));
 
@@ -169,7 +185,7 @@ function activateImmediateFollowUp(state: GameState, pack: StoryPack, nodeId: st
     !node ||
     alreadyProcessed ||
     node.postedDay > state.currentDay ||
-    !storyTriggerMet(node.trigger, state)
+    !storyTriggerMet(node.trigger, state, pack)
   ) {
     return state;
   }

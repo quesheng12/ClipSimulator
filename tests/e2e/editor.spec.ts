@@ -146,7 +146,7 @@ test('edits global profile data and previews template variables with long-text g
 
   await page.getByText('暑假第一天的作息表', { exact: true }).click();
   const preview = page.locator('.template-preview');
-  await expect(preview).toContainText('员员！今天正式放暑假');
+  await expect(preview).toContainText('员员！今天我正式放暑假啦');
 
   const longReply = page.getByLabel('回复文字').nth(2);
   await expect(longReply).toHaveValue(/今晚直播记得来支持下我的业务/);

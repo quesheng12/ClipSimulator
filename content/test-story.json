@@ -181,7 +181,10 @@
       "name": "柚子汽水（最爱{{idolName}}版）",
       "handle": "@{{idolName}}今天也要开心",
       "bio": "暑假会立刻回复你的高中生，把能给的十几票看得很认真。",
-      "tags": ["高中生", "暖心小可爱"],
+      "tags": [
+        "高中生",
+        "暖心小可爱"
+      ],
       "pastChats": [
         {
           "id": "yuzu-past-01",
@@ -245,7 +248,11 @@
       "name": "Mico_",
       "handle": "@好想和你在一起",
       "bio": "营业当暧昧，跟踪当偶遇，还觉得是你先动的心。",
-      "tags": ["私生预警", "回踩风险", "对她有点困扰"],
+      "tags": [
+        "私生预警",
+        "回踩风险",
+        "对她有点困扰"
+      ],
       "pastChats": [
         {
           "id": "salt-past-01",
@@ -303,7 +310,11 @@
       "name": "椰子饼蛋挞酱",
       "handle": "@球球了有人来接饭头吗",
       "bio": "从你出道起一直在线，却开始怀疑应援会是否吞掉了自己的生活。",
-      "tags": ["应援会饭头", "组织者", "老河粉"],
+      "tags": [
+        "应援会饭头",
+        "组织者",
+        "老河粉"
+      ],
       "pastChats": [
         {
           "id": "lighthouse-past-01",
@@ -373,7 +384,10 @@
       "name": "Blaze火",
       "handle": "@她是首推你是例外",
       "bio": "隔壁家单推王，常来看你，也总会先提起自己的首推。",
-      "tags": ["隔壁单推王", "二推你"],
+      "tags": [
+        "隔壁单推王",
+        "二推你"
+      ],
       "pastChats": [
         {
           "id": "battery-past-01",
@@ -431,7 +445,11 @@
       "name": "过路看一眼",
       "handle": "@不做长期承诺",
       "bio": "见多了小偶像的神豪，花钱前先看你值不值。",
-      "tags": ["冷静神豪", "观望中", "极高票力"],
+      "tags": [
+        "冷静神豪",
+        "观望中",
+        "极高票力"
+      ],
       "pastChats": [],
       "avatar": "/assets/avatars/fan-callsticks.webp",
       "accent": "#5278B9",
@@ -474,29 +492,31 @@
       "postedDay": 1,
       "replyWindowDays": 7,
       "content": {
-        "text": "{{idolNickname}}！今天正式放暑假。我昨晚排了个作息表，上午写作业，下午帮家里干活，晚上有空就来看你。\n\n结果第一天睡到十点，计划表当场阵亡哈哈😭。等会儿还要陪妹妹去剪头发🥺",
+        "text": "{{idolNickname}}！今天我正式放暑假啦！可以经常看你直播了~等我再攒攒就来线下看公演给你喊call！",
         "context": "她已经陪伴玩家数月。总选月的第一条新消息从自己的暑假生活开始，而不是重新认识。"
       },
       "choices": [
         {
           "id": "play-along",
-          "text": "暑假第一天的计划表本来就是用来放弃的。陪妹妹剪头发就好好陪，晚上有空再回来汇报她的新发型呀。",
+          "text": "哇宝宝，恭喜呀终于放暑假了！好呀好呀，等你什么时候有空了来线下看我，要提前跟我说哦，给你多多饭撒😊",
           "cost": {
-            "energy": 1,
-            "mindset": 1
+            "energy": 2,
+            "mindset": 3
           },
           "effects": {
             "affinity": {
               "yuzu": 10
             },
-            "setFlags": ["yuzu-life-noticed"],
+            "setFlags": [
+              "yuzu-life-noticed"
+            ],
             "popularity": 0
           },
           "nextNodeId": "yuzu-02"
         },
         {
           "id": "summer-wishes",
-          "text": "暑假快乐！计划表阵亡一次很正常，睡到自然醒也是暑假作业。替我祝妹妹剪出满意的新发型💇",
+          "text": "暑假快乐，等你多多来看我，爱你哟~",
           "cost": {
             "energy": 1,
             "mindset": 1
@@ -511,7 +531,7 @@
         },
         {
           "id": "assign-data-work",
-          "text": "今晚直播记得来支持下我的业务哦，总选月我最近真的很需要你们。",
+          "text": "今晚直播记得来支持下我的业务哦，总选月我最近真的很需要你们~",
           "cost": {
             "energy": 1,
             "mindset": 1
@@ -520,7 +540,9 @@
             "affinity": {
               "yuzu": -4
             },
-            "setFlags": ["yuzu-treated-as-data"],
+            "setFlags": [
+              "yuzu-treated-as-data"
+            ],
             "popularity": 0
           },
           "nextNodeId": "yuzu-02"
@@ -543,21 +565,23 @@
       "postedDay": 7,
       "replyWindowDays": 7,
       "content": {
-        "text": "期末成绩出来了，数学比上次多 11 分🎉，英语反而退了😢。我本来想发朋友圈，可同学们都在晒旅游照片，感觉只有我在晒一张很普通的成绩单。\n\n所以只来告诉你。我把你上次的小卡夹在错题本里，做不下去就翻一下。这样是不是有点幼稚？你不要笑我🥹"
+        "text": "期末成绩出来了，数学比上次多 11 分🎉，英语反而退步了😢。我本来想发朋友圈，可同学们都在晒旅游照片，感觉只有我在晒一张很普通的成绩单。\n\n所以只来告诉你。我把你上次的小卡夹在错题本里，做不下去就翻一下。这样是不是有点幼稚？你不要笑我🥹"
       },
       "choices": [
         {
           "id": "notice-details",
-          "text": "数学多 11 分怎么会是普通成绩单，先替你鼓掌。英语退一点就和错题本慢慢算账。\n\n小卡夹里面不幼稚，但不许只看小卡不看题，我会隔空抽查👀",
+          "text": "数学多 11 分怎么会是普通成绩单，先替你鼓掌。没事的~等你\n\n我的小卡夹里面才不幼稚，但不许只看小卡忘记看题，小卡在我就在，我会一直看着你的👀",
           "cost": {
             "energy": 3,
-            "mindset": 2
+            "mindset": 3
           },
           "effects": {
             "affinity": {
               "yuzu": 13
             },
-            "setFlags": ["yuzu-school-remembered"],
+            "setFlags": [
+              "yuzu-school-remembered"
+            ],
             "popularity": 0
           },
           "nextNodeId": "yuzu-03"
@@ -579,7 +603,7 @@
         },
         {
           "id": "pivot-to-election",
-          "text": "不幼稚呀！放假了正好，多来我直播间陪陪我，总选月我特别想多点人在。",
+          "text": "不幼稚呀！放假了正好，多来我直播间陪陪我，总选月的时候我特别想多点人在",
           "cost": {
             "energy": 1,
             "mindset": 1
@@ -610,28 +634,30 @@
       "postedDay": 13,
       "replyWindowDays": 7,
       "content": {
-        "text": "我把零花钱和之前攒下来的都算了一遍，大概能给你投十二票🥳没有不吃饭！就是少买了几次奶茶，还把本来想买的笔袋往后放了。\n\n但看到群里有人一次投好多，我还是觉得十二这个数字小得有点不好意思。它真的有一点点意义吗？🥺"
+        "text": "我把零花钱和之前的小金库都算了一遍，大概能给你投十多票🥳没有不吃饭！少买了几次奶茶，再多努力攒攒就行了~\n\n看到有人一次投好多，感觉十几票有点不好意思嘿嘿，希望我们{{idolNickname}}多多吸粉今年拿到满意的成绩🙏🏻"
       },
       "choices": [
         {
           "id": "life-first",
-          "text": "十二票哪里小啦🤗奶茶不许戒，笔袋也去买回来。喜欢我不用先从自己身上抠，你肯把这张小账算给我听，这十二票就比谁都大。",
+          "text": "十几票哪里小啦，宝宝能支持我我就已经很开心了🤗奶茶不许少喝！要先好好照顾自己，知豆了吗宝宝！",
           "cost": {
             "energy": 3,
-            "mindset": 2
+            "mindset": 3
           },
           "effects": {
             "affinity": {
               "yuzu": 14
             },
-            "setFlags": ["yuzu-life-first"],
+            "setFlags": [
+              "yuzu-life-first"
+            ],
             "popularity": 0
           },
           "nextNodeId": "yuzu-04"
         },
         {
           "id": "thank-votes",
-          "text": "一点都不少，这十二票我收好了🧡还有，好好吃饭这件事也谢谢你跟我报备。",
+          "text": "一点都不少，这些票我收好了🧡谢谢宝宝~",
           "cost": {
             "energy": 1,
             "mindset": 1
@@ -646,9 +672,9 @@
         },
         {
           "id": "push-more",
-          "text": "十二票我收下啦。月底还能不能再挤一点？总选拼的就是最后这几天，能投多少就投多少嘛。",
+          "text": "谢谢宝宝支持我~宝宝月底还能不能再挤一点？今年我真的很想争一下新人奖，能投多少就投多少嘛。",
           "cost": {
-            "energy": 1,
+            "energy": 2,
             "mindset": 1
           },
           "effects": {
@@ -656,7 +682,9 @@
               "yuzu": -13
             },
             "popularity": -3,
-            "setFlags": ["yuzu-pressured"]
+            "setFlags": [
+              "yuzu-pressured"
+            ]
           },
           "nextNodeId": "yuzu-04"
         }
@@ -678,7 +706,7 @@
       "postedDay": 19,
       "replyWindowDays": 7,
       "content": {
-        "text": "今天握手只有两张券，我排队的时候把想说的写了五条，见到你以后还是紧张到只说了半句。出来才想起来最重要的那句‘最近别太累’都没说。\n\n不过我在场馆待到散场，又远远看到你好几次！你有一次是不是往我这边挥手了？我怕是自己想多了，一直没敢认领😣"
+        "text": "啊啊啊今天握手只有两张券，我排队的时候把想说的写了五条，见到你以后还是紧张到只说了半句，感觉一直在脸红😳😳😳\n\n不过我一直在旁边看你！你有一次是不是往我这边挥手了嘿嘿，还偷偷拍了几张照片，stf可能是看我用手机拍的都没来赶我，旁边相机拍的哥哥姐姐都被说了😣"
       },
       "choices": [
         {
@@ -692,7 +720,9 @@
             "affinity": {
               "yuzu": 14
             },
-            "setFlags": ["yuzu-remembered"],
+            "setFlags": [
+              "yuzu-remembered"
+            ],
             "popularity": 0
           },
           "nextNodeId": "yuzu-05"
@@ -759,7 +789,9 @@
             "affinity": {
               "yuzu": 13
             },
-            "setFlags": ["yuzu-braver"],
+            "setFlags": [
+              "yuzu-braver"
+            ],
             "popularity": 0
           },
           "nextNodeId": "yuzu-06"
@@ -790,7 +822,9 @@
             "affinity": {
               "yuzu": -10
             },
-            "setFlags": ["yuzu-pressured"],
+            "setFlags": [
+              "yuzu-pressured"
+            ],
             "popularity": 0
           },
           "nextNodeId": "yuzu-06"
@@ -827,7 +861,9 @@
             "affinity": {
               "yuzu": 15
             },
-            "setFlags": ["yuzu-stays"],
+            "setFlags": [
+              "yuzu-stays"
+            ],
             "popularity": 0
           }
         },
@@ -842,7 +878,9 @@
             "affinity": {
               "yuzu": 8
             },
-            "setFlags": ["yuzu-studies"],
+            "setFlags": [
+              "yuzu-studies"
+            ],
             "popularity": 0
           }
         },
@@ -865,7 +903,9 @@
         "affinity": {
           "yuzu": -15
         },
-        "setFlags": ["yuzu-left"]
+        "setFlags": [
+          "yuzu-left"
+        ]
       },
       "editor": {
         "y": 0
@@ -892,7 +932,9 @@
             "affinity": {
               "salt": -4
             },
-            "setFlags": ["stalker-boundary"],
+            "setFlags": [
+              "stalker-boundary"
+            ],
             "popularity": 0
           },
           "nextNodeId": "salt-02"
@@ -908,7 +950,9 @@
             "affinity": {
               "salt": 10
             },
-            "setFlags": ["stalker-encouraged"],
+            "setFlags": [
+              "stalker-encouraged"
+            ],
             "popularity": 0
           },
           "nextNodeId": "salt-02"
@@ -924,7 +968,9 @@
             "affinity": {
               "salt": -12
             },
-            "setFlags": ["stalker-boundary"],
+            "setFlags": [
+              "stalker-boundary"
+            ],
             "popularity": 0
           },
           "nextNodeId": "salt-02"
@@ -961,7 +1007,9 @@
             "affinity": {
               "salt": -10
             },
-            "setFlags": ["stalker-documented"],
+            "setFlags": [
+              "stalker-documented"
+            ],
             "popularity": 0
           },
           "nextNodeId": "salt-03"
@@ -978,7 +1026,10 @@
               "salt": -12,
               "lighthouse": 5
             },
-            "setFlags": ["stalker-documented", "organizer-knows"],
+            "setFlags": [
+              "stalker-documented",
+              "organizer-knows"
+            ],
             "popularity": 0
           },
           "nextNodeId": "salt-03"
@@ -1030,7 +1081,9 @@
             "affinity": {
               "salt": -18
             },
-            "setFlags": ["stalker-official"],
+            "setFlags": [
+              "stalker-official"
+            ],
             "popularity": 0
           },
           "nextNodeId": "salt-04"
@@ -1047,7 +1100,10 @@
               "salt": -15,
               "lighthouse": 8
             },
-            "setFlags": ["stalker-official", "organizer-knows"],
+            "setFlags": [
+              "stalker-official",
+              "organizer-knows"
+            ],
             "popularity": 0
           },
           "nextNodeId": "salt-04"
@@ -1063,7 +1119,9 @@
             "affinity": {
               "salt": -8
             },
-            "setFlags": ["stalker-cold"],
+            "setFlags": [
+              "stalker-cold"
+            ],
             "popularity": 0
           },
           "nextNodeId": "salt-04"
@@ -1079,7 +1137,9 @@
             "affinity": {
               "salt": 8
             },
-            "setFlags": ["stalker-appeased"],
+            "setFlags": [
+              "stalker-appeased"
+            ],
             "popularity": 0
           },
           "nextNodeId": "salt-04"
@@ -1116,7 +1176,10 @@
             "affinity": {
               "salt": -20
             },
-            "setFlags": ["stalker-blocked", "stalker-official"],
+            "setFlags": [
+              "stalker-blocked",
+              "stalker-official"
+            ],
             "popularity": 0
           }
         },
@@ -1132,7 +1195,11 @@
               "salt": -18,
               "lighthouse": 8
             },
-            "setFlags": ["stalker-blocked", "stalker-supported", "organizer-knows"],
+            "setFlags": [
+              "stalker-blocked",
+              "stalker-supported",
+              "organizer-knows"
+            ],
             "popularity": 0
           }
         },
@@ -1147,7 +1214,9 @@
             "affinity": {
               "salt": -12
             },
-            "setFlags": ["stalker-cold"],
+            "setFlags": [
+              "stalker-cold"
+            ],
             "popularity": 0
           }
         },
@@ -1162,7 +1231,9 @@
             "affinity": {
               "salt": 10
             },
-            "setFlags": ["stalker-appeased"],
+            "setFlags": [
+              "stalker-appeased"
+            ],
             "popularity": 0
           }
         }
@@ -1171,7 +1242,9 @@
         "affinity": {
           "salt": -15
         },
-        "setFlags": ["stalker-ignored"]
+        "setFlags": [
+          "stalker-ignored"
+        ]
       },
       "editor": {
         "y": 240
@@ -1218,7 +1291,10 @@
               "lighthouse": 8
             },
             "popularity": 12,
-            "setFlags": ["stalker-smear-answered", "fan-circle-united"]
+            "setFlags": [
+              "stalker-smear-answered",
+              "fan-circle-united"
+            ]
           }
         },
         {
@@ -1233,7 +1309,9 @@
               "salt": -8
             },
             "popularity": 5,
-            "setFlags": ["stalker-smear-contained"]
+            "setFlags": [
+              "stalker-smear-contained"
+            ]
           }
         },
         {
@@ -1253,7 +1331,9 @@
       ],
       "onExpire": {
         "popularity": -12,
-        "setFlags": ["stalker-smear-spread"]
+        "setFlags": [
+          "stalker-smear-spread"
+        ]
       },
       "editor": {
         "y": 300
@@ -1280,7 +1360,9 @@
             "affinity": {
               "lighthouse": 11
             },
-            "setFlags": ["organizer-shared-work"],
+            "setFlags": [
+              "organizer-shared-work"
+            ],
             "popularity": 0
           },
           "nextNodeId": "lighthouse-02"
@@ -1311,7 +1393,9 @@
             "affinity": {
               "lighthouse": -7
             },
-            "setFlags": ["organizer-overloaded"],
+            "setFlags": [
+              "organizer-overloaded"
+            ],
             "popularity": 0
           },
           "nextNodeId": "yuzu-27",
@@ -1365,7 +1449,9 @@
               "lighthouse": 5
             },
             "popularity": 3,
-            "setFlags": ["idol-targets-whales"]
+            "setFlags": [
+              "idol-targets-whales"
+            ]
           },
           "nextNodeId": "lighthouse-briefing"
         },
@@ -1418,7 +1504,9 @@
               "lighthouse": 13
             },
             "popularity": 6,
-            "setFlags": ["organizer-layered-business"]
+            "setFlags": [
+              "organizer-layered-business"
+            ]
           },
           "nextNodeId": "lighthouse-03"
         },
@@ -1434,7 +1522,9 @@
               "lighthouse": 4
             },
             "popularity": -4,
-            "setFlags": ["idol-targets-whales"]
+            "setFlags": [
+              "idol-targets-whales"
+            ]
           },
           "nextNodeId": "lighthouse-03"
         },
@@ -1449,7 +1539,9 @@
             "affinity": {
               "lighthouse": -9
             },
-            "setFlags": ["organizer-overloaded"],
+            "setFlags": [
+              "organizer-overloaded"
+            ],
             "popularity": 0
           },
           "nextNodeId": "lighthouse-03"
@@ -1459,7 +1551,9 @@
         "affinity": {
           "lighthouse": -9
         },
-        "setFlags": ["organizer-overloaded"],
+        "setFlags": [
+          "organizer-overloaded"
+        ],
         "nextNodeId": "lighthouse-03"
       },
       "editor": {
@@ -1487,7 +1581,9 @@
             "affinity": {
               "lighthouse": 15
             },
-            "setFlags": ["organizer-rests"],
+            "setFlags": [
+              "organizer-rests"
+            ],
             "popularity": 0
           },
           "nextNodeId": "lighthouse-04-rest"
@@ -1503,7 +1599,9 @@
             "affinity": {
               "lighthouse": 3
             },
-            "setFlags": ["organizer-guilt-stays"],
+            "setFlags": [
+              "organizer-guilt-stays"
+            ],
             "popularity": 0
           },
           "nextNodeId": "lighthouse-04-guilt"
@@ -1519,7 +1617,9 @@
             "affinity": {
               "lighthouse": 10
             },
-            "setFlags": ["organizer-free-choice"],
+            "setFlags": [
+              "organizer-free-choice"
+            ],
             "popularity": 0
           },
           "nextNodeId": "lighthouse-04-choice"
@@ -1529,7 +1629,9 @@
         "affinity": {
           "lighthouse": -12
         },
-        "setFlags": ["organizer-unheard"],
+        "setFlags": [
+          "organizer-unheard"
+        ],
         "nextNodeId": "lighthouse-04-choice"
       },
       "editor": {
@@ -1561,7 +1663,9 @@
             "voteBonus": {
               "lighthouse": 180
             },
-            "setFlags": ["organizer-healthy"]
+            "setFlags": [
+              "organizer-healthy"
+            ]
           }
         },
         {
@@ -1666,7 +1770,9 @@
             "affinity": {
               "lighthouse": 15
             },
-            "setFlags": ["organizer-remains-fan"],
+            "setFlags": [
+              "organizer-remains-fan"
+            ],
             "popularity": 0
           }
         },
@@ -1715,7 +1821,9 @@
             "affinity": {
               "battery": 7
             },
-            "setFlags": ["king-safe-anecdote"],
+            "setFlags": [
+              "king-safe-anecdote"
+            ],
             "popularity": 0
           },
           "nextNodeId": "battery-02"
@@ -1731,7 +1839,9 @@
             "affinity": {
               "battery": -3
             },
-            "setFlags": ["king-boundary"],
+            "setFlags": [
+              "king-boundary"
+            ],
             "popularity": 0
           },
           "nextNodeId": "battery-02"
@@ -1748,7 +1858,9 @@
               "battery": 12
             },
             "popularity": -3,
-            "setFlags": ["king-secret-leaked"]
+            "setFlags": [
+              "king-secret-leaked"
+            ]
           },
           "nextNodeId": "battery-02"
         }
@@ -1784,7 +1896,9 @@
             "affinity": {
               "battery": 12
             },
-            "setFlags": ["king-own-story"],
+            "setFlags": [
+              "king-own-story"
+            ],
             "popularity": 0
           },
           "nextNodeId": "battery-02b"
@@ -1800,7 +1914,9 @@
             "affinity": {
               "battery": 8
             },
-            "setFlags": ["king-poached"],
+            "setFlags": [
+              "king-poached"
+            ],
             "popularity": 0
           },
           "nextNodeId": "battery-02b"
@@ -1852,7 +1968,9 @@
             "affinity": {
               "battery": 14
             },
-            "setFlags": ["king-independent-relationship"],
+            "setFlags": [
+              "king-independent-relationship"
+            ],
             "popularity": 0
           },
           "nextNodeId": "battery-03"
@@ -1868,7 +1986,9 @@
             "affinity": {
               "battery": 10
             },
-            "setFlags": ["king-poached"],
+            "setFlags": [
+              "king-poached"
+            ],
             "popularity": 0
           },
           "nextNodeId": "battery-03"
@@ -1920,7 +2040,9 @@
             "affinity": {
               "battery": 14
             },
-            "setFlags": ["king-not-exploited"],
+            "setFlags": [
+              "king-not-exploited"
+            ],
             "popularity": 0
           },
           "nextNodeId": "battery-04"
@@ -1939,7 +2061,9 @@
             "voteBonus": {
               "battery": 300
             },
-            "setFlags": ["king-heartbreak-transfer"],
+            "setFlags": [
+              "king-heartbreak-transfer"
+            ],
             "popularity": 0
           },
           "nextNodeId": "battery-04"
@@ -1959,7 +2083,9 @@
             "voteBonus": {
               "battery": 500
             },
-            "setFlags": ["king-more-secrets"]
+            "setFlags": [
+              "king-more-secrets"
+            ]
           },
           "nextNodeId": "battery-04"
         }
@@ -2067,7 +2193,9 @@
             "affinity": {
               "patron": 9
             },
-            "setFlags": ["patron-specific"],
+            "setFlags": [
+              "patron-specific"
+            ],
             "popularity": 0
           },
           "nextNodeId": "patron-02"
@@ -2083,7 +2211,9 @@
             "affinity": {
               "patron": 12
             },
-            "setFlags": ["patron-full-service"],
+            "setFlags": [
+              "patron-full-service"
+            ],
             "popularity": 0
           },
           "nextNodeId": "patron-02"
@@ -2108,7 +2238,9 @@
         "affinity": {
           "patron": -12
         },
-        "setFlags": ["patron-first-expired"]
+        "setFlags": [
+          "patron-first-expired"
+        ]
       },
       "editor": {
         "y": 960
@@ -2155,7 +2287,9 @@
             "voteBonus": {
               "patron": 450
             },
-            "setFlags": ["patron-service-promised"],
+            "setFlags": [
+              "patron-service-promised"
+            ],
             "popularity": 0
           }
         },
@@ -2178,7 +2312,9 @@
         "affinity": {
           "patron": -15
         },
-        "setFlags": ["patron-second-expired"]
+        "setFlags": [
+          "patron-second-expired"
+        ]
       },
       "editor": {
         "y": 960
@@ -2217,7 +2353,9 @@
             "affinity": {
               "patron": -5
             },
-            "setFlags": ["patron-left"],
+            "setFlags": [
+              "patron-left"
+            ],
             "popularity": 0
           }
         },
@@ -2235,7 +2373,9 @@
             "voteBonus": {
               "patron": 80
             },
-            "setFlags": ["patron-left"],
+            "setFlags": [
+              "patron-left"
+            ],
             "popularity": 0
           }
         },
@@ -2250,7 +2390,9 @@
             "affinity": {
               "patron": -8
             },
-            "setFlags": ["patron-left"],
+            "setFlags": [
+              "patron-left"
+            ],
             "popularity": 0
           }
         }
@@ -2259,7 +2401,9 @@
         "affinity": {
           "patron": -12
         },
-        "setFlags": ["patron-left"]
+        "setFlags": [
+          "patron-left"
+        ]
       },
       "editor": {
         "y": 960
@@ -2340,7 +2484,9 @@
               "patron": 10,
               "lighthouse": 3
             },
-            "setFlags": ["patron-saw-honesty"],
+            "setFlags": [
+              "patron-saw-honesty"
+            ],
             "popularity": 0
           }
         },
@@ -2355,7 +2501,9 @@
             "affinity": {
               "patron": 6
             },
-            "setFlags": ["patron-direct-talk"],
+            "setFlags": [
+              "patron-direct-talk"
+            ],
             "popularity": 0
           }
         },
@@ -2418,7 +2566,9 @@
               "patron": 8,
               "lighthouse": 5
             },
-            "setFlags": ["patron-respects-team"],
+            "setFlags": [
+              "patron-respects-team"
+            ],
             "popularity": 0
           }
         },
@@ -2448,7 +2598,9 @@
             "affinity": {
               "patron": -6
             },
-            "setFlags": ["patron-saw-marketing"],
+            "setFlags": [
+              "patron-saw-marketing"
+            ],
             "popularity": 2
           }
         }
@@ -2500,7 +2652,9 @@
             "affinity": {
               "yuzu": 12
             },
-            "setFlags": ["yuzu-stayed-through-storm"],
+            "setFlags": [
+              "yuzu-stayed-through-storm"
+            ],
             "popularity": 0
           }
         },
@@ -2515,7 +2669,9 @@
             "affinity": {
               "yuzu": 6
             },
-            "setFlags": ["yuzu-reassured"],
+            "setFlags": [
+              "yuzu-reassured"
+            ],
             "popularity": 0
           }
         },
@@ -2538,7 +2694,9 @@
         "affinity": {
           "yuzu": -8
         },
-        "setFlags": ["yuzu-unanswered-storm"]
+        "setFlags": [
+          "yuzu-unanswered-storm"
+        ]
       },
       "editor": {
         "y": 180
@@ -2840,7 +2998,9 @@
       "title": "应援会也要下班",
       "description": "让饭头第一次按时下班。",
       "condition": {
-        "allFlags": ["organizer-healthy"]
+        "allFlags": [
+          "organizer-healthy"
+        ]
       }
     },
     {
@@ -2848,7 +3008,10 @@
       "title": "只说能证明的事",
       "description": "面对回踩时用证据澄清，并阻止粉圈开盒围攻。",
       "condition": {
-        "allFlags": ["stalker-smear-answered", "fan-circle-united"]
+        "allFlags": [
+          "stalker-smear-answered",
+          "fan-circle-united"
+        ]
       }
     }
   ]

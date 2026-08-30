@@ -17,6 +17,14 @@ export type StoryTriggerCondition =
       fanId: string;
       count: number;
       turns: number;
+    }
+  | {
+      /** 该粉丝线的前 count 个节点（按发布日期与包内顺序）都已及时回复。 */
+      type: 'first-nodes-replied-on-time';
+      fanId: string;
+      count: number;
+      /** 允许的延迟回合上限；默认 0，即翻牌出现当回合就回复。 */
+      maxDelayTurns?: number;
     };
 
 export interface StoryTrigger {

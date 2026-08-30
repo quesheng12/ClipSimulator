@@ -238,6 +238,7 @@ v14 内容包必须设置 `"schemaVersion": 14`，并提供以下顶层字段：
 - `{ "type": "expired-flips-at-least", "count": N }`：本周目累计至少 N 条核心翻牌过期。
 - `{ "type": "takeout-orders-at-least", "count": N }`：本周目累计至少点过 N 顿外卖。
 - `{ "type": "consecutive-replies-delayed-at-least", "fanId": "fan-a", "count": N, "turns": T }`：指定粉丝最近连续 N 次已回复翻牌，从进入收件箱到回复都至少经过了 T 次回合推进。其他粉丝的回复不打断该粉丝自己的连续记录；一次更及时的回复会打断延迟序列，过期翻牌不计入已回复次数。
+- `{ "type": "first-nodes-replied-on-time", "fanId": "fan-a", "count": N, "maxDelayTurns": D }`：指定粉丝故事线的前 N 个节点（按发布日期与包内顺序排序）都已及时回复。`maxDelayTurns` 可选，默认 `0`，表示每条翻牌都在出现当回合就回复；填 `1` 则允许晚一个回合。用于奖励“第一时间秒回”的玩法分支。
 
 默认情况下，所有节点触发条件只在初始日或进入新一天时检查。新一天先结算过期翻牌，再应用当天事件和资源恢复，最后检测节点；因此普通连线、刚刚回复产生的 flag 或当天刚点的外卖不会在同一天中途弹出节点。唯一的剧情节点例外是回复选项明确设置 `nextNodeTiming: "immediate"`：该回复的效果先结算，然后引擎只检查它的 `nextNodeId`，不会顺带激活当天其他节点。目标的 `postedDay` 不能晚于当前日，且 `trigger` 必须已满足；未满足时节点仍保持解锁，等待之后的日初检查。外卖坏结局属于独立的立即判定，不受此规则影响。
 

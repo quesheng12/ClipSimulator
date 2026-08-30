@@ -89,6 +89,7 @@ const TRIGGER_TYPE_LABELS: Record<StoryTriggerCondition['type'], string> = {
   'expired-flips-at-least': '过期翻牌至少',
   'takeout-orders-at-least': '已点外卖至少',
   'consecutive-replies-delayed-at-least': '连续延迟回复至少',
+  'first-nodes-replied-on-time': '前几节点均及时回复',
 };
 
 function AvatarPreview({ avatar }: { avatar: string }) {
@@ -1769,7 +1770,14 @@ function NodeInspector({
                                     count: 2,
                                     turns: 2,
                                   }
-                                : { type, count: 1 },
+                                : type === 'first-nodes-replied-on-time'
+                                  ? {
+                                      type,
+                                      fanId: pack.fans[0]?.id ?? 'fan-id',
+                                      count: 2,
+                                      maxDelayTurns: 0,
+                                    }
+                                  : { type, count: 1 },
                           );
                         }}
                       >
@@ -1794,7 +1802,8 @@ function NodeInspector({
                           }
                         />
                       </label>
-                    ) : condition.type === 'consecutive-replies-delayed-at-least' ? (
+                    ) : condition.type === 'consecutive-replies-delayed-at-least' ||
+                      condition.type === 'first-nodes-replied-on-time' ? (
                       <div className="trigger-delay-fields">
                         <label className="compact-field">
                           <span className="sr-only">触发条件 {index + 1} 粉丝</span>
@@ -1803,7 +1812,8 @@ function NodeInspector({
                             value={condition.fanId}
                             onChange={(event) =>
                               updateTriggerCondition(index, (current) =>
-                                current.type === 'consecutive-replies-delayed-at-least'
+                                current.type === 'consecutive-replies-delayed-at-least' ||
+                                current.type === 'first-nodes-replied-on-time'
                                   ? { ...current, fanId: event.target.value }
                                   : current,
                               )
@@ -1825,29 +1835,49 @@ function NodeInspector({
                             value={condition.count}
                             onChange={(event) =>
                               updateTriggerCondition(index, (current) =>
-                                current.type === 'consecutive-replies-delayed-at-least'
+                                current.type === 'consecutive-replies-delayed-at-least' ||
+                                current.type === 'first-nodes-replied-on-time'
                                   ? { ...current, count: Number(event.target.value) }
                                   : current,
                               )
                             }
                           />
                         </label>
-                        <label className="compact-field">
-                          <span className="sr-only">触发条件 {index + 1} 等待回合</span>
-                          <input
-                            type="number"
-                            min={1}
-                            aria-label={`触发条件 ${index + 1} 等待回合`}
-                            value={condition.turns}
-                            onChange={(event) =>
-                              updateTriggerCondition(index, (current) =>
-                                current.type === 'consecutive-replies-delayed-at-least'
-                                  ? { ...current, turns: Number(event.target.value) }
-                                  : current,
-                              )
-                            }
-                          />
-                        </label>
+                        {condition.type === 'consecutive-replies-delayed-at-least' ? (
+                          <label className="compact-field">
+                            <span className="sr-only">触发条件 {index + 1} 等待回合</span>
+                            <input
+                              type="number"
+                              min={1}
+                              aria-label={`触发条件 ${index + 1} 等待回合`}
+                              value={condition.turns}
+                              onChange={(event) =>
+                                updateTriggerCondition(index, (current) =>
+                                  current.type === 'consecutive-replies-delayed-at-least'
+                                    ? { ...current, turns: Number(event.target.value) }
+                                    : current,
+                                )
+                              }
+                            />
+                          </label>
+                        ) : (
+                          <label className="compact-field">
+                            <span className="sr-only">触发条件 {index + 1} 允许延迟回合</span>
+                            <input
+                              type="number"
+                              min={0}
+                              aria-label={`触发条件 ${index + 1} 允许延迟回合`}
+                              value={condition.maxDelayTurns ?? 0}
+                              onChange={(event) =>
+                                updateTriggerCondition(index, (current) =>
+                                  current.type === 'first-nodes-replied-on-time'
+                                    ? { ...current, maxDelayTurns: Number(event.target.value) }
+                                    : current,
+                                )
+                              }
+                            />
+                          </label>
+                        )}
                       </div>
                     ) : (
                       <label className="compact-field">
