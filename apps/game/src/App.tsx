@@ -43,6 +43,7 @@ import {
   replyToNode,
 } from '@clip/story-core/engine';
 import { publicAssetSrc } from '@clip/story-core/asset-paths';
+import { fanAvatarSrc } from '@clip/story-core/fan-avatars';
 import { createProfileNamePicker } from '@clip/story-core/profile-names';
 import type {
   DisplayMode,
@@ -66,6 +67,7 @@ import {
   type ConversationParticipant,
 } from './conversations';
 import { storyPack } from './content';
+import { scheduleDeferredImagePreloads } from './image-preloader';
 import { DEFAULT_PROFILE_AVATAR_ID, PROFILE_AVATARS, profileAvatarForId } from './profile-avatars';
 import { recordGameTransition, recordRunAbandoned, recordRunStarted } from './statistics';
 import {
@@ -134,6 +136,17 @@ const TAKEOUT_SHOPS = [
     imageAlt: '装在纸质外带餐盒里的炸鸡',
   },
 ] as const;
+
+const DEFERRED_IMAGE_SOURCES = [
+  // 按首次需要的时间排序：身份设置页 → 翻牌列表 → 外卖 → 结局
+  ...PROFILE_AVATARS.map((avatar) => avatar.src),
+  ...storyPack.fans.map((fan) => fanAvatarSrc(fan.avatarId, import.meta.env.BASE_URL)),
+  ...storyPack.backgroundFlips.map((flip) => fanAvatarSrc(flip.avatarId, import.meta.env.BASE_URL)),
+  ...TAKEOUT_SHOPS.map((shop) => shop.image),
+  ...storyPack.earlyEndings.flatMap((ending) =>
+    ending.image ? [publicAssetSrc(ending.image.src, import.meta.env.BASE_URL)] : [],
+  ),
+];
 
 type TakeoutShop = (typeof TAKEOUT_SHOPS)[number];
 
@@ -1610,6 +1623,8 @@ export default function App() {
   const stateRef = useRef(state);
   const navigationRef = useRef(navigation);
   const view = navigation.view;
+
+  useEffect(() => scheduleDeferredImagePreloads(DEFERRED_IMAGE_SOURCES), []);
 
   useEffect(() => {
     stateRef.current = state;
