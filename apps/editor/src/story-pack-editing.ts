@@ -38,7 +38,8 @@ export function renameFanReferences(
         ? {
             ...node.trigger,
             conditions: node.trigger.conditions.map((condition) =>
-              condition.type === 'consecutive-replies-delayed-at-least' &&
+              (condition.type === 'consecutive-replies-delayed-at-least' ||
+                condition.type === 'first-nodes-replied-on-time') &&
               condition.fanId === previousId
                 ? { ...condition, fanId: nextId }
                 : condition,

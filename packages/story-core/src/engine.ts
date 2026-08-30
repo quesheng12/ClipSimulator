@@ -199,6 +199,41 @@ function activateImmediateFollowUp(state: GameState, pack: StoryPack, nodeId: st
   };
 }
 
+/**
+ * 每次回复翻牌后检查所有带 trigger 的节点：条件满足且日期已到的立即进入收件箱。
+ * 普通连线节点不在此列，仍按日初或 nextNodeTiming 规则出现。
+ */
+function activateTriggeredNodes(state: GameState, pack: StoryPack): GameState {
+  const nextState = {
+    ...state,
+    pendingNodeIds: [...state.pendingNodeIds],
+    activatedTurnByNodeId: { ...state.activatedTurnByNodeId },
+  };
+
+  const incoming = buildIncomingNodeIds(pack);
+  const processed = new Set([...Object.keys(nextState.resolvedNodes), ...nextState.pendingNodeIds]);
+  const unlocked = new Set(nextState.unlockedNodeIds);
+
+  const available = pack.nodes
+    .filter((node) => {
+      if (!node.trigger) return false;
+      if (processed.has(node.id)) return false;
+      if (node.postedDay > nextState.currentDay) return false;
+      if (incoming.has(node.id) && !unlocked.has(node.id)) return false;
+      return storyTriggerMet(node.trigger, nextState, pack);
+    })
+    .sort((a, b) => a.postedDay - b.postedDay || a.id.localeCompare(b.id));
+
+  for (const node of available) {
+    nextState.activatedTurnByNodeId[node.id] ??= nextState.turn;
+  }
+
+  return {
+    ...nextState,
+    pendingNodeIds: unique([...nextState.pendingNodeIds, ...available.map((node) => node.id)]),
+  };
+}
+
 export function createInitialGame(pack: StoryPack, mode: DisplayMode): GameState {
   const affinity = Object.fromEntries(pack.fans.map((fan) => [fan.id, fan.initialAffinity]));
   const initial: GameState = {
@@ -278,6 +313,8 @@ export function replyToNode(
       nextState = activateImmediateFollowUp(nextState, pack, choice.nextNodeId);
     }
   }
+  // 回复后立刻重查所有触发条件节点，秒回奖励当场弹出
+  nextState = activateTriggeredNodes(nextState, pack);
 
   const feedback: ReplyFeedback = {
     nodeId,

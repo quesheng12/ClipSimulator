@@ -219,7 +219,7 @@ describe('story engine', () => {
     const triggerNode = {
       ...structuredClone(source),
       id: 'prompt-trigger-test',
-      postedDay: 4,
+      postedDay: 1,
       trigger: {
         match: 'all' as const,
         conditions: [
@@ -239,7 +239,7 @@ describe('story engine', () => {
     };
     const triggerPack: StoryPack = { ...pack, nodes: [...pack.nodes, triggerNode] };
 
-    // 当回合回复：delayTurns 0 → 触发
+    // 当回合回复：delayTurns 0 → 回复后立即触发，无需等到日初
     const prompt = replyToNode(
       createInitialGame(triggerPack, 'standard'),
       triggerPack,
@@ -247,7 +247,7 @@ describe('story engine', () => {
       'play-along',
     );
     expect(prompt.replyHistory.at(-1)?.delayTurns).toBe(0);
-    expect(advanceTurn(prompt, triggerPack).pendingNodeIds).toContain('prompt-trigger-test');
+    expect(prompt.pendingNodeIds).toContain('prompt-trigger-test');
 
     // 延迟一个回合回复：delayTurns 1 → 不触发
     const delayed = replyToNode(
@@ -257,6 +257,7 @@ describe('story engine', () => {
       'play-along',
     );
     expect(delayed.replyHistory.at(-1)?.delayTurns).toBe(1);
+    expect(delayed.pendingNodeIds).not.toContain('prompt-trigger-test');
     const delayedDaySeven = advanceTurn(advanceTurn(delayed, triggerPack), triggerPack);
     expect(delayedDaySeven.pendingNodeIds).not.toContain('prompt-trigger-test');
   });
@@ -281,7 +282,8 @@ describe('story engine', () => {
     state = advanceTurn(advanceTurn(state, pack), pack);
     state = replyToNode(state, pack, 'patron-02', 'calm-honesty');
     expect(state.replyHistory.at(-1)?.delayTurns).toBe(2);
-    expect(state.pendingNodeIds).not.toContain('patron-goodbye');
+    // 回复后立即重查触发条件：告别信当场弹出，无需等下一次日初
+    expect(state.pendingNodeIds).toContain('patron-goodbye');
 
     state = advanceTurn(state, pack);
     expect(state.turn).toBe(10);

@@ -17,6 +17,11 @@ describe('renameFanReferences', () => {
           count: 2,
           turns: 2,
         },
+        {
+          type: 'first-nodes-replied-on-time',
+          fanId: 'yuzu',
+          count: 3,
+        },
       ],
     };
     const firstChoice = firstNode.choices[0];
@@ -42,6 +47,7 @@ describe('renameFanReferences', () => {
     expect(renamedNode?.fanId).toBe('daydream');
     expect(renamedNode?.id).toBe(firstNode.id);
     expect(renamedNode?.trigger?.conditions[0]).toMatchObject({ fanId: 'daydream' });
+    expect(renamedNode?.trigger?.conditions[1]).toMatchObject({ fanId: 'daydream' });
     expect(renamedChoice?.effects.affinity).toEqual({ daydream: 10 });
     expect(renamedChoice?.effects.voteBonus).toEqual({ daydream: 3 });
     expect(renamedNode?.onExpire?.affinity).toEqual({ daydream: -2 });
