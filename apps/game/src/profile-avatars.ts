@@ -1,3 +1,5 @@
+import { publicAssetSrc } from '@clip/story-core/asset-paths';
+
 export interface ProfileAvatarOption {
   id: string;
   src: string;
@@ -5,12 +7,36 @@ export interface ProfileAvatarOption {
 }
 
 export const PROFILE_AVATARS: readonly ProfileAvatarOption[] = [
-  { id: 'cafe', src: '/assets/avatars/profile-cafe.webp', label: '窗边侧颜' },
-  { id: 'lamb', src: '/assets/avatars/profile-lamb.webp', label: '抱抱小羊' },
-  { id: 'breeze', src: '/assets/avatars/profile-breeze.webp', label: '春日回头' },
-  { id: 'kitten', src: '/assets/avatars/profile-kitten.webp', label: '包里小猫' },
-  { id: 'poodle', src: '/assets/avatars/profile-poodle.webp', label: '歪头小狗' },
-  { id: 'bunny', src: '/assets/avatars/profile-bunny.webp', label: '耳机兔兔' },
+  {
+    id: 'cafe',
+    src: publicAssetSrc('/assets/avatars/profile-cafe.webp', import.meta.env.BASE_URL),
+    label: '窗边侧颜',
+  },
+  {
+    id: 'lamb',
+    src: publicAssetSrc('/assets/avatars/profile-lamb.webp', import.meta.env.BASE_URL),
+    label: '抱抱小羊',
+  },
+  {
+    id: 'breeze',
+    src: publicAssetSrc('/assets/avatars/profile-breeze.webp', import.meta.env.BASE_URL),
+    label: '春日回头',
+  },
+  {
+    id: 'kitten',
+    src: publicAssetSrc('/assets/avatars/profile-kitten.webp', import.meta.env.BASE_URL),
+    label: '包里小猫',
+  },
+  {
+    id: 'poodle',
+    src: publicAssetSrc('/assets/avatars/profile-poodle.webp', import.meta.env.BASE_URL),
+    label: '歪头小狗',
+  },
+  {
+    id: 'bunny',
+    src: publicAssetSrc('/assets/avatars/profile-bunny.webp', import.meta.env.BASE_URL),
+    label: '耳机兔兔',
+  },
 ];
 
 export const DEFAULT_PROFILE_AVATAR_ID = PROFILE_AVATARS[0]!.id;

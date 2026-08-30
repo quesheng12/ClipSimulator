@@ -5,6 +5,7 @@ const inboxMessageList = (page: Page) => page.locator('.inbox-message-list');
 const repliedGroup = (page: Page) => page.locator('.conversation-group--replied');
 const fixedTurnActions = (page: Page) => page.locator('.turn-actions--fixed');
 const DEFAULT_IDOL_NAME = '沈知夏';
+const GAME_ASSET_BASE = '/ClipSimulator/assets';
 const ADAPTED_IDOL_NAMES = new Set(testStoryJson.profileSetup.namePools.adapted);
 const YUZU_FAN = testStoryJson.fans.find((fan) => fan.id === 'yuzu');
 const TAKEOUT_ENDING = testStoryJson.earlyEndings.find((ending) => ending.id === 'takeout-idol');
@@ -71,7 +72,7 @@ test('first entry creates a persistent member profile that remains editable in s
   await page.getByRole('radio', { name: '包里小猫' }).check();
   await expect(page.locator('.profile-form__preview img')).toHaveAttribute(
     'src',
-    '/assets/avatars/profile-kitten.webp',
+    `${GAME_ASSET_BASE}/avatars/profile-kitten.webp`,
   );
   const onboardingScrollBeforeOpen = await page.evaluate(() => window.scrollY);
   await teamCombobox.click();
@@ -123,7 +124,7 @@ test('first entry creates a persistent member profile that remains editable in s
   expect(hiiStatusColor.teamColor).toBe('#F29A61');
   await expect(page.locator('.member-portrait > img')).toHaveAttribute(
     'src',
-    '/assets/avatars/profile-kitten.webp',
+    `${GAME_ASSET_BASE}/avatars/profile-kitten.webp`,
   );
 
   await page.getByRole('button', { name: '设置' }).click();
@@ -158,7 +159,7 @@ test('first entry creates a persistent member profile that remains editable in s
   expect(xStatusColor.background).not.toBe(hiiStatusColor.background);
   await expect(page.locator('.member-portrait > img')).toHaveAttribute(
     'src',
-    '/assets/avatars/profile-bunny.webp',
+    `${GAME_ASSET_BASE}/avatars/profile-bunny.webp`,
   );
 
   await page.reload();
@@ -181,7 +182,7 @@ test('first entry creates a persistent member profile that remains editable in s
   await expect(page.getByRole('heading', { name: '旧档成员' })).toBeVisible();
   await expect(page.locator('.member-portrait > img')).toHaveAttribute(
     'src',
-    '/assets/avatars/profile-cafe.webp',
+    `${GAME_ASSET_BASE}/avatars/profile-cafe.webp`,
   );
 });
 
@@ -521,7 +522,7 @@ test('takeout shows a lightweight receipt with mood recovery', async ({ page }) 
   await expect(receipt).toContainText('精力 +3');
   await expect(receipt).toContainText('心情 +3');
   const foodImage = receipt.getByRole('img');
-  await expect(foodImage).toHaveAttribute('src', '/assets/takeout/malatang-takeout.jpg');
+  await expect(foodImage).toHaveAttribute('src', `${GAME_ASSET_BASE}/takeout/malatang-takeout.jpg`);
   await expect(foodImage).toHaveAttribute('alt', '装在单人外卖碗里的热汤和面食');
   await expect
     .poll(() => foodImage.evaluate((image: HTMLImageElement) => image.naturalWidth))
@@ -944,6 +945,15 @@ test('day-one rows for core fans open their history with or without a pending fl
   page,
 }) => {
   await page.getByRole('button', { name: /翻牌.*待回复/ }).click();
+  const visibleFanAvatars = inboxMessageList(page).locator('.fan-avatar img');
+  await expect(visibleFanAvatars.first()).toBeVisible();
+  await expect
+    .poll(() =>
+      visibleFanAvatars.evaluateAll((images: HTMLImageElement[]) =>
+        images.every((image) => image.naturalWidth > 0),
+      ),
+    )
+    .toBe(true);
 
   // Mico_ 第 1 天已有待回复翻牌，从待回复行打开：赛前旧聊天和回复选项都应出现
   await inboxMessageList(page)

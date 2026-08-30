@@ -986,6 +986,24 @@ select:focus-visible {
   white-space: nowrap;
 }
 
+.npc-flip-editor__identity {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 8px;
+}
+
+.npc-flip-editor__identity .core-fan-editor__avatar {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+}
+
+.npc-flip-editor__identity > span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .npc-flip-editor > summary:hover {
   background: rgba(255, 255, 255, 0.035);
 }

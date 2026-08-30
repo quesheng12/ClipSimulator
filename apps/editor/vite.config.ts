@@ -7,6 +7,7 @@ import react from '@vitejs/plugin-react';
 const storyContentPath = fileURLToPath(new URL('../../content/test-story.json', import.meta.url));
 
 export default defineConfig({
+  publicDir: fileURLToPath(new URL('../game/public', import.meta.url)),
   plugins: [
     react(),
     {

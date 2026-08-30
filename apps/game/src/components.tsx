@@ -30,7 +30,12 @@ export function FanAvatar({
       style={{ '--fan-accent': fan.accent } as React.CSSProperties}
       aria-hidden="true"
     >
-      <img src={fanAvatarSrc(fan.avatarId)} alt="" width={512} height={512} />
+      <img
+        src={fanAvatarSrc(fan.avatarId, import.meta.env.BASE_URL)}
+        alt=""
+        width={512}
+        height={512}
+      />
     </span>
   );
 }

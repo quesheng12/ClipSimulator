@@ -1,3 +1,5 @@
+import { publicAssetSrc } from './asset-paths';
+
 export const FAN_AVATAR_IDS = [
   'fan-yuzu',
   'fan-salt',
@@ -22,6 +24,6 @@ export const FAN_AVATAR_IDS = [
 
 export type FanAvatarId = (typeof FAN_AVATAR_IDS)[number];
 
-export function fanAvatarSrc(avatarId: FanAvatarId): string {
-  return `/assets/avatars/${avatarId}.webp`;
+export function fanAvatarSrc(avatarId: FanAvatarId, baseUrl = '/'): string {
+  return publicAssetSrc(`/assets/avatars/${avatarId}.webp`, baseUrl);
 }

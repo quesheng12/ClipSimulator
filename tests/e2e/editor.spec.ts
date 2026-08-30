@@ -171,6 +171,15 @@ test('edits core fan identity, tags, and relationship history without breaking r
   const fanEditor = page.locator('details.core-fan-editor').filter({ hasText: '柚子汽水' });
   await fanEditor.locator('summary').click();
   await expect(fanEditor.getByLabel('稳定 ID')).toHaveValue('yuzu');
+  await expect(fanEditor.getByLabel('头像 ID')).toHaveValue('fan-yuzu');
+  await expect
+    .poll(() =>
+      fanEditor
+        .locator('img')
+        .first()
+        .evaluate((image: HTMLImageElement) => image.naturalWidth),
+    )
+    .toBeGreaterThan(0);
   const tagInputs = fanEditor.locator('.core-fan-tag-row input');
   await expect(tagInputs).toHaveCount(YUZU_FAN.tags.length);
   await expect(fanEditor.locator('.core-fan-history-card')).toHaveCount(4);
@@ -200,6 +209,15 @@ test('edits and copies a name-linked ordinary NPC topic round', async ({ page })
   const topic = page.locator('details.npc-flip-editor').filter({ hasText: '曹可恬的狗' }).first();
   await topic.locator('summary').click();
   await expect(topic.getByLabel('稳定 contactId')).toHaveValue('idol-dog');
+  await expect(topic.getByLabel('头像 ID')).toHaveValue('fan-shiba');
+  await expect
+    .poll(() =>
+      topic
+        .locator('img')
+        .first()
+        .evaluate((image: HTMLImageElement) => image.naturalWidth),
+    )
+    .toBeGreaterThan(0);
   await expect(topic.getByLabel('互动类型')).toHaveValue('automatic');
   await expect(topic.getByLabel('成员自动回复')).toBeVisible();
   await topic.getByLabel('互动类型').selectOption('chatter');

@@ -94,7 +94,9 @@ const TRIGGER_TYPE_LABELS: Record<StoryTriggerCondition['type'], string> = {
 };
 
 function AvatarPreview({ avatarId }: { avatarId: FanAvatarId }) {
-  return <img src={fanAvatarSrc(avatarId)} alt="" width={512} height={512} />;
+  return (
+    <img src={fanAvatarSrc(avatarId, import.meta.env.BASE_URL)} alt="" width={512} height={512} />
+  );
 }
 
 function backgroundContactId(flip: BackgroundFlip): string {
@@ -1276,7 +1278,12 @@ function ContentPackInspector({
             {pack.backgroundFlips.map((flip, index) => (
               <details className="npc-flip-editor" key={index}>
                 <summary>
-                  <span>{renderTemplateText(flip.fanName, templateVariables)}</span>
+                  <span className="npc-flip-editor__identity">
+                    <span className="core-fan-editor__avatar" aria-hidden="true">
+                      <AvatarPreview avatarId={flip.avatarId} />
+                    </span>
+                    <span>{renderTemplateText(flip.fanName, templateVariables)}</span>
+                  </span>
                   <span className="npc-flip-editor__meta">
                     第 {flip.day} 日 · {flip.reply !== undefined ? '自动一问一答' : 'NPC 闲聊'}
                   </span>

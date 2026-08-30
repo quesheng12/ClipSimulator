@@ -42,6 +42,7 @@ import {
   orderTakeout,
   replyToNode,
 } from '@clip/story-core/engine';
+import { publicAssetSrc } from '@clip/story-core/asset-paths';
 import { createProfileNamePicker } from '@clip/story-core/profile-names';
 import type {
   DisplayMode,
@@ -99,37 +100,37 @@ type View =
 const TAKEOUT_SHOPS = [
   {
     name: '鸡柳大人',
-    image: '/assets/takeout/fried-takeout.jpg',
+    image: publicAssetSrc('/assets/takeout/fried-takeout.jpg', import.meta.env.BASE_URL),
     imageAlt: '装在纸质外带餐盒里的炸鸡',
   },
   {
     name: '椰子鸡',
-    image: '/assets/takeout/asian-takeout.jpg',
+    image: publicAssetSrc('/assets/takeout/asian-takeout.jpg', import.meta.env.BASE_URL),
     imageAlt: '装在一次性餐盒里的鸡肉和面食',
   },
   {
     name: '麻辣烫',
-    image: '/assets/takeout/malatang-takeout.jpg',
+    image: publicAssetSrc('/assets/takeout/malatang-takeout.jpg', import.meta.env.BASE_URL),
     imageAlt: '装在单人外卖碗里的热汤和面食',
   },
   {
     name: '聚湘缘',
-    image: '/assets/takeout/asian-takeout.jpg',
+    image: publicAssetSrc('/assets/takeout/asian-takeout.jpg', import.meta.env.BASE_URL),
     imageAlt: '装在一次性餐盒里的鸡肉和面食',
   },
   {
     name: 'KFC',
-    image: '/assets/takeout/fried-takeout.jpg',
+    image: publicAssetSrc('/assets/takeout/fried-takeout.jpg', import.meta.env.BASE_URL),
     imageAlt: '装在纸质外带餐盒里的炸鸡',
   },
   {
     name: '麦麦',
-    image: '/assets/takeout/fried-takeout.jpg',
+    image: publicAssetSrc('/assets/takeout/fried-takeout.jpg', import.meta.env.BASE_URL),
     imageAlt: '装在纸质外带餐盒里的炸鸡',
   },
   {
     name: '塔斯汀',
-    image: '/assets/takeout/fried-takeout.jpg',
+    image: publicAssetSrc('/assets/takeout/fried-takeout.jpg', import.meta.env.BASE_URL),
     imageAlt: '装在纸质外带餐盒里的炸鸡',
   },
 ] as const;
@@ -1467,7 +1468,7 @@ function EndingScreen({
         {ending.image && (
           <figure className="ending-post-image">
             <img
-              src={ending.image.src}
+              src={publicAssetSrc(ending.image.src, import.meta.env.BASE_URL)}
               alt={ending.image.alt}
               width={1448}
               height={1086}
