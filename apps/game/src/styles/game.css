@@ -2887,6 +2887,19 @@
   .menu-hero {
     padding-top: 3.2rem;
   }
+  .profile-avatar-options {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-auto-columns: unset;
+    grid-auto-flow: row;
+    gap: 0.35rem;
+    overflow-x: visible;
+    padding-inline: 0;
+    scroll-snap-type: none;
+  }
+  .profile-avatar-option__image {
+    width: 52px;
+    height: 52px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -39,7 +39,7 @@ export const PROFILE_AVATARS: readonly ProfileAvatarOption[] = [
   },
 ];
 
-export const DEFAULT_PROFILE_AVATAR_ID = 'cafe';
+export const DEFAULT_PROFILE_AVATAR_ID = PROFILE_AVATARS[0]!.id;
 
 export function profileAvatarForId(id?: string): ProfileAvatarOption {
   return PROFILE_AVATARS.find((avatar) => avatar.id === id) ?? PROFILE_AVATARS[0]!;

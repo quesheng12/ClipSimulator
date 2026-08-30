@@ -189,8 +189,28 @@ test('first entry creates a persistent member profile that remains editable in s
   await expect(page.getByRole('heading', { name: '旧档成员' })).toBeVisible();
   await expect(page.locator('.member-portrait > img')).toHaveAttribute(
     'src',
-    `${GAME_ASSET_BASE}/avatars/profile-cafe.webp`,
+    `${GAME_ASSET_BASE}/avatars/profile-kitten.webp`,
   );
+
+  await page.evaluate(() => localStorage.removeItem('clip-simulator:player-profile:v1'));
+  await page.setViewportSize({ width: 1024, height: 900 });
+  await page.reload();
+  await expect(page.getByRole('heading', { name: '先写下你的成员资料' })).toBeVisible();
+  const desktopAvatarStrip = page.locator('.profile-avatar-options');
+  await expect
+    .poll(() =>
+      desktopAvatarStrip.evaluate((strip) => ({
+        fits: strip.scrollWidth <= strip.clientWidth,
+        overflowX: getComputedStyle(strip).overflowX,
+      })),
+    )
+    .toEqual({ fits: true, overflowX: 'visible' });
+  await expect(page.getByRole('radio').first()).toBeChecked();
+  await expect(page.locator('.profile-form__preview img')).toHaveAttribute(
+    'src',
+    `${GAME_ASSET_BASE}/avatars/profile-kitten.webp`,
+  );
+  await page.screenshot({ path: 'artifacts/playtest/game-profile-setup-desktop.png' });
 });
 
 test('standard mode shows a quiet inbox and keeps complete conversation history', async ({
