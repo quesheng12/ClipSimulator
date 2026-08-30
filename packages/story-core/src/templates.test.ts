@@ -64,7 +64,7 @@ describe('story templates', () => {
     source.backgroundFlips[0]!.contactId = '{{idolName}}-contact';
     const topicFlip = source.backgroundFlips.find((flip) => flip.id === 'topic-idol-dog-01')!;
     topicFlip.reply = '{{idolNickname}}会继续聊这个。';
-    source.fans[0]!.avatar = '{{idolName}}.png';
+    source.fans[0]!.avatarId = '{{idolName}}-avatar' as StoryPack['fans'][number]['avatarId'];
     source.fans[0]!.tags[0] = '{{idolNickname}}单推';
     source.fans[0]!.pastChats[0]!.message = '{{idolName}}，这是过去的消息。';
     source.fans[0]!.pastChats[0]!.reply = '{{idolNickname}}记得。';
@@ -83,7 +83,7 @@ describe('story templates', () => {
     expect(resolved.backgroundFlips.find((flip) => flip.id === 'topic-idol-dog-01')!.reply).toBe(
       '遥遥会继续聊这个。',
     );
-    expect(resolved.fans[0]!.avatar).toBe('{{idolName}}.png');
+    expect(resolved.fans[0]!.avatarId).toBe('{{idolName}}-avatar');
     expect(resolved.fans[0]!.tags[0]).toBe('遥遥单推');
     expect(resolved.fans[0]!.pastChats[0]).toMatchObject({
       message: '沈星遥，这是过去的消息。',

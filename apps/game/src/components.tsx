@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react';
 import { BatteryCharging, Heart, Smile, Users } from 'lucide-react';
+import { fanAvatarSrc } from '@clip/story-core/fan-avatars';
 import type { FanDefinition, GameState, Resources, StoryPack } from '@clip/story-core/types';
 
 export function affinityLabel(value: number): string {
@@ -10,7 +11,7 @@ export function affinityLabel(value: number): string {
   return '渐行渐远';
 }
 
-type AvatarIdentity = Pick<FanDefinition, 'avatar' | 'accent'>;
+type AvatarIdentity = Pick<FanDefinition, 'avatarId' | 'accent'>;
 
 export function FanAvatar({
   fan,
@@ -21,7 +22,6 @@ export function FanAvatar({
   small?: boolean;
   muted?: boolean;
 }) {
-  const isImage = fan.avatar.startsWith('/') || /^https?:\/\//.test(fan.avatar);
   const sizeClass = small ? 'fan-avatar fan-avatar--small' : 'fan-avatar';
   const className = muted ? `${sizeClass} fan-avatar--muted` : sizeClass;
   return (
@@ -30,7 +30,7 @@ export function FanAvatar({
       style={{ '--fan-accent': fan.accent } as React.CSSProperties}
       aria-hidden="true"
     >
-      {isImage ? <img src={fan.avatar} alt="" /> : fan.avatar}
+      <img src={fanAvatarSrc(fan.avatarId)} alt="" width={512} height={512} />
     </span>
   );
 }

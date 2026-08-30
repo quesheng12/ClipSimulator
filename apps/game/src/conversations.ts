@@ -1,4 +1,5 @@
 import type { BackgroundFlip, GameState, StoryChoice, StoryPack } from '@clip/story-core/types';
+import type { FanAvatarId } from '@clip/story-core/fan-avatars';
 
 export type ConversationKind = 'core' | 'background';
 
@@ -9,7 +10,7 @@ export interface ConversationParticipant {
   kind: ConversationKind;
   name: string;
   handle?: string;
-  avatar: string;
+  avatarId: FanAvatarId;
   accent: string;
   tags: string[];
   affinity?: number;
@@ -42,13 +43,6 @@ export interface RepliedConversation {
 }
 
 const BACKGROUND_ACCENTS = ['#8f82e8', '#5fb7aa', '#d8799e', '#6d9fd1', '#e49a63'];
-const BACKGROUND_AVATARS = [
-  '/assets/avatars/fan-callsticks.webp',
-  '/assets/avatars/fan-milktea.webp',
-  '/assets/avatars/fan-subway.webp',
-  '/assets/avatars/fan-desk.webp',
-];
-
 function stableHash(value: string): number {
   let hash = 0;
   for (const character of value) {
@@ -59,10 +53,6 @@ function stableHash(value: string): number {
 
 function backgroundAccent(contactId: string): string {
   return BACKGROUND_ACCENTS[stableHash(contactId) % BACKGROUND_ACCENTS.length]!;
-}
-
-function backgroundAvatar(contactId: string): string {
-  return BACKGROUND_AVATARS[stableHash(contactId) % BACKGROUND_AVATARS.length]!;
 }
 
 export function getBackgroundContactId(flip: BackgroundFlip): string {
@@ -81,7 +71,7 @@ export function getCoreParticipant(
     kind: 'core',
     name: fan.name,
     handle: fan.handle,
-    avatar: fan.avatar,
+    avatarId: fan.avatarId,
     accent: fan.accent,
     tags: fan.tags,
     affinity: state.affinity[fan.id] ?? fan.initialAffinity,
@@ -102,7 +92,7 @@ export function getBackgroundParticipant(
     id: contactId,
     kind: 'background',
     name: latest.fanName,
-    avatar: latest.avatar ?? backgroundAvatar(contactId),
+    avatarId: latest.avatarId,
     accent: backgroundAccent(contactId),
     tags: [latest.tag],
   };

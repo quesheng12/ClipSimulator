@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 14,
+  "schemaVersion": 15,
   "id": "core-fans-demo",
   "title": "总选前的三十天",
   "description": "{{groupName}}总选月的五名核心粉丝、三十个剧情节点，以及三名会追着热点聊下去的普通粉丝。",
@@ -181,10 +181,7 @@
       "name": "柚子汽水（最爱{{idolName}}版）",
       "handle": "@{{idolName}}今天也要开心",
       "bio": "暑假会立刻回复你的高中生，把能给的十几票看得很认真。",
-      "tags": [
-        "高中生",
-        "暖心小可爱"
-      ],
+      "tags": ["高中生", "暖心小可爱"],
       "pastChats": [
         {
           "id": "yuzu-past-01",
@@ -211,7 +208,7 @@
           "reply": "这计划表比我行程还专业哈哈。提醒一下制定人，吃饭和睡觉也得排进去，不能全是作业、帮忙和攒钱。\n\n数字不急着报，你先过好暑假！"
         }
       ],
-      "avatar": "/assets/avatars/fan-yuzu.webp",
+      "avatarId": "fan-yuzu",
       "accent": "#E8952F",
       "initialAffinity": 62,
       "maxVotePower": 20,
@@ -248,11 +245,7 @@
       "name": "Mico_",
       "handle": "@好想和你在一起",
       "bio": "营业当暧昧，跟踪当偶遇，还觉得是你先动的心。",
-      "tags": [
-        "私生预警",
-        "回踩风险",
-        "对她有点困扰"
-      ],
+      "tags": ["私生预警", "回踩风险", "对她有点困扰"],
       "pastChats": [
         {
           "id": "salt-past-01",
@@ -273,7 +266,7 @@
           "reply": "最近排练和工作挤在一起实在是太忙了🥹，回得稍微慢了一点点~不过宝宝有时候翻牌确实很多，稍微隔几天回复也正常的，不要想太多哦！谢谢宝宝体谅啦~"
         }
       ],
-      "avatar": "/assets/avatars/fan-salt.webp",
+      "avatarId": "fan-salt",
       "accent": "#7457C8",
       "initialAffinity": 45,
       "maxVotePower": 80,
@@ -310,11 +303,7 @@
       "name": "椰子饼蛋挞酱",
       "handle": "@球球了有人来接饭头吗",
       "bio": "从你出道起一直在线，却开始怀疑应援会是否吞掉了自己的生活。",
-      "tags": [
-        "应援会饭头",
-        "组织者",
-        "老河粉"
-      ],
+      "tags": ["应援会饭头", "组织者", "老河粉"],
       "pastChats": [
         {
           "id": "lighthouse-past-01",
@@ -347,7 +336,7 @@
           "reply": "辛苦了宝宝，不要太勉强自己，如果真的太累我们可以稍微缓一点节奏。我也不知道怎么才能帮上你...\n\n如果有需要我出力的地方，记得跟我说！"
         }
       ],
-      "avatar": "/assets/avatars/fan-lighthouse.webp",
+      "avatarId": "fan-lighthouse",
       "accent": "#2E9F93",
       "initialAffinity": 58,
       "maxVotePower": 999,
@@ -384,10 +373,7 @@
       "name": "Blaze火",
       "handle": "@她是首推你是例外",
       "bio": "隔壁家单推王，常来看你，也总会先提起自己的首推。",
-      "tags": [
-        "隔壁单推王",
-        "二推你"
-      ],
+      "tags": ["隔壁单推王", "二推你"],
       "pastChats": [
         {
           "id": "battery-past-01",
@@ -408,7 +394,7 @@
           "reply": "那半分钟本来就是来见我的，怎么还想夹带隔壁业务？\n\n下次不用借，给你单独开一个‘只聊我们自己的三十秒’账户。"
         }
       ],
-      "avatar": "/assets/avatars/fan-battery.webp",
+      "avatarId": "fan-battery",
       "accent": "#F04F72",
       "initialAffinity": 36,
       "maxVotePower": 1800,
@@ -445,13 +431,9 @@
       "name": "过路看一眼",
       "handle": "@不做长期承诺",
       "bio": "见多了小偶像的神豪，花钱前先看你值不值。",
-      "tags": [
-        "冷静神豪",
-        "观望中",
-        "极高票力"
-      ],
+      "tags": ["冷静神豪", "观望中", "极高票力"],
       "pastChats": [],
-      "avatar": "/assets/avatars/fan-callsticks.webp",
+      "avatarId": "fan-callsticks",
       "accent": "#5278B9",
       "initialAffinity": 20,
       "maxVotePower": 3000,
@@ -507,9 +489,7 @@
             "affinity": {
               "yuzu": 10
             },
-            "setFlags": [
-              "yuzu-life-noticed"
-            ],
+            "setFlags": ["yuzu-life-noticed"],
             "popularity": 0
           },
           "nextNodeId": "yuzu-02"
@@ -540,9 +520,7 @@
             "affinity": {
               "yuzu": -4
             },
-            "setFlags": [
-              "yuzu-treated-as-data"
-            ],
+            "setFlags": ["yuzu-treated-as-data"],
             "popularity": 0
           },
           "nextNodeId": "yuzu-02"
@@ -579,9 +557,7 @@
             "affinity": {
               "yuzu": 13
             },
-            "setFlags": [
-              "yuzu-school-remembered"
-            ],
+            "setFlags": ["yuzu-school-remembered"],
             "popularity": 0
           },
           "nextNodeId": "yuzu-03"
@@ -648,9 +624,7 @@
             "affinity": {
               "yuzu": 14
             },
-            "setFlags": [
-              "yuzu-life-first"
-            ],
+            "setFlags": ["yuzu-life-first"],
             "popularity": 0
           },
           "nextNodeId": "yuzu-04"
@@ -682,9 +656,7 @@
               "yuzu": -13
             },
             "popularity": -3,
-            "setFlags": [
-              "yuzu-pressured"
-            ]
+            "setFlags": ["yuzu-pressured"]
           },
           "nextNodeId": "yuzu-04"
         }
@@ -711,7 +683,7 @@
       "choices": [
         {
           "id": "remember-wave",
-          "text": "认领成功，就是往你那边👋你今天戴了黄色发夹，我看见你举灯牌又放下好几次。\n\n还有那句‘别太累’现在也收到了，下次不用把五句话全背完，想到哪句说哪句。",
+          "text": "认领成功，就是往你那边👋你今天戴了黄色发夹，我看见你举灯牌又放下好几次~",
           "cost": {
             "energy": 3,
             "mindset": 2
@@ -720,16 +692,14 @@
             "affinity": {
               "yuzu": 14
             },
-            "setFlags": [
-              "yuzu-remembered"
-            ],
+            "setFlags": ["yuzu-remembered"],
             "popularity": 0
           },
           "nextNodeId": "yuzu-05"
         },
         {
           "id": "gentle-thanks",
-          "text": "看到你啦！站一整天累坏了吧？‘别太累’我收到了，你也一样。回去早点睡，下次来不用背台词。",
+          "text": "看到你啦！站一整天累坏了吧？回去早点睡哦",
           "cost": {
             "energy": 1,
             "mindset": 1
@@ -744,7 +714,7 @@
         },
         {
           "id": "template-reply",
-          "text": "谢谢你来看公演，下次见！",
+          "text": "谢谢宝宝来握手，下次见！",
           "cost": {
             "energy": 1,
             "mindset": 1
@@ -789,9 +759,7 @@
             "affinity": {
               "yuzu": 13
             },
-            "setFlags": [
-              "yuzu-braver"
-            ],
+            "setFlags": ["yuzu-braver"],
             "popularity": 0
           },
           "nextNodeId": "yuzu-06"
@@ -822,9 +790,7 @@
             "affinity": {
               "yuzu": -10
             },
-            "setFlags": [
-              "yuzu-pressured"
-            ],
+            "setFlags": ["yuzu-pressured"],
             "popularity": 0
           },
           "nextNodeId": "yuzu-06"
@@ -852,7 +818,7 @@
       "choices": [
         {
           "id": "remember-you",
-          "text": "你先去过好自己的高三。不能秒回也没关系，我会记得那个总是亮得很快、偶尔也要去写作业的头像。等你有空再回来，不点名🫶",
+          "text": "你先去过好自己的高三。不能秒回也没关系，我会记得那个总是亮得很快、偶尔也要去写作业的头像。等你有空再回来，我会一直在的🫶",
           "cost": {
             "energy": 3,
             "mindset": 2
@@ -861,9 +827,7 @@
             "affinity": {
               "yuzu": 15
             },
-            "setFlags": [
-              "yuzu-stays"
-            ],
+            "setFlags": ["yuzu-stays"],
             "popularity": 0
           }
         },
@@ -878,9 +842,7 @@
             "affinity": {
               "yuzu": 8
             },
-            "setFlags": [
-              "yuzu-studies"
-            ],
+            "setFlags": ["yuzu-studies"],
             "popularity": 0
           }
         },
@@ -903,9 +865,7 @@
         "affinity": {
           "yuzu": -15
         },
-        "setFlags": [
-          "yuzu-left"
-        ]
+        "setFlags": ["yuzu-left"]
       },
       "editor": {
         "y": 0
@@ -932,9 +892,7 @@
             "affinity": {
               "salt": -4
             },
-            "setFlags": [
-              "stalker-boundary"
-            ],
+            "setFlags": ["stalker-boundary"],
             "popularity": 0
           },
           "nextNodeId": "salt-02"
@@ -950,9 +908,7 @@
             "affinity": {
               "salt": 10
             },
-            "setFlags": [
-              "stalker-encouraged"
-            ],
+            "setFlags": ["stalker-encouraged"],
             "popularity": 0
           },
           "nextNodeId": "salt-02"
@@ -968,9 +924,7 @@
             "affinity": {
               "salt": -12
             },
-            "setFlags": [
-              "stalker-boundary"
-            ],
+            "setFlags": ["stalker-boundary"],
             "popularity": 0
           },
           "nextNodeId": "salt-02"
@@ -1007,9 +961,7 @@
             "affinity": {
               "salt": -10
             },
-            "setFlags": [
-              "stalker-documented"
-            ],
+            "setFlags": ["stalker-documented"],
             "popularity": 0
           },
           "nextNodeId": "salt-03"
@@ -1026,10 +978,7 @@
               "salt": -12,
               "lighthouse": 5
             },
-            "setFlags": [
-              "stalker-documented",
-              "organizer-knows"
-            ],
+            "setFlags": ["stalker-documented", "organizer-knows"],
             "popularity": 0
           },
           "nextNodeId": "salt-03"
@@ -1081,9 +1030,7 @@
             "affinity": {
               "salt": -18
             },
-            "setFlags": [
-              "stalker-official"
-            ],
+            "setFlags": ["stalker-official"],
             "popularity": 0
           },
           "nextNodeId": "salt-04"
@@ -1100,10 +1047,7 @@
               "salt": -15,
               "lighthouse": 8
             },
-            "setFlags": [
-              "stalker-official",
-              "organizer-knows"
-            ],
+            "setFlags": ["stalker-official", "organizer-knows"],
             "popularity": 0
           },
           "nextNodeId": "salt-04"
@@ -1119,9 +1063,7 @@
             "affinity": {
               "salt": -8
             },
-            "setFlags": [
-              "stalker-cold"
-            ],
+            "setFlags": ["stalker-cold"],
             "popularity": 0
           },
           "nextNodeId": "salt-04"
@@ -1137,9 +1079,7 @@
             "affinity": {
               "salt": 8
             },
-            "setFlags": [
-              "stalker-appeased"
-            ],
+            "setFlags": ["stalker-appeased"],
             "popularity": 0
           },
           "nextNodeId": "salt-04"
@@ -1176,10 +1116,7 @@
             "affinity": {
               "salt": -20
             },
-            "setFlags": [
-              "stalker-blocked",
-              "stalker-official"
-            ],
+            "setFlags": ["stalker-blocked", "stalker-official"],
             "popularity": 0
           }
         },
@@ -1195,11 +1132,7 @@
               "salt": -18,
               "lighthouse": 8
             },
-            "setFlags": [
-              "stalker-blocked",
-              "stalker-supported",
-              "organizer-knows"
-            ],
+            "setFlags": ["stalker-blocked", "stalker-supported", "organizer-knows"],
             "popularity": 0
           }
         },
@@ -1214,9 +1147,7 @@
             "affinity": {
               "salt": -12
             },
-            "setFlags": [
-              "stalker-cold"
-            ],
+            "setFlags": ["stalker-cold"],
             "popularity": 0
           }
         },
@@ -1231,9 +1162,7 @@
             "affinity": {
               "salt": 10
             },
-            "setFlags": [
-              "stalker-appeased"
-            ],
+            "setFlags": ["stalker-appeased"],
             "popularity": 0
           }
         }
@@ -1242,9 +1171,7 @@
         "affinity": {
           "salt": -15
         },
-        "setFlags": [
-          "stalker-ignored"
-        ]
+        "setFlags": ["stalker-ignored"]
       },
       "editor": {
         "y": 240
@@ -1291,10 +1218,7 @@
               "lighthouse": 8
             },
             "popularity": 12,
-            "setFlags": [
-              "stalker-smear-answered",
-              "fan-circle-united"
-            ]
+            "setFlags": ["stalker-smear-answered", "fan-circle-united"]
           }
         },
         {
@@ -1309,9 +1233,7 @@
               "salt": -8
             },
             "popularity": 5,
-            "setFlags": [
-              "stalker-smear-contained"
-            ]
+            "setFlags": ["stalker-smear-contained"]
           }
         },
         {
@@ -1331,9 +1253,7 @@
       ],
       "onExpire": {
         "popularity": -12,
-        "setFlags": [
-          "stalker-smear-spread"
-        ]
+        "setFlags": ["stalker-smear-spread"]
       },
       "editor": {
         "y": 300
@@ -1360,9 +1280,7 @@
             "affinity": {
               "lighthouse": 11
             },
-            "setFlags": [
-              "organizer-shared-work"
-            ],
+            "setFlags": ["organizer-shared-work"],
             "popularity": 0
           },
           "nextNodeId": "lighthouse-02"
@@ -1393,9 +1311,7 @@
             "affinity": {
               "lighthouse": -7
             },
-            "setFlags": [
-              "organizer-overloaded"
-            ],
+            "setFlags": ["organizer-overloaded"],
             "popularity": 0
           },
           "nextNodeId": "yuzu-27",
@@ -1449,9 +1365,7 @@
               "lighthouse": 5
             },
             "popularity": 3,
-            "setFlags": [
-              "idol-targets-whales"
-            ]
+            "setFlags": ["idol-targets-whales"]
           },
           "nextNodeId": "lighthouse-briefing"
         },
@@ -1504,9 +1418,7 @@
               "lighthouse": 13
             },
             "popularity": 6,
-            "setFlags": [
-              "organizer-layered-business"
-            ]
+            "setFlags": ["organizer-layered-business"]
           },
           "nextNodeId": "lighthouse-03"
         },
@@ -1522,9 +1434,7 @@
               "lighthouse": 4
             },
             "popularity": -4,
-            "setFlags": [
-              "idol-targets-whales"
-            ]
+            "setFlags": ["idol-targets-whales"]
           },
           "nextNodeId": "lighthouse-03"
         },
@@ -1539,9 +1449,7 @@
             "affinity": {
               "lighthouse": -9
             },
-            "setFlags": [
-              "organizer-overloaded"
-            ],
+            "setFlags": ["organizer-overloaded"],
             "popularity": 0
           },
           "nextNodeId": "lighthouse-03"
@@ -1551,9 +1459,7 @@
         "affinity": {
           "lighthouse": -9
         },
-        "setFlags": [
-          "organizer-overloaded"
-        ],
+        "setFlags": ["organizer-overloaded"],
         "nextNodeId": "lighthouse-03"
       },
       "editor": {
@@ -1581,9 +1487,7 @@
             "affinity": {
               "lighthouse": 15
             },
-            "setFlags": [
-              "organizer-rests"
-            ],
+            "setFlags": ["organizer-rests"],
             "popularity": 0
           },
           "nextNodeId": "lighthouse-04-rest"
@@ -1599,9 +1503,7 @@
             "affinity": {
               "lighthouse": 3
             },
-            "setFlags": [
-              "organizer-guilt-stays"
-            ],
+            "setFlags": ["organizer-guilt-stays"],
             "popularity": 0
           },
           "nextNodeId": "lighthouse-04-guilt"
@@ -1617,9 +1519,7 @@
             "affinity": {
               "lighthouse": 10
             },
-            "setFlags": [
-              "organizer-free-choice"
-            ],
+            "setFlags": ["organizer-free-choice"],
             "popularity": 0
           },
           "nextNodeId": "lighthouse-04-choice"
@@ -1629,9 +1529,7 @@
         "affinity": {
           "lighthouse": -12
         },
-        "setFlags": [
-          "organizer-unheard"
-        ],
+        "setFlags": ["organizer-unheard"],
         "nextNodeId": "lighthouse-04-choice"
       },
       "editor": {
@@ -1663,9 +1561,7 @@
             "voteBonus": {
               "lighthouse": 180
             },
-            "setFlags": [
-              "organizer-healthy"
-            ]
+            "setFlags": ["organizer-healthy"]
           }
         },
         {
@@ -1770,9 +1666,7 @@
             "affinity": {
               "lighthouse": 15
             },
-            "setFlags": [
-              "organizer-remains-fan"
-            ],
+            "setFlags": ["organizer-remains-fan"],
             "popularity": 0
           }
         },
@@ -1821,9 +1715,7 @@
             "affinity": {
               "battery": 7
             },
-            "setFlags": [
-              "king-safe-anecdote"
-            ],
+            "setFlags": ["king-safe-anecdote"],
             "popularity": 0
           },
           "nextNodeId": "battery-02"
@@ -1839,9 +1731,7 @@
             "affinity": {
               "battery": -3
             },
-            "setFlags": [
-              "king-boundary"
-            ],
+            "setFlags": ["king-boundary"],
             "popularity": 0
           },
           "nextNodeId": "battery-02"
@@ -1858,9 +1748,7 @@
               "battery": 12
             },
             "popularity": -3,
-            "setFlags": [
-              "king-secret-leaked"
-            ]
+            "setFlags": ["king-secret-leaked"]
           },
           "nextNodeId": "battery-02"
         }
@@ -1896,9 +1784,7 @@
             "affinity": {
               "battery": 12
             },
-            "setFlags": [
-              "king-own-story"
-            ],
+            "setFlags": ["king-own-story"],
             "popularity": 0
           },
           "nextNodeId": "battery-02b"
@@ -1914,9 +1800,7 @@
             "affinity": {
               "battery": 8
             },
-            "setFlags": [
-              "king-poached"
-            ],
+            "setFlags": ["king-poached"],
             "popularity": 0
           },
           "nextNodeId": "battery-02b"
@@ -1968,9 +1852,7 @@
             "affinity": {
               "battery": 14
             },
-            "setFlags": [
-              "king-independent-relationship"
-            ],
+            "setFlags": ["king-independent-relationship"],
             "popularity": 0
           },
           "nextNodeId": "battery-03"
@@ -1986,9 +1868,7 @@
             "affinity": {
               "battery": 10
             },
-            "setFlags": [
-              "king-poached"
-            ],
+            "setFlags": ["king-poached"],
             "popularity": 0
           },
           "nextNodeId": "battery-03"
@@ -2040,9 +1920,7 @@
             "affinity": {
               "battery": 14
             },
-            "setFlags": [
-              "king-not-exploited"
-            ],
+            "setFlags": ["king-not-exploited"],
             "popularity": 0
           },
           "nextNodeId": "battery-04"
@@ -2061,9 +1939,7 @@
             "voteBonus": {
               "battery": 300
             },
-            "setFlags": [
-              "king-heartbreak-transfer"
-            ],
+            "setFlags": ["king-heartbreak-transfer"],
             "popularity": 0
           },
           "nextNodeId": "battery-04"
@@ -2083,9 +1959,7 @@
             "voteBonus": {
               "battery": 500
             },
-            "setFlags": [
-              "king-more-secrets"
-            ]
+            "setFlags": ["king-more-secrets"]
           },
           "nextNodeId": "battery-04"
         }
@@ -2193,9 +2067,7 @@
             "affinity": {
               "patron": 9
             },
-            "setFlags": [
-              "patron-specific"
-            ],
+            "setFlags": ["patron-specific"],
             "popularity": 0
           },
           "nextNodeId": "patron-02"
@@ -2211,9 +2083,7 @@
             "affinity": {
               "patron": 12
             },
-            "setFlags": [
-              "patron-full-service"
-            ],
+            "setFlags": ["patron-full-service"],
             "popularity": 0
           },
           "nextNodeId": "patron-02"
@@ -2238,9 +2108,7 @@
         "affinity": {
           "patron": -12
         },
-        "setFlags": [
-          "patron-first-expired"
-        ]
+        "setFlags": ["patron-first-expired"]
       },
       "editor": {
         "y": 960
@@ -2287,9 +2155,7 @@
             "voteBonus": {
               "patron": 450
             },
-            "setFlags": [
-              "patron-service-promised"
-            ],
+            "setFlags": ["patron-service-promised"],
             "popularity": 0
           }
         },
@@ -2312,9 +2178,7 @@
         "affinity": {
           "patron": -15
         },
-        "setFlags": [
-          "patron-second-expired"
-        ]
+        "setFlags": ["patron-second-expired"]
       },
       "editor": {
         "y": 960
@@ -2353,9 +2217,7 @@
             "affinity": {
               "patron": -5
             },
-            "setFlags": [
-              "patron-left"
-            ],
+            "setFlags": ["patron-left"],
             "popularity": 0
           }
         },
@@ -2373,9 +2235,7 @@
             "voteBonus": {
               "patron": 80
             },
-            "setFlags": [
-              "patron-left"
-            ],
+            "setFlags": ["patron-left"],
             "popularity": 0
           }
         },
@@ -2390,9 +2250,7 @@
             "affinity": {
               "patron": -8
             },
-            "setFlags": [
-              "patron-left"
-            ],
+            "setFlags": ["patron-left"],
             "popularity": 0
           }
         }
@@ -2401,9 +2259,7 @@
         "affinity": {
           "patron": -12
         },
-        "setFlags": [
-          "patron-left"
-        ]
+        "setFlags": ["patron-left"]
       },
       "editor": {
         "y": 960
@@ -2484,9 +2340,7 @@
               "patron": 10,
               "lighthouse": 3
             },
-            "setFlags": [
-              "patron-saw-honesty"
-            ],
+            "setFlags": ["patron-saw-honesty"],
             "popularity": 0
           }
         },
@@ -2501,9 +2355,7 @@
             "affinity": {
               "patron": 6
             },
-            "setFlags": [
-              "patron-direct-talk"
-            ],
+            "setFlags": ["patron-direct-talk"],
             "popularity": 0
           }
         },
@@ -2566,9 +2418,7 @@
               "patron": 8,
               "lighthouse": 5
             },
-            "setFlags": [
-              "patron-respects-team"
-            ],
+            "setFlags": ["patron-respects-team"],
             "popularity": 0
           }
         },
@@ -2598,9 +2448,7 @@
             "affinity": {
               "patron": -6
             },
-            "setFlags": [
-              "patron-saw-marketing"
-            ],
+            "setFlags": ["patron-saw-marketing"],
             "popularity": 2
           }
         }
@@ -2652,9 +2500,7 @@
             "affinity": {
               "yuzu": 12
             },
-            "setFlags": [
-              "yuzu-stayed-through-storm"
-            ],
+            "setFlags": ["yuzu-stayed-through-storm"],
             "popularity": 0
           }
         },
@@ -2669,9 +2515,7 @@
             "affinity": {
               "yuzu": 6
             },
-            "setFlags": [
-              "yuzu-reassured"
-            ],
+            "setFlags": ["yuzu-reassured"],
             "popularity": 0
           }
         },
@@ -2694,9 +2538,7 @@
         "affinity": {
           "yuzu": -8
         },
-        "setFlags": [
-          "yuzu-unanswered-storm"
-        ]
+        "setFlags": ["yuzu-unanswered-storm"]
       },
       "editor": {
         "y": 180
@@ -2808,7 +2650,7 @@
       "contactId": "milk-tea-ice",
       "day": 1,
       "fanName": "奶茶去冰",
-      "avatar": "/assets/avatars/fan-milktea.webp",
+      "avatarId": "fan-milktea",
       "tag": "冒泡",
       "message": "今天吃了吗？",
       "reply": "吃了，吃的是公司的画饼。"
@@ -2818,7 +2660,7 @@
       "contactId": "back-row-microscope",
       "day": 1,
       "fanName": "后排显微镜",
-      "avatar": "/assets/avatars/fan-salt.webp",
+      "avatarId": "fan-opera-glasses",
       "tag": "初识",
       "message": "你第三首是不是鞋带开了？",
       "reply": "那是舞美的一部分，鞋带也是道具。"
@@ -2828,7 +2670,7 @@
       "contactId": "subway-champion",
       "day": 4,
       "fanName": "赶地铁冠军",
-      "avatar": "/assets/avatars/fan-subway.webp",
+      "avatarId": "fan-subway",
       "tag": "铁粉",
       "message": "散场五分钟赶上末班车，夸我。",
       "reply": "你比我们的换装还快🚇"
@@ -2838,7 +2680,7 @@
       "contactId": "repo-writer",
       "day": 7,
       "fanName": "不会写repo",
-      "avatar": "/assets/avatars/fan-desk.webp",
+      "avatarId": "fan-desk",
       "tag": "萌新",
       "message": "周报写不出来怎么办？",
       "reply": "把‘进行中’写得真诚一点。"
@@ -2848,7 +2690,7 @@
       "contactId": "pocket-loading",
       "day": 10,
       "fanName": "口袋加载中",
-      "avatar": "/assets/avatars/fan-battery.webp",
+      "avatarId": "fan-loading-charm",
       "tag": "冒泡",
       "message": "我这里卡住了。",
       "reply": "别急，我的人生进度条比你还卡。"
@@ -2858,7 +2700,7 @@
       "contactId": "cold-joke-support",
       "day": 13,
       "fanName": "冷笑话售后",
-      "avatar": "/assets/avatars/fan-yuzu.webp",
+      "avatarId": "fan-snowman-mic",
       "tag": "初识",
       "message": "今天MC好冷。",
       "reply": "售后不退，只能下次换新梗。"
@@ -2868,7 +2710,7 @@
       "contactId": "call-stick",
       "day": 16,
       "fanName": "红蓝打call棒",
-      "avatar": "/assets/avatars/fan-callsticks.webp",
+      "avatarId": "fan-star-lightstick",
       "tag": "铁粉",
       "message": "拿错队色了怎么办？",
       "reply": "挥快一点，别人看不清。下次记得认准{{teamShortName}}🧡"
@@ -2878,7 +2720,7 @@
       "contactId": "office-diver",
       "day": 19,
       "fanName": "工位潜水员",
-      "avatar": "/assets/avatars/fan-desk.webp",
+      "avatarId": "fan-office-goldfish",
       "tag": "潜水",
       "message": "老板在背后还能看直播吗？",
       "reply": "能，但这条不能翻。"
@@ -2888,7 +2730,7 @@
       "contactId": "sleep-tomorrow",
       "day": 22,
       "fanName": "明天一定早睡",
-      "avatar": "/assets/avatars/fan-lighthouse.webp",
+      "avatarId": "fan-sleepy-owl",
       "tag": "冒泡",
       "message": "你怎么还没睡？",
       "reply": "这句话我们互相撤回。"
@@ -2898,7 +2740,7 @@
       "contactId": "vote-calculator",
       "day": 25,
       "fanName": "票仓计算器",
-      "avatar": "/assets/avatars/fan-callsticks.webp",
+      "avatarId": "fan-vote-abacus",
       "tag": "铁粉",
       "message": "我算了一晚上票。",
       "reply": "先算算今晚睡几个小时。"
@@ -2908,7 +2750,7 @@
       "contactId": "last-train",
       "day": 28,
       "fanName": "最后一班车",
-      "avatar": "/assets/avatars/fan-subway.webp",
+      "avatarId": "fan-last-train",
       "tag": "初识",
       "message": "总选见！",
       "reply": "总选见。别忘了先吃饭🍚"
@@ -2918,7 +2760,7 @@
       "contactId": "idol-dog",
       "day": 4,
       "fanName": "{{idolName}}的狗",
-      "avatar": "/assets/avatars/fan-callsticks.webp",
+      "avatarId": "fan-shiba",
       "tag": "规则显微镜",
       "message": "我去，400星梦值折0.3作品分，我拿计算器按了三遍，计算器先申请退河了。这到底是作品赛、应援赛，还是数学竞赛披了件MV外套？不过懂了，作品负责让我点开，规则负责让钱包点头。已老实，先等成片🐕",
       "reply": "哈哈哈哈计算器比我先退河🤣规则那块我也看不懂，已经转发饭头求翻译，翻译完我负责点头。\n\n成片剪着呢，出来第一个喊你。钱包先按住，人来就行🥹"
@@ -2928,7 +2770,7 @@
       "contactId": "river-teacher",
       "day": 7,
       "fanName": "阿卷（恩师{{idolName}}）",
-      "avatar": "/assets/avatars/fan-desk.webp",
+      "avatarId": "fan-river-notebook",
       "tag": "河史课代表",
       "message": "恩师开课：TOP成员可自选兼任或移籍。选择权这三个字很好看，执行起来可能需要三本课后练习册。粉丝问团魂怎么办，成员说排练表先给我。本课结论：舍不得可以，别把舍不得写成替别人填志愿。下课！📚",
       "reply": "下课下课！阿卷老师的课我一次没缺过，这次坐第一排记笔记📝\n\n选择权归选择权，我的作业还是先把排练表填满。老师，团魂那道题我能交白卷吗🤣"
@@ -2938,7 +2780,7 @@
       "contactId": "seen-version",
       "day": 10,
       "fanName": "小葵（见过{{idolName}}版）",
-      "avatar": "/assets/avatars/fan-milktea.webp",
+      "avatarId": "fan-instant-camera",
       "tag": "剧场repo",
       "message": "TOP16香港团综加定制MV，公告刚看完，我已经把{{idolNickname}}的港风路透脑补完了，甚至连不存在的路透都打了码。资源越具体，梦越好做；兑现越准时，梦才不用售后。先冲，明年同一时间回来对账，小葵（见过{{idolName}}版）什么都记得！📷",
       "reply": "路透还没拍呢你先打码了可还行🤣\n\n那我记下了，明年这个时间，站在港风里给你拍真·路透，不用打码的那种。先一起冲！"
@@ -2948,7 +2790,7 @@
       "contactId": "idol-dog",
       "day": 16,
       "fanName": "{{idolNickname}}的狗（改名版）",
-      "avatar": "/assets/avatars/fan-callsticks.webp",
+      "avatarId": "fan-shiba",
       "tag": "消费机制观察",
       "message": "1680应援版、必中奖刮刮卡、随机专属握手券、集100张还有加餐……我看的是EP公告还是大型阅读理解？规则看完只记住一句，预算不会因为爱豆可爱就自动扩容。抽卡是娱乐，不是忠诚度体检。今天继续当{{idolNickname}}的文明狗，汪得量力而行🐶。",
       "reply": "阅读理解我也做不明白，字都认识，连起来就看不懂了🥹\n\n但你最后两句我抄下来了，预算不会因为可爱自动扩容，汪得量力而行。文明狗同学，握手会见！"
@@ -2958,7 +2800,7 @@
       "contactId": "river-teacher",
       "day": 19,
       "fanName": "阿卷（恩师{{idolName}}·二讲）",
-      "avatar": "/assets/avatars/fan-desk.webp",
+      "avatarId": "fan-river-notebook",
       "tag": "舆情课代表",
       "message": "舆情课今天只有一道判断题：双方公开说法冲突、案件未决，围观群众能不能提前当判官？答案：不能，抢答也扣分。关心可以，转述未经证实的指控不行；现役成员更不该被抓来做立场投票机。本课没有瓜，只有边界。下课，互联网法庭今日休庭⚖️",
       "reply": "这题我会，不接瓜，不站队，不替任何人按投票键。阿卷老师放心，我最近只聊公演和作业，别的让公告自己说话🥹"
@@ -2968,7 +2810,7 @@
       "contactId": "seen-version",
       "day": 22,
       "fanName": "小葵（见过{{idolName}}版2.0）",
-      "avatar": "/assets/avatars/fan-milktea.webp",
+      "avatarId": "fan-instant-camera",
       "tag": "原创公演党",
       "message": "新原创把三套公演串成一个世界观，我的考据脑已经开机，第一幕眨眼是不是第三幕伏笔？不是也可以先写八百字。但设定不能替舞台打歌，世界观再大也得落到每一个八拍。如果{{idolName}}真演上，我负责截图拉亮度；看不清也能论证这是导演的留白🎬。",
       "reply": "八百字先写着，我等着验收🤣\n\n要是我真上了，你别拉亮度，我直接站追光灯最中间，让留白无处可留。记得鼓掌，鼓掌会记入考据笔记第三页。"
@@ -3056,9 +2898,7 @@
       "title": "应援会也要下班",
       "description": "让饭头第一次按时下班。",
       "condition": {
-        "allFlags": [
-          "organizer-healthy"
-        ]
+        "allFlags": ["organizer-healthy"]
       }
     },
     {
@@ -3066,10 +2906,7 @@
       "title": "只说能证明的事",
       "description": "面对回踩时用证据澄清，并阻止粉圈开盒围攻。",
       "condition": {
-        "allFlags": [
-          "stalker-smear-answered",
-          "fan-circle-united"
-        ]
+        "allFlags": ["stalker-smear-answered", "fan-circle-united"]
       }
     }
   ]

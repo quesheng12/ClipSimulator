@@ -198,7 +198,7 @@ describe('story validation', () => {
     ).toBe(true);
   });
 
-  it('requires schema v14 and rejects duplicate or invalid profile names', () => {
+  it('requires schema v15 and rejects duplicate or invalid profile names', () => {
     const wrongVersion = structuredClone(pack) as StoryPack & { schemaVersion: number };
     wrongVersion.schemaVersion = 2;
     expect(
@@ -220,6 +220,35 @@ describe('story validation', () => {
     ];
     const invalidIssues = validateStoryPack(invalid);
     expect(invalidIssues.filter((issue) => issue.code === 'schema')).toHaveLength(2);
+  });
+
+  it('requires one unique avatar id per core fan and ordinary contact', () => {
+    const duplicate = structuredClone(pack);
+    duplicate.backgroundFlips[0]!.avatarId = duplicate.fans[0]!.avatarId;
+    expect(validateStoryPack(duplicate).some((issue) => issue.code === 'duplicate-avatar-id')).toBe(
+      true,
+    );
+
+    const inconsistent = structuredClone(pack);
+    const secondDogRound = inconsistent.backgroundFlips.find(
+      (flip) => flip.id === 'topic-idol-dog-02',
+    )!;
+    secondDogRound.avatarId = 'fan-opera-glasses';
+    expect(
+      validateStoryPack(inconsistent).some(
+        (issue) => issue.code === 'inconsistent-contact-avatar-id',
+      ),
+    ).toBe(true);
+
+    const missing = structuredClone(pack) as unknown as {
+      fans: Array<{ avatarId?: string }>;
+    };
+    delete missing.fans[0]!.avatarId;
+    expect(
+      validateStoryPack(missing).some(
+        (issue) => issue.code === 'schema' && issue.path === 'fans.0.avatarId',
+      ),
+    ).toBe(true);
   });
 
   it('requires accessible alternative text when an early ending has an image', () => {

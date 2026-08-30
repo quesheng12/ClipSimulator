@@ -1,3 +1,5 @@
+import type { FanAvatarId } from './fan-avatars';
+
 export type DisplayMode = 'standard' | 'realistic';
 
 export type GameStatus = 'playing' | 'early-ending' | 'election';
@@ -104,7 +106,8 @@ export interface FanDefinition {
   tags: string[];
   /** Read-only relationship history shown before the current election run. */
   pastChats: CoreFanPastChat[];
-  avatar: string;
+  /** Bundled avatar identity; every distinct core fan or ordinary contact owns a unique id. */
+  avatarId: FanAvatarId;
   accent: string;
   initialAffinity: number;
   maxVotePower: number;
@@ -153,7 +156,8 @@ export interface BackgroundFlip {
   contactId?: string;
   day: number;
   fanName: string;
-  avatar?: string;
+  /** Repeated rounds for one contact share this id; different contacts must not reuse it. */
+  avatarId: FanAvatarId;
   tag: string;
   message: string;
   /** Optional automatic member reply used by ambient archive exchanges. */

@@ -49,6 +49,7 @@ import {
   type TemplateVariables,
 } from '@clip/story-core/templates';
 import { createProfileNamePicker } from '@clip/story-core/profile-names';
+import { FAN_AVATAR_IDS, fanAvatarSrc, type FanAvatarId } from '@clip/story-core/fan-avatars';
 import { hasValidationErrors, validateStoryPack } from '@clip/story-core/validation';
 import type {
   BackgroundFlip,
@@ -92,9 +93,12 @@ const TRIGGER_TYPE_LABELS: Record<StoryTriggerCondition['type'], string> = {
   'first-nodes-replied-on-time': '前几节点均及时回复',
 };
 
-function AvatarPreview({ avatar }: { avatar: string }) {
-  const isImage = avatar.startsWith('/') || /^https?:\/\//.test(avatar);
-  return isImage ? <img src={avatar} alt="" /> : <>{avatar}</>;
+function AvatarPreview({ avatarId }: { avatarId: FanAvatarId }) {
+  return <img src={fanAvatarSrc(avatarId)} alt="" width={512} height={512} />;
+}
+
+function backgroundContactId(flip: BackgroundFlip): string {
+  return flip.contactId?.trim() || flip.fanName;
 }
 
 type StoryNodeData = { storyNode: StoryNode; fan: FanDefinition };
@@ -538,6 +542,16 @@ function ContentPackInspector({
     }));
   };
 
+  const updateBackgroundContactAvatar = (source: BackgroundFlip, avatarId: FanAvatarId) => {
+    const contactId = backgroundContactId(source);
+    onUpdate((current) => ({
+      ...current,
+      backgroundFlips: current.backgroundFlips.map((flip) =>
+        backgroundContactId(flip) === contactId ? { ...flip, avatarId } : flip,
+      ),
+    }));
+  };
+
   const nextBackgroundFlipId = (base = 'npc-topic') => {
     const used = new Set(pack.backgroundFlips.map((flip) => flip.id));
     let suffix = pack.backgroundFlips.length + 1;
@@ -547,6 +561,11 @@ function ContentPackInspector({
 
   const addBackgroundFlip = () => {
     const id = nextBackgroundFlipId();
+    const usedAvatarIds = new Set([
+      ...pack.fans.map((fan) => fan.avatarId),
+      ...pack.backgroundFlips.map((flip) => flip.avatarId),
+    ]);
+    const avatarId = FAN_AVATAR_IDS.find((candidate) => !usedAvatarIds.has(candidate));
     onUpdate((current) => ({
       ...current,
       backgroundFlips: [
@@ -556,6 +575,7 @@ function ContentPackInspector({
           contactId: id,
           day: 1,
           fanName: '{{idolName}}的新听众',
+          avatarId: avatarId ?? FAN_AVATAR_IDS[0],
           tag: '河内热议',
           message: '在这里填写 NPC 随日期出现的第一条闲聊。',
           continuations: ['需要分成多个气泡时，可以继续填写这一句。'],
@@ -936,7 +956,7 @@ function ContentPackInspector({
                   <summary>
                     <span className="core-fan-editor__identity">
                       <span className="core-fan-editor__avatar" aria-hidden="true">
-                        <AvatarPreview avatar={fan.avatar} />
+                        <AvatarPreview avatarId={fan.avatarId} />
                       </span>
                       <span>
                         <strong>{renderTemplateText(fan.name, templateVariables)}</strong>
@@ -1006,16 +1026,22 @@ function ContentPackInspector({
                         />
                       </label>
                       <label className="compact-field">
-                        <span>头像路径</span>
-                        <input
-                          value={fan.avatar}
+                        <span>头像 ID</span>
+                        <select
+                          value={fan.avatarId}
                           onChange={(event) =>
                             updateFan(fanIndex, (current) => ({
                               ...current,
-                              avatar: event.target.value,
+                              avatarId: event.target.value as FanAvatarId,
                             }))
                           }
-                        />
+                        >
+                          {FAN_AVATAR_IDS.map((avatarId) => (
+                            <option key={avatarId} value={avatarId}>
+                              {avatarId}
+                            </option>
+                          ))}
+                        </select>
                       </label>
                       <label className="compact-field">
                         <span>初始好感</span>
@@ -1376,16 +1402,19 @@ function ContentPackInspector({
                       />
                     </label>
                     <label className="compact-field npc-flip-editor__avatar-field">
-                      <span>头像路径（可空）</span>
-                      <input
-                        value={flip.avatar ?? ''}
+                      <span>头像 ID</span>
+                      <select
+                        value={flip.avatarId}
                         onChange={(event) =>
-                          updateBackgroundFlip(index, (current) => ({
-                            ...current,
-                            avatar: event.target.value || undefined,
-                          }))
+                          updateBackgroundContactAvatar(flip, event.target.value as FanAvatarId)
                         }
-                      />
+                      >
+                        {FAN_AVATAR_IDS.map((avatarId) => (
+                          <option key={avatarId} value={avatarId}>
+                            {avatarId}
+                          </option>
+                        ))}
+                      </select>
                     </label>
                   </div>
 
@@ -2719,7 +2748,7 @@ export function App() {
                     onChange={() => toggleFan(fan.id)}
                   />
                   <span className="fan-dot" style={{ '--fan-accent': fan.accent } as CSSProperties}>
-                    <AvatarPreview avatar={fan.avatar} />
+                    <AvatarPreview avatarId={fan.avatarId} />
                   </span>
                   <span className="filter-name">{fan.name}</span>
                   <span className="filter-count">

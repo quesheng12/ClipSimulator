@@ -16,7 +16,7 @@ export default defineConfig({
       },
     },
   ],
-  base: './',
+  base: '/ClipSimulator/',
   build: {
     outDir: 'dist',
     emptyOutDir: true,

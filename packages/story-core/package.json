@@ -7,6 +7,7 @@
     "./types": "./src/types.ts",
     "./engine": "./src/engine.ts",
     "./profile-names": "./src/profile-names.ts",
+    "./fan-avatars": "./src/fan-avatars.ts",
     "./validation": "./src/validation.ts",
     "./templates": "./src/templates.ts"
   },

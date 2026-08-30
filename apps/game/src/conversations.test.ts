@@ -83,6 +83,7 @@ describe('conversation selectors', () => {
         contactId: 'milk-tea-fan',
         day: 1,
         fanName: '奶茶去冰',
+        avatarId: 'fan-milktea',
         tag: '初识',
         message: '第一条消息',
         reply: '第一条回复',
@@ -92,6 +93,7 @@ describe('conversation selectors', () => {
         contactId: 'milk-tea-fan',
         day: 2,
         fanName: '奶茶半糖',
+        avatarId: 'fan-milktea',
         tag: '冒泡',
         message: '第二条消息',
         reply: '第二条回复',
@@ -101,6 +103,7 @@ describe('conversation selectors', () => {
         contactId: 'milk-tea-fan',
         day: 4,
         fanName: '奶茶半糖',
+        avatarId: 'fan-milktea',
         tag: '铁粉',
         message: '未来消息',
         reply: '未来回复',
@@ -117,6 +120,7 @@ describe('conversation selectors', () => {
       id: 'milk-tea-fan',
       kind: 'background',
       name: '奶茶半糖',
+      avatarId: 'fan-milktea',
       tags: ['冒泡'],
     });
   });

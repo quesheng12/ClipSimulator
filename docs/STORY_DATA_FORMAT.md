@@ -1,6 +1,6 @@
-# 剧情数据格式 v14
+# 剧情数据格式 v15
 
-当前游戏读取一个完整的 JSON 内容包：`content/test-story.json`。编辑器和游戏共享这份格式，但不共享入口或 UI 代码。v14 移除回复结算评语，游戏只根据好感变化值生成中性的增减界面；玩家实际选择的身份仍独立保存在浏览器本地，不写入内容包。
+当前游戏读取一个完整的 JSON 内容包：`content/test-story.json`。编辑器和游戏共享这份格式，但不共享入口或 UI 代码。v15 为每名核心粉丝和每个普通 NPC 联系人增加必填的应用内头像 ID，并要求不同角色不能共用；玩家实际选择的身份仍独立保存在浏览器本地，不写入内容包。
 
 ## 顶层结构
 
@@ -22,11 +22,11 @@ StoryPack
 
 正式类型定义见 `packages/story-core/src/types.ts`，运行时结构与图校验见 `packages/story-core/src/validation.ts`。
 
-v14 内容包必须设置 `"schemaVersion": 14`，并提供以下顶层字段：
+v15 内容包必须设置 `"schemaVersion": 15`，并提供以下顶层字段：
 
 ```json
 {
-  "schemaVersion": 14,
+  "schemaVersion": 15,
   "profileSetup": {
     "namePools": {
       "adapted": ["孙可恬", "周夏雨", "陈静扬"],
@@ -103,6 +103,7 @@ v14 内容包必须设置 `"schemaVersion": 14`，并提供以下顶层字段：
   "name": "夜航灯塔",
   "handle": "@应援会还缺两个人",
   "bio": "从出道起一直在线的应援会组织者。",
+  "avatarId": "fan-lighthouse",
   "tags": ["应援会饭头", "组织者", "老河粉"],
   "pastChats": [
     {
@@ -119,6 +120,7 @@ v14 内容包必须设置 `"schemaVersion": 14`，并提供以下顶层字段：
 - 每个标签去除首尾空格后必须非空，最多 12 个字符，同一粉丝不得重复。
 - 标签按内容包中的顺序展示。优先放最能帮助玩家做判断的身份、关系位置或投入特征。
 - 核心粉丝标签会同时出现在消息列表和聊天页联系人标题中。普通粉丝继续使用每条 `backgroundFlips[].tag`，进入会话展示层后同样转换为标签数组。
+- `avatarId` 必须引用 `packages/story-core/src/fan-avatars.ts` 中的一个内置头像，并且不能与其他核心粉丝或普通 NPC 联系人重复。
 
 每名核心粉丝还必须提供 `pastChats` 数组；刚刚出现、没有关系基础的角色可以使用空数组：
 
@@ -272,7 +274,7 @@ v14 内容包必须设置 `"schemaVersion": 14`，并提供以下顶层字段：
   "contactId": "milk-tea-fan",
   "day": 1,
   "fanName": "奶茶去冰",
-  "avatar": "/assets/avatars/fan-milktea.webp",
+  "avatarId": "fan-milktea",
   "tag": "冒泡",
   "message": "我去，公告看了三遍，计算器先申请退河了。这到底是作品赛，还是数学竞赛披了件 MV 外套？已老实，先等成片。",
   "reply": "哈哈哈哈计算器比我先退河🤣规则我也看不懂，先等饭头翻译。"
@@ -281,7 +283,8 @@ v14 内容包必须设置 `"schemaVersion": 14`，并提供以下顶层字段：
 
 - `id` 标识一条具体消息，必须唯一。
 - `contactId` 是可选的稳定联系人 ID；同一联系人跨日期或改名时应保持不变。
-- `avatar` 是可选的头像资源路径；缺省时游戏按联系人 ID 从内置原创头像池稳定分配。
+- `avatarId` 是必填的内置头像 ID；同一 `contactId` 的多轮聊天必须保持一致。
+- 不同普通 NPC 联系人之间、普通 NPC 与核心粉丝之间都不能共用 `avatarId`。
 - 游戏按 `contactId ?? fanName` 聚合聊天历史，因此旧内容包不填写该字段也能继续读取。
 - 当前内容包统一使用一问一答：`message` 写粉丝消息（要聊多件事就合并成一条长消息），`reply` 写成员回复；真人翻牌每条都会得到回复。
 - `reply` 可选：填写时在聊天中显示 NPC 左侧消息和成员右侧回复。
@@ -328,6 +331,7 @@ v14 内容包必须设置 `"schemaVersion": 14`，并提供以下顶层字段：
 
 ## 文件版本与存档
 
+- v15 把 `fans[].avatar` 和可选的 `backgroundFlips[].avatar` 资源路径改为必填 `avatarId`。迁移时为每个核心粉丝及每个唯一 `contactId ?? fanName` 分配不同的内置 ID；同一联系人的多轮记录复用该 ID，再把 `schemaVersion` 改为 `15`。
 - v14 移除 `nodes[].choices[].feedback`。从 v13 迁移时，删除每条回复的 `feedback`，保留好感和泛人气数值，再把 `schemaVersion` 改为 `14`。
 - v13 要求每个 `nodes[].choices[].effects` 显式包含整数 `popularity`。从 v12 迁移时，为没有泛人气效果的回复补 `"popularity": 0`，保留已有非零数值，再把 `schemaVersion` 改为 `13`。
 - v12 为每个 `nodes[].choices[]` 增加必填 `feedback.headline` 与 `feedback.summary`，并要求 `effects.affinity` 显式包含节点所属粉丝。编辑器把这三项作为结构化表单维护；从 v11 迁移时必须为每条回复补齐后再把 `schemaVersion` 改为 `12`。
@@ -346,7 +350,7 @@ v14 内容包必须设置 `"schemaVersion": 14`，并提供以下顶层字段：
 npm run validate:content
 ```
 
-保存与构建会检查结构、重复 ID、缺失引用、越界日期、循环、不可达节点、票力上限、身份配置、静态变量、未知模板引用和内容规模。超过 140 个字符的回复由编辑器显示非阻塞软提醒，不属于内容包结构错误。剧情文件只能包含声明式 JSON，不能嵌入任意 JavaScript。
+保存与构建会检查结构、重复 ID、角色头像 ID 唯一性、同一 NPC 多轮头像一致性、缺失引用、越界日期、循环、不可达节点、票力上限、身份配置、静态变量、未知模板引用和内容规模。超过 140 个字符的回复由编辑器显示非阻塞软提醒，不属于内容包结构错误。剧情文件只能包含声明式 JSON，不能嵌入任意 JavaScript。
 
 ## 修订记录
 
@@ -369,3 +373,4 @@ npm run validate:content
 | v12  | 2026-08-23 | 每条回复增加必填的好感结算大标题、小评语及当前粉丝好感变化数值。                           |
 | v13  | 2026-08-23 | 每条回复显式设置可手动编辑的泛人气变化值；无变化时保存为 0。                               |
 | v14  | 2026-08-23 | 移除回复结算评语；游戏根据好感变化值显示中性的增减记录。                                   |
+| v15  | 2026-08-30 | 核心粉丝和普通 NPC 改用必填的内置头像 ID，并校验跨角色唯一与同联系人多轮一致。             |

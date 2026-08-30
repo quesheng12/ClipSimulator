@@ -4,6 +4,7 @@ import {
   isValidTemplateVariableName,
   RESERVED_TEMPLATE_VARIABLES,
 } from './templates';
+import { FAN_AVATAR_IDS } from './fan-avatars';
 import type { StoryPack, ValidationIssue } from './types';
 
 const resourcesSchema = z.object({
@@ -122,7 +123,7 @@ const backgroundFlipSchema = z
     contactId: z.string().min(1).optional(),
     day: z.number().int().min(1),
     fanName: z.string().min(1),
-    avatar: z.string().min(1).optional(),
+    avatarId: z.enum(FAN_AVATAR_IDS),
     tag: z.string().min(1),
     message: z.string().min(1),
     reply: z.string().min(1).optional(),
@@ -139,7 +140,7 @@ const backgroundFlipSchema = z
   });
 
 export const storyPackSchema: z.ZodType<StoryPack> = z.object({
-  schemaVersion: z.literal(14),
+  schemaVersion: z.literal(15),
   id: z.string().min(1),
   title: z.string().min(1),
   description: z.string(),
@@ -199,7 +200,7 @@ export const storyPackSchema: z.ZodType<StoryPack> = z.object({
         bio: z.string(),
         tags: fanTagsSchema,
         pastChats: z.array(coreFanPastChatSchema).max(8),
-        avatar: z.string().min(1),
+        avatarId: z.enum(FAN_AVATAR_IDS),
         accent: z.string().min(1),
         initialAffinity: z.number().int().min(0).max(100),
         maxVotePower: z.number().int().min(0),
@@ -324,6 +325,52 @@ export function validateStoryPack(value: unknown): ValidationIssue[] {
       'profileSetup.teams',
     ),
   ];
+
+  const avatarOwners: Array<{ avatarId: string; label: string; path: string }> = pack.fans.map(
+    (fan) => ({
+      avatarId: fan.avatarId,
+      label: `核心粉丝 ${fan.name}`,
+      path: `fans.${fan.id}.avatarId`,
+    }),
+  );
+  const backgroundContacts = new Map<string, { avatarId: string; label: string; path: string }>();
+  for (const flip of pack.backgroundFlips) {
+    const contactId = flip.contactId?.trim() || flip.fanName;
+    const previous = backgroundContacts.get(contactId);
+    if (previous && previous.avatarId !== flip.avatarId) {
+      issues.push({
+        severity: 'error',
+        code: 'inconsistent-contact-avatar-id',
+        message: `同一 NPC ${contactId} 的多轮聊天必须使用同一个头像 ID：${previous.avatarId}`,
+        path: `backgroundFlips.${flip.id}.avatarId`,
+      });
+      continue;
+    }
+    if (!previous) {
+      backgroundContacts.set(contactId, {
+        avatarId: flip.avatarId,
+        label: `普通 NPC ${contactId}`,
+        path: `backgroundFlips.${flip.id}.avatarId`,
+      });
+    }
+  }
+  avatarOwners.push(...backgroundContacts.values());
+
+  const ownersByAvatarId = new Map<string, typeof avatarOwners>();
+  for (const owner of avatarOwners) {
+    const owners = ownersByAvatarId.get(owner.avatarId) ?? [];
+    owners.push(owner);
+    ownersByAvatarId.set(owner.avatarId, owners);
+  }
+  for (const [avatarId, owners] of ownersByAvatarId) {
+    if (owners.length < 2) continue;
+    issues.push({
+      severity: 'error',
+      code: 'duplicate-avatar-id',
+      message: `头像 ID 不能由不同角色共用：${avatarId}（${owners.map((owner) => owner.label).join('、')}）`,
+      path: owners.map((owner) => owner.path).join(', '),
+    });
+  }
 
   if (pack.profileSetup.namePools.adapted.length < 3) {
     issues.push({
