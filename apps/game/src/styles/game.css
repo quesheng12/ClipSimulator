@@ -2452,14 +2452,6 @@
   content: '';
 }
 
-.idol-message span {
-  display: block;
-  margin-bottom: 0.24rem;
-  color: var(--color-secondary);
-  font-size: 0.63rem;
-  font-weight: 800;
-}
-
 .idol-message p {
   margin: 0;
   font-size: 0.86rem;

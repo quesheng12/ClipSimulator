@@ -1301,7 +1301,6 @@ function ConversationScreen({
               {exchange.outgoing && (
                 <div className="chat-row chat-row--idol">
                   <article className="idol-message">
-                    <span>你</span>
                     <p>{exchange.outgoing}</p>
                   </article>
                 </div>
