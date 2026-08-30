@@ -12,11 +12,21 @@ export function affinityLabel(value: number): string {
 
 type AvatarIdentity = Pick<FanDefinition, 'avatar' | 'accent'>;
 
-export function FanAvatar({ fan, small = false }: { fan: AvatarIdentity; small?: boolean }) {
+export function FanAvatar({
+  fan,
+  small = false,
+  muted = false,
+}: {
+  fan: AvatarIdentity;
+  small?: boolean;
+  muted?: boolean;
+}) {
   const isImage = fan.avatar.startsWith('/') || /^https?:\/\//.test(fan.avatar);
+  const sizeClass = small ? 'fan-avatar fan-avatar--small' : 'fan-avatar';
+  const className = muted ? `${sizeClass} fan-avatar--muted` : sizeClass;
   return (
     <span
-      className={small ? 'fan-avatar fan-avatar--small' : 'fan-avatar'}
+      className={className}
       style={{ '--fan-accent': fan.accent } as React.CSSProperties}
       aria-hidden="true"
     >

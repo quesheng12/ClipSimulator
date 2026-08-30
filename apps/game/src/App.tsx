@@ -1010,7 +1010,7 @@ function ConversationRow({
       onClick={onOpen}
       style={{ '--fan-accent': participant.accent } as React.CSSProperties}
     >
-      <FanAvatar fan={participant} />
+      <FanAvatar fan={participant} muted={participant.kind === 'background'} />
       <span className="conversation-row__body">
         <span className="conversation-row__topline">
           <strong>{participant.name}</strong>
@@ -1276,7 +1276,7 @@ function ConversationScreen({
                 <div className="chat-day-marker">{marker}</div>
               )}
               <div className="chat-row chat-row--fan">
-                <FanAvatar fan={participant} small />
+                <FanAvatar fan={participant} small muted={participant.kind === 'background'} />
                 <article
                   className="fan-message"
                   style={{ '--fan-accent': participant.accent } as React.CSSProperties}
@@ -1289,7 +1289,7 @@ function ConversationScreen({
                   className="chat-row chat-row--fan chat-row--continuation"
                   key={`${exchange.id}-continuation-${continuationIndex}`}
                 >
-                  <FanAvatar fan={participant} small />
+                  <FanAvatar fan={participant} small muted={participant.kind === 'background'} />
                   <article
                     className="fan-message fan-message--continuation"
                     style={{ '--fan-accent': participant.accent } as React.CSSProperties}

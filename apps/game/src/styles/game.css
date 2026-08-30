@@ -1810,6 +1810,9 @@
   object-fit: cover;
   border-radius: inherit;
 }
+.fan-avatar--muted img {
+  filter: saturate(0.38);
+}
 .fan-card__body {
   display: grid;
   min-width: 0;
