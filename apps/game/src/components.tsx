@@ -1,7 +1,136 @@
-import type { ReactNode } from 'react';
+import { useCallback, useEffect, useRef, useState, type ReactNode } from 'react';
 import { BatteryCharging, Heart, Smile, Users } from 'lucide-react';
 import { fanAvatarSrc } from '@clip/story-core/fan-avatars';
 import type { FanDefinition, GameState, Resources, StoryPack } from '@clip/story-core/types';
+
+const HOLD_TO_CONFIRM_DURATION_MS = 1_500;
+
+export function HoldToConfirmButton({
+  onConfirm,
+  idleLabel,
+  holdingLabel = '继续按住…',
+  className = '',
+  describedBy,
+  children,
+}: {
+  onConfirm: () => void;
+  idleLabel: string;
+  holdingLabel?: string;
+  className?: string;
+  describedBy?: string;
+  children?: ReactNode;
+}) {
+  const [holding, setHolding] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const activeRef = useRef(false);
+  const startedAtRef = useRef(0);
+  const animationFrameRef = useRef<number | undefined>(undefined);
+  const confirmRef = useRef(onConfirm);
+  const pointerIdRef = useRef<number | undefined>(undefined);
+
+  useEffect(() => {
+    confirmRef.current = onConfirm;
+  }, [onConfirm]);
+
+  const cancelHold = useCallback(() => {
+    activeRef.current = false;
+    pointerIdRef.current = undefined;
+    if (animationFrameRef.current !== undefined) {
+      cancelAnimationFrame(animationFrameRef.current);
+      animationFrameRef.current = undefined;
+    }
+    setHolding(false);
+    setProgress(0);
+  }, []);
+
+  const updateHold = useCallback(function updateHoldFrame(now: number) {
+    if (!activeRef.current) return;
+    const nextProgress = Math.min(1, (now - startedAtRef.current) / HOLD_TO_CONFIRM_DURATION_MS);
+    setProgress(nextProgress);
+    if (nextProgress < 1) {
+      animationFrameRef.current = requestAnimationFrame(updateHoldFrame);
+      return;
+    }
+
+    activeRef.current = false;
+    pointerIdRef.current = undefined;
+    animationFrameRef.current = undefined;
+    setHolding(false);
+    confirmRef.current();
+  }, []);
+
+  const beginHold = useCallback(() => {
+    if (activeRef.current) return;
+    activeRef.current = true;
+    startedAtRef.current = performance.now();
+    setProgress(0);
+    setHolding(true);
+    animationFrameRef.current = requestAnimationFrame(updateHold);
+  }, [updateHold]);
+
+  useEffect(() => cancelHold, [cancelHold]);
+
+  const buttonClassName = [
+    'button',
+    'button--wide',
+    'hold-confirm-button',
+    holding ? 'is-holding' : '',
+    className,
+  ]
+    .filter(Boolean)
+    .join(' ');
+
+  return (
+    <button
+      type="button"
+      className={buttonClassName}
+      aria-label={idleLabel}
+      aria-describedby={describedBy}
+      aria-busy={holding}
+      data-holding={holding ? 'true' : 'false'}
+      style={{ '--hold-progress': progress } as React.CSSProperties}
+      onClick={(event) => event.preventDefault()}
+      onPointerDown={(event) => {
+        if (!event.isPrimary || (event.pointerType === 'mouse' && event.button !== 0)) return;
+        pointerIdRef.current = event.pointerId;
+        event.currentTarget.setPointerCapture(event.pointerId);
+        beginHold();
+      }}
+      onPointerMove={(event) => {
+        if (!activeRef.current || pointerIdRef.current !== event.pointerId) return;
+        const bounds = event.currentTarget.getBoundingClientRect();
+        const isOutside =
+          event.clientX < bounds.left ||
+          event.clientX > bounds.right ||
+          event.clientY < bounds.top ||
+          event.clientY > bounds.bottom;
+        if (isOutside) cancelHold();
+      }}
+      onPointerUp={cancelHold}
+      onPointerCancel={cancelHold}
+      onLostPointerCapture={cancelHold}
+      onKeyDown={(event) => {
+        if ((event.key === ' ' || event.key === 'Enter') && !event.repeat) {
+          event.preventDefault();
+          beginHold();
+        }
+      }}
+      onKeyUp={(event) => {
+        if (event.key === ' ' || event.key === 'Enter') {
+          event.preventDefault();
+          cancelHold();
+        }
+      }}
+      onBlur={cancelHold}
+    >
+      <span className="hold-confirm-button__fill" aria-hidden="true" />
+      <span className="hold-confirm-button__content">
+        {children}
+        <span aria-live="polite">{holding ? holdingLabel : idleLabel}</span>
+      </span>
+    </button>
+  );
+}
 
 export function affinityLabel(value: number): string {
   if (value >= 90) return '全力奔赴';
@@ -73,7 +202,9 @@ function Meter({
           {icon}
           {label}
         </span>
-        <strong>{value}</strong>
+        <strong className="resource-meter__value" key={`${tone}-${value}`}>
+          {value}
+        </strong>
       </div>
       <div
         className="resource-meter__track"

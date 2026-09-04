@@ -66,6 +66,10 @@ function transformVisibleStoryText(pack: StoryPack, transform: VisibleTextTransf
   resolved.title = apply(resolved.title, 'title');
   resolved.description = apply(resolved.description, 'description');
 
+  for (const [warningIndex, warning] of resolved.config.takeout.warnings.entries()) {
+    warning.text = apply(warning.text, `config.takeout.warnings.${warningIndex}.text`);
+  }
+
   for (const [tierIndex, tier] of resolved.config.popularity.voteTiers.entries()) {
     tier.label = apply(tier.label, `config.popularity.voteTiers.${tierIndex}.label`);
   }

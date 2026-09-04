@@ -86,6 +86,7 @@ describe('story validation', () => {
     const issues = validateStoryPack(pack);
     expect(issues).toEqual([]);
     expect(hasValidationErrors(issues)).toBe(false);
+    expect(pack.nodes.length).toBeGreaterThan(28);
     expect(pack.profileSetup.namePools.adapted).toHaveLength(70);
     expect(pack.profileSetup.namePools.original).toHaveLength(0);
   });
@@ -198,7 +199,7 @@ describe('story validation', () => {
     ).toBe(true);
   });
 
-  it('requires schema v15 and rejects duplicate or invalid profile names', () => {
+  it('requires schema v16 and rejects duplicate or invalid profile names', () => {
     const wrongVersion = structuredClone(pack) as StoryPack & { schemaVersion: number };
     wrongVersion.schemaVersion = 2;
     expect(
@@ -220,6 +221,24 @@ describe('story validation', () => {
     ];
     const invalidIssues = validateStoryPack(invalid);
     expect(invalidIssues.filter((issue) => issue.code === 'schema')).toHaveLength(2);
+  });
+
+  it('requires unique takeout warnings before the ending threshold', () => {
+    const duplicate = structuredClone(pack);
+    duplicate.config.takeout.warnings[1]!.count = duplicate.config.takeout.warnings[0]!.count;
+    expect(
+      validateStoryPack(duplicate).some(
+        (issue) => issue.code === 'duplicate-takeout-warning-count',
+      ),
+    ).toBe(true);
+
+    const tooLate = structuredClone(pack);
+    tooLate.config.takeout.warnings[1]!.count = tooLate.config.takeout.triggerCount;
+    expect(
+      validateStoryPack(tooLate).some(
+        (issue) => issue.code === 'takeout-warning-at-or-after-ending',
+      ),
+    ).toBe(true);
   });
 
   it('requires one unique avatar id per core fan and ordinary contact', () => {

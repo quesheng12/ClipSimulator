@@ -223,6 +223,10 @@ export interface StoryPack {
     takeout: {
       recovery: Resources;
       maxPerTurn: number;
+      warnings: Array<{
+        count: number;
+        text: string;
+      }>;
       triggerCount: number;
       endingId: string;
     };

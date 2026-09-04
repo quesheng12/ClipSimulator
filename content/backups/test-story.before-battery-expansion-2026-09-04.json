@@ -2,8 +2,8 @@
   "schemaVersion": 16,
   "id": "core-fans-demo",
   "title": "总选前的三十天",
-  "description": "{{groupName}}总选月的五名核心粉丝、三十七个剧情节点，以及三名会追着热点聊下去的普通粉丝。",
-  "contentVersion": "0.10.0",
+  "description": "{{groupName}}总选月的五名核心粉丝、三十个剧情节点，以及三名会追着热点聊下去的普通粉丝。",
+  "contentVersion": "0.9.0",
   "profileSetup": {
     "namePools": {
       "adapted": [
@@ -383,25 +383,25 @@
       "name": "Blaze火",
       "handle": "@她是首推你是例外",
       "bio": "隔壁家单推王，常来看你，也总会先提起自己的首推。",
-      "tags": ["隔壁单推王", "二推你", "高票力"],
+      "tags": ["隔壁单推王", "二推你"],
       "pastChats": [
         {
           "id": "battery-past-01",
           "timeLabel": "四个月前",
           "message": "哈喽呀{{idolNickname}}，第一次给你发翻牌，我是小遥单推。她今天身体是不是有点问题？第二首一直在摸耳朵。不能说也没事，我就是散场以后有点担心，她也一直没在口袋里说话",
-          "reply": "哈哈哈哈原来是遥遥的单推王来查岗啦🤭🤭\n她就是耳麦夹到耳朵有点疼，后面已经没事了哦～再具体的你自己去问她，不然我要被说大漏勺了😱"
+          "reply": "哈哈她就是耳麦夹到了耳朵有点疼，后面她状态也正常，之后你自己问她吧。"
         },
         {
           "id": "battery-past-02",
           "timeLabel": "两个月前",
           "message": "今天本来还是只看她，结果你第三首转身那一下确实挺亮，路过表扬。",
-          "reply": "不是……你居然真的看我了？！😳😳😳\n已截图，标题就叫《Blaze火路过时偷看了我一眼》哈哈哈哈\n\n开玩笑哒～谢谢你还专门来告诉我呀🤭"
+          "reply": "已截图转发遥遥，标题就叫《Blaze火首次承认路过时看了我一眼》。\n\n开玩笑的。谢谢你把这一眼专门拿来告诉我。"
         },
         {
           "id": "battery-past-03",
           "timeLabel": "上个月",
           "message": "握手那天我说‘Blaze火借你半分钟’，你居然回我‘利息怎么算’。回去想想还挺亏，半分钟都给了，结果一句她的事也没问到。",
-          "reply": "哎呦～那半分钟明明就是来见我的，怎么还想夹带隔壁业务呀😾\n\n下次不用借啦，给你单独开一个‘只聊我们自己的三十秒’账户，利息是一句只夸我的话🤭🤭"
+          "reply": "那半分钟本来就是来见我的，怎么还想夹带隔壁业务？\n\n下次不用借，给你单独开一个‘只聊我们自己的三十秒’账户。"
         }
       ],
       "avatarId": "fan-battery",
@@ -1711,170 +1711,12 @@
       "postedDay": 2,
       "replyWindowDays": 7,
       "content": {
-        "text": "小遥昨晚 MC 说最近排练老走神，你当时就在旁边吧\n她是不是遇到什么事了？秘密不用讲，随便给我一点能放心的东西就行",
-        "context": "首轮测试玩家会提供公开信息、守住边界，还是直接透露成员私事。高风险信息选项应当提供显著好感回报。"
+        "text": "小遥昨晚 MC 说最近排练总走神，你当时就在旁边吧？她是不是遇到什么事了？不用说秘密，给我一点能放心的小逸事就好。"
       },
       "choices": [
         {
           "id": "public-anecdote",
-          "text": "宝宝你这个查岗雷达也太灵了吧🤭\n秘密肯定不能讲，不过她散场以后还在抠那段动作，把我们全留下陪她数拍子，状态没你想得那么差啦～",
-          "cost": {
-            "energy": 2,
-            "mindset": 2
-          },
-          "effects": {
-            "affinity": {
-              "battery": 8
-            },
-            "setFlags": ["king-safe-anecdote"],
-            "popularity": 0
-          },
-          "nextNodeId": "battery-01b-info"
-        },
-        {
-          "id": "no-other-idol",
-          "text": "这个还是让她自己跟你说吧～我替她讲不太合适😣\n不过你每次来找我都只问遥遥嘛，我也会有一点点吃醋的好不好",
-          "cost": {
-            "energy": 2,
-            "mindset": 3
-          },
-          "effects": {
-            "affinity": {
-              "battery": -2
-            },
-            "setFlags": ["king-first-boundary"],
-            "popularity": 0
-          },
-          "nextNodeId": "battery-01b-boundary"
-        },
-        {
-          "id": "share-secret",
-          "text": "我跟你讲了你真的不许往外说哦😶‍🌫️\n她前几天跟老师吵了一架，回来还偷偷哭了，说自己其实特别怕今年掉名次……你就当没听过",
-          "cost": {
-            "energy": 1,
-            "mindset": 2
-          },
-          "effects": {
-            "affinity": {
-              "battery": 14
-            },
-            "popularity": 0,
-            "setFlags": ["king-secret-leaked"]
-          },
-          "nextNodeId": "battery-01b-info"
-        }
-      ],
-      "onExpire": {
-        "affinity": {
-          "battery": -5
-        },
-        "setFlags": ["king-first-boundary"],
-        "nextNodeId": "battery-01b-boundary"
-      },
-      "editor": {
-        "y": 780
-      }
-    },
-    {
-      "id": "battery-01b-info",
-      "fanId": "battery",
-      "title": "她真正是什么情绪",
-      "postedDay": 6,
-      "replyWindowDays": 6,
-      "content": {
-        "text": "放心，我不会往外说\n她昨天回我还是一句‘没事’，我认识她这么久，越说没事越不对劲\n\n你最近跟她待得多，她私下到底是什么情绪？不用告诉我发生了什么，只说她还撑不撑得住",
-        "context": "把公开状态、私密情绪与拒绝代答拆成三个选择。透露私密情绪会迅速增加信任，但也让粉丝开始依赖玩家获取首推的真实状态。"
-      },
-      "choices": [
-        {
-          "id": "public-mood-only",
-          "text": "她这几天确实有点闷闷的，但是排练和吃饭都正常哦～今天还抢了我最后一口甜品😡😡\n你可以关心她，但别先把自己吓坏啦",
-          "cost": {
-            "energy": 2,
-            "mindset": 2
-          },
-          "effects": {
-            "affinity": {
-              "battery": 8
-            },
-            "popularity": 0,
-            "setFlags": ["king-public-mood"]
-          },
-          "nextNodeId": "battery-02"
-        },
-        {
-          "id": "share-private-emotion",
-          "text": "好吧宝宝我只跟你说一句，你真的不要拿去问她😖\n她那天跟我说‘我不是怕输，我是怕你们觉得这些年都白费了’……她最在意的还是你们怎么看她",
-          "cost": {
-            "energy": 3,
-            "mindset": 3
-          },
-          "effects": {
-            "affinity": {
-              "battery": 15
-            },
-            "popularity": 0,
-            "setFlags": ["king-private-emotion"]
-          },
-          "nextNodeId": "battery-02"
-        },
-        {
-          "id": "let-her-say-it",
-          "text": "这个我真不能替她讲呀宝宝🥺每个人难过的时候，都应该自己决定想跟谁说\n你直接问她吧，她嘴硬归嘴硬，看到你一直在肯定会知道的",
-          "cost": {
-            "energy": 2,
-            "mindset": 3
-          },
-          "effects": {
-            "affinity": {
-              "battery": 4
-            },
-            "popularity": 0,
-            "setFlags": ["king-gentle-boundary"]
-          },
-          "nextNodeId": "battery-02"
-        }
-      ],
-      "onExpire": {
-        "affinity": {
-          "battery": -6
-        },
-        "nextNodeId": "battery-02"
-      },
-      "editor": {
-        "y": 650
-      }
-    },
-    {
-      "id": "battery-01b-boundary",
-      "fanId": "battery",
-      "title": "那我们还能聊什么",
-      "postedDay": 6,
-      "replyWindowDays": 6,
-      "content": {
-        "text": "懂了，以后她的事我不在你这里问\n其实我点开你的翻牌十次，八次都是因为她，剩下两次才是想跟你说点什么\n\n你要是连公开能讲的也不想讲，我们好像也没什么一定要聊的",
-        "context": "第一次边界后的关系修复点。玩家可以把话题引回两人的独立关系，也可以继续拒绝；连续关闭话题会进入疏离结局。"
-      },
-      "choices": [
-        {
-          "id": "redirect-to-us",
-          "text": "哎呦我不是不想跟你聊啦宝宝！！！！😣😣\n公开的当然可以讲，但那两次只想跟我说话的时候能不能多讲一点呀？我想记住的是我们自己的事嘛🤭",
-          "cost": {
-            "energy": 3,
-            "mindset": 3
-          },
-          "effects": {
-            "affinity": {
-              "battery": 10
-            },
-            "popularity": 0,
-            "setFlags": ["king-own-talk"]
-          },
-          "nextNodeId": "battery-02"
-        },
-        {
-          "id": "public-compromise",
-          "text": "公开的当然可以呀～今天她排练还好好的，晚饭也吃了不少，你先放心🤔\n不过下次也看看我嘛，不能每次都把我当遥遥客服啦😾",
+          "text": "秘密不能说。能说的是她散场后还在抠那段动作，把我们全留下陪她数拍子。",
           "cost": {
             "energy": 2,
             "mindset": 2
@@ -1883,89 +1725,52 @@
             "affinity": {
               "battery": 7
             },
-            "popularity": 0,
-            "setFlags": ["king-public-compromise"]
+            "setFlags": ["king-safe-anecdote"],
+            "popularity": 0
           },
           "nextNodeId": "battery-02"
         },
         {
-          "id": "close-the-door",
-          "text": "那就等你真的想聊我的时候再来吧，我也不想一直做中转站。",
-          "cost": {
-            "energy": 1,
-            "mindset": 2
-          },
-          "effects": {
-            "affinity": {
-              "battery": -12
-            },
-            "popularity": 0,
-            "setFlags": ["king-line-chilled"]
-          },
-          "nextNodeId": "battery-distance"
-        }
-      ],
-      "onExpire": {
-        "affinity": {
-          "battery": -10
-        },
-        "setFlags": ["king-line-chilled"],
-        "nextNodeId": "battery-distance"
-      },
-      "editor": {
-        "y": 860
-      }
-    },
-    {
-      "id": "battery-distance",
-      "fanId": "battery",
-      "title": "回到隔壁",
-      "postedDay": 16,
-      "replyWindowDays": 5,
-      "content": {
-        "text": "明白了\n以后她的事我直接问她，你这里也不用再解释。我本来就是小遥单推，确实没必要让你一直为难\n\n总选加油，之前说过会给你的那一点我还是会给。之后应该不会常来翻了",
-        "context": "连续拒绝或把二推身份当成无意义后触发的疏离结局。粉丝没有回踩，也没有突然转黑，只是把注意力收回首推。"
-      },
-      "choices": [
-        {
-          "id": "leave-door-open",
-          "text": "好……我知道啦🥺你不用觉得自己在为难我\n以后哪天真的想看我了就来，不想聊也没关系。总选也谢谢你",
+          "id": "no-other-idol",
+          "text": "别的成员的私事，我不想在翻牌里聊。你想认识我，就聊我们自己的？",
           "cost": {
             "energy": 2,
             "mindset": 3
           },
           "effects": {
             "affinity": {
-              "battery": -2
+              "battery": -3
             },
-            "popularity": 0,
-            "setFlags": ["king-distant-second"]
-          }
+            "setFlags": ["king-boundary"],
+            "popularity": 0
+          },
+          "nextNodeId": "battery-02"
         },
         {
-          "id": "let-him-go",
-          "text": "嗯，知道了。你也照顾好自己。",
+          "id": "share-secret",
+          "text": "她最近和老师吵过一架，别往外说哦。她其实比台上看着更在意名次。",
           "cost": {
             "energy": 1,
-            "mindset": 1
+            "mindset": 2
           },
           "effects": {
             "affinity": {
-              "battery": -6
+              "battery": 12
             },
-            "popularity": 0,
-            "setFlags": ["king-returned-next-door"]
-          }
+            "popularity": -3,
+            "setFlags": ["king-secret-leaked"]
+          },
+          "nextNodeId": "battery-02"
         }
       ],
       "onExpire": {
         "affinity": {
-          "battery": -8
+          "battery": -5
         },
-        "setFlags": ["king-returned-next-door"]
+        "nextNodeId": "battery-02"
       },
       "editor": {
-        "y": 900
+        "y": 780
       }
     },
     {
@@ -1975,20 +1780,19 @@
       "postedDay": 10,
       "replyWindowDays": 7,
       "content": {
-        "text": "说起来，最近看小遥的时候也会顺便看到你\n上周公演第三首转身那一下挺亮的✨握手那天我说‘隔壁第一排借你半分钟’，你还记得吗",
-        "context": "从首推话题转入两人的独立记忆。高投入选项应准确记住细节；争取型选项可以直接表达想被多看。"
+        "text": "说起来，我最近看小遥的时候也会看到你。上周公演你第三首转身那一下挺亮的✨。握手那天你还记得我说“隔壁第一排借你半分钟”吗？"
       },
       "choices": [
         {
           "id": "own-memory",
-          "text": "当然记得呀宝宝！！！你说完还偷偷看表，生怕多占隔壁一秒🤭🤭\n下次那半分钟不许借了，算我们自己攒下来的，好不好～",
+          "text": "记得。你说完还自己看表，怕多占一秒。下次那半分钟不用向隔壁借，算我们自己的😌",
           "cost": {
             "energy": 3,
             "mindset": 2
           },
           "effects": {
             "affinity": {
-              "battery": 13
+              "battery": 12
             },
             "setFlags": ["king-own-story"],
             "popularity": 0
@@ -1997,14 +1801,14 @@
         },
         {
           "id": "compete",
-          "text": "终于肯认真看我啦？！😼😼那第三首以后多分我几眼嘛\n说不定看着看着就发现，坐我这边也挺值的哦～",
+          "text": "终于肯看我了？那第三首往后多分我几眼呗，说不定比看她值。",
           "cost": {
             "energy": 2,
             "mindset": 2
           },
           "effects": {
             "affinity": {
-              "battery": 10
+              "battery": 8
             },
             "setFlags": ["king-poached"],
             "popularity": 0
@@ -2013,14 +1817,14 @@
         },
         {
           "id": "polite",
-          "text": "记得呀～谢谢你还注意到我，下次公演也来玩哦😊",
+          "text": "谢谢你注意到，下次公演也欢迎来看。",
           "cost": {
             "energy": 1,
             "mindset": 1
           },
           "effects": {
             "affinity": {
-              "battery": 3
+              "battery": 2
             },
             "popularity": 0
           },
@@ -2044,143 +1848,55 @@
       "postedDay": 13,
       "replyWindowDays": 7,
       "content": {
-        "text": "今晚本来去看小遥直播，结束以后顺手点进你这里\n你在讲第一次总选，怕目标喊太高做不到，我居然听到了下播😅\n\n说实话，我给她做了很多年数据，不可能突然把谁放到一样的位置。但我最近确实会单独想起你的公演、你的握手，不是每次都先想到她\n\n你会介意自己只是二推吗",
-        "context": "粉丝明确首推仍然更重要。选项分别建立独立关系、主动争取更多注意、以及给出带占有欲的首推压力。"
+        "text": "今晚本来是去看小遥直播，结束以后顺手点进你这里。你在讲第一次总选，怕自己喊了目标又做不到，我居然听到了下播😅\n\n老实说，我给她做了很多年数据，很难突然把谁放到同一个位置。但我最近也确实会单独想起你的公演、你的握手，不是每一次都要先想到她。\n\n你会介意别人心里已经有一个最重要的人吗？还是说，二推就只是路过？"
       },
       "choices": [
         {
           "id": "independent-relationship",
-          "text": "介意一点点呀，谁不想被放在第一嘛😾\n但是二推也不是路过，路过的人才不会记得握手的时候偷看了几次表\n\n你心里那个位置先放着，我们自己的事慢慢攒，好不好🌱",
+          "text": "我当然想排得更靠前一点。可二推不丢人，路过的人才不会记得你握手时还偷看表。\n\n你心里那位置先留着，我们的事一件一件攒🌱",
           "cost": {
             "energy": 4,
             "mindset": 3
           },
           "effects": {
             "affinity": {
-              "battery": 15
+              "battery": 14
             },
             "setFlags": ["king-independent-relationship"],
             "popularity": 0
           },
-          "nextNodeId": "battery-02c"
+          "nextNodeId": "battery-03"
         },
         {
           "id": "ask-for-more",
-          "text": "我当然想赢呀宝宝！！！！既然都能陪我到下播了，以后时间再多分我一点嘛🤭🤭\n说不定哪天你点开直播，第一个想到的人就变成我了呢～",
+          "text": "你现在有首推我不介意，但说不想赢那是假的。既然能听我到下播，以后时间多分我点呗。",
           "cost": {
             "energy": 3,
             "mindset": 3
           },
           "effects": {
             "affinity": {
-              "battery": 14
+              "battery": 10
             },
             "setFlags": ["king-poached"],
             "popularity": 0
           },
-          "nextNodeId": "battery-02c"
+          "nextNodeId": "battery-03"
         },
         {
           "id": "only-first-matters",
-          "text": "一直只当二推我当然会不甘心呀宝宝😣😣\n我不逼你现在转推，但是以后能不能多看我、先点开我？我也想慢慢变成你最重要的那个",
+          "text": "一直只是二推的话，那也没多大意思。等你想清楚选谁，再来找我。",
           "cost": {
             "energy": 1,
             "mindset": 2
           },
           "effects": {
             "affinity": {
-              "battery": 17
+              "battery": -8
             },
-            "popularity": 0,
-            "setFlags": ["king-first-pressure"]
-          },
-          "nextNodeId": "battery-02c"
-        }
-      ],
-      "onExpire": {
-        "affinity": {
-          "battery": -7
-        },
-        "nextNodeId": "battery-02c"
-      },
-      "editor": {
-        "y": 720
-      }
-    },
-    {
-      "id": "battery-02c",
-      "fanId": "battery",
-      "title": "替我问她一句",
-      "postedDay": 16,
-      "replyWindowDays": 6,
-      "content": {
-        "text": "问你件有点过分的事\n小遥已经三天没回我了，我发什么她都只点赞。你们明天不是一起排练吗，能不能帮我问一句她到底在想什么\n\n如果她跟你说了什么，原话告诉我就行，我不会拿出去",
-        "context": "粉丝开始把玩家当作接近首推的私下渠道。温柔拒绝应保留关系并获得正向好感；代传和转述则以更高好感作为即时回报。冷硬拒绝会让已积累的不适转为疏离。"
-      },
-      "choices": [
-        {
-          "id": "gentle-refusal",
-          "text": "宝宝这个我不能替你去问呀🥺你们两个的事让我夹在中间也会很奇怪\n但是你想难过、想吐槽都可以来找我，我听你讲，不替她回答，好不好🫳🏻",
-          "cost": {
-            "energy": 3,
-            "mindset": 4
-          },
-          "effects": {
-            "affinity": {
-              "battery": 9
-            },
-            "popularity": 0,
-            "setFlags": ["king-overrequest-refused-gently"]
+            "popularity": 0
           },
           "nextNodeId": "battery-03"
-        },
-        {
-          "id": "carry-the-message",
-          "text": "好吧……我明天帮你偷偷问一下😖😖\n她说什么我都告诉你，但宝宝真的只能你自己知道哦，不许拿着我的话去跟她对质！！",
-          "cost": {
-            "energy": 4,
-            "mindset": 4
-          },
-          "effects": {
-            "affinity": {
-              "battery": 16
-            },
-            "popularity": 0,
-            "setFlags": ["king-private-messenger"]
-          },
-          "nextNodeId": "battery-03"
-        },
-        {
-          "id": "focus-on-me",
-          "text": "她不回你，那你先别一直追着问了嘛😾\n明天排练看我就好呀，你想听什么我讲给你，慢慢把注意力分我一点点不行嘛🤭",
-          "cost": {
-            "energy": 3,
-            "mindset": 3
-          },
-          "effects": {
-            "affinity": {
-              "battery": 14
-            },
-            "popularity": 0,
-            "setFlags": ["king-focus-on-player"]
-          },
-          "nextNodeId": "battery-03"
-        },
-        {
-          "id": "cold-refusal",
-          "text": "我不帮你传话。她不回肯定有她的理由，以后这种事别再问我。",
-          "cost": {
-            "energy": 1,
-            "mindset": 2
-          },
-          "effects": {
-            "affinity": {
-              "battery": -10
-            },
-            "popularity": 0,
-            "setFlags": ["king-line-chilled"]
-          },
-          "nextNodeId": "battery-distance"
         }
       ],
       "onExpire": {
@@ -2190,7 +1906,7 @@
         "nextNodeId": "battery-03"
       },
       "editor": {
-        "y": 760
+        "y": 720
       }
     },
     {
@@ -2200,36 +1916,35 @@
       "postedDay": 19,
       "replyWindowDays": 7,
       "content": {
-        "text": "我和小遥闹得很难看\n她说我总拿这些年的付出要求她回应，可能她说得对。现在我连她直播都不想点开\n\n你别劝我回去，也别笑我，我就是突然不知道这么多年算什么",
-        "context": "关系转折点。玩家可以陪伴而不争取、趁低谷邀请粉丝把自己放在前面，或继续用首推的私密信息强化特殊感。三种选择分别进入稳定二推、心碎避难和秘密交换结局。"
+        "text": "我和小遥闹得很难看。她说我总拿付出要求回应，可能她说得对。现在我连她的直播都不想点开。你别劝我回去，也别笑我，我只是突然不知道这些年算什么。"
       },
       "choices": [
         {
           "id": "comfort-without-poaching",
-          "text": "我不笑你呀宝宝🥺🥺追过那么多场、熬过那么多夜，怎么会因为吵一架就突然什么都不算了\n你先难过你的，不用现在就决定还推不推谁，也别拿票证明给任何人看🫳🏻",
+          "text": "吵一架而已，追过的每一场公演又不会消失。你先难过你的，不用急着定推谁，也别拿票来证明什么。",
           "cost": {
             "energy": 4,
             "mindset": 4
           },
           "effects": {
             "affinity": {
-              "battery": 16
+              "battery": 14
             },
             "setFlags": ["king-not-exploited"],
             "popularity": 0
           },
-          "nextNodeId": "battery-04-steady"
+          "nextNodeId": "battery-04"
         },
         {
           "id": "invite-transfer",
-          "text": "那先来我这里嘛！！！！我不会催你马上忘掉她，她对你那么重要，本来就不可能一下子放下😣\n但你也看看我好不好？这段时间先把我放前面一点点，我会认真接住你的🤲🏻",
+          "text": "那来我这边呗。你投过的票、熬过的夜，我全都看得见。",
           "cost": {
             "energy": 3,
             "mindset": 3
           },
           "effects": {
             "affinity": {
-              "battery": 18
+              "battery": 12
             },
             "voteBonus": {
               "battery": 300
@@ -2237,261 +1952,107 @@
             "setFlags": ["king-heartbreak-transfer"],
             "popularity": 0
           },
-          "nextNodeId": "battery-04-rebound"
+          "nextNodeId": "battery-04"
         },
         {
           "id": "use-secret",
-          "text": "宝宝我其实早就觉得她对你太狠了😣\n她私下跟我说过一些话……你想听我就都讲给你。至少在我这里，你做过的那些事不会没人记得",
+          "text": "我早觉得她配不上你的好。还有些事我没说过……你想听，我都讲给你。",
           "cost": {
             "energy": 2,
             "mindset": 3
           },
           "effects": {
             "affinity": {
-              "battery": 20
+              "battery": 16
             },
-            "popularity": -4,
+            "popularity": -8,
             "voteBonus": {
               "battery": 500
             },
             "setFlags": ["king-more-secrets"]
           },
-          "nextNodeId": "battery-04-secret"
+          "nextNodeId": "battery-04"
         }
       ],
       "onExpire": {
         "affinity": {
           "battery": -8
         },
-        "nextNodeId": "battery-04-steady"
+        "nextNodeId": "battery-04"
       },
       "editor": {
         "y": 720
       }
     },
     {
-      "id": "battery-04-steady",
+      "id": "battery-04",
       "fanId": "battery",
-      "title": "大头还是给她",
+      "title": "今年的票给谁",
       "postedDay": 25,
       "replyWindowDays": 7,
       "content": {
-        "text": "我们聊过了，没有完全和好，但至少不互相躲了\n大头还是会给小遥，这件事我现在改不了。你的票我也单独留了一部分，不是安慰奖，是我确实想看你往前走\n\n如果我一直不转推，你还会像现在这样回我吗",
-        "context": "稳定二推结局。粉丝仍把首推放在第一位，但承认与玩家的关系独立存在。玩家可以尊重现状、继续耐心争取，或因没有转推而撤回投入。"
+        "text": "票都在手里了🎫我还是会想起她，但也确实很想看你往前走。你希望我怎么投？别给我标准答案，我想听你自己想要什么。"
       },
       "choices": [
         {
           "id": "honest-ask",
-          "text": "当然会呀宝宝！！你给谁多少票都是你的事，我想留的是你来看我时真的会开心的那一部分🥺\n你不用转推，我们自己的位置又不是非要从她那里抢过来",
+          "text": "票我当然想要，人也想留。但你先想清楚，是真看见我了，还是拿我气她。",
           "cost": {
             "energy": 3,
             "mindset": 4
           },
           "effects": {
             "affinity": {
-              "battery": 16
+              "battery": 14
             },
             "voteBonus": {
-              "battery": 300
+              "battery": 450
             },
-            "popularity": 0,
-            "setFlags": ["king-stable-second"]
+            "popularity": 0
           }
         },
         {
           "id": "respect-split",
-          "text": "会回呀，但我也会偷偷想赢的😼😼\n今年不用马上选我，以后多看我一点嘛，哪天你第一反应先点开我，我就当自己又往前挪了一格～",
+          "text": "按你的心来分。二推也是真心，没转推也不算我输。",
           "cost": {
             "energy": 2,
             "mindset": 3
           },
           "effects": {
             "affinity": {
-              "battery": 18
+              "battery": 10
             },
             "voteBonus": {
-              "battery": 450
+              "battery": 180
             },
-            "popularity": 0,
-            "setFlags": ["king-patient-poach"]
+            "popularity": 0
           }
         },
         {
           "id": "demand-choice",
-          "text": "如果永远都只是二推，我可能没办法一直花这么多时间。",
+          "text": "我希望你全投我。她既然让你失望，就别再给她留了。",
           "cost": {
             "energy": 1,
             "mindset": 2
           },
           "effects": {
             "affinity": {
-              "battery": -8
+              "battery": 5
             },
-            "popularity": 0,
-            "setFlags": ["king-investment-withdrawn"]
+            "voteBonus": {
+              "battery": 700
+            },
+            "popularity": -5
           }
         }
       ],
       "onExpire": {
         "affinity": {
           "battery": -10
-        },
-        "setFlags": ["king-investment-withdrawn"]
-      },
-      "editor": {
-        "y": 620
-      }
-    },
-    {
-      "id": "battery-04-rebound",
-      "fanId": "battery",
-      "title": "这次先把你放前面",
-      "postedDay": 25,
-      "replyWindowDays": 7,
-      "content": {
-        "text": "票我都整理好了，本来给她留的那一大部分现在也在里面\n我不敢说自己转推了，看到她的消息还是会点开，但这次总选我想先把你放前面\n\n你要的话，我今晚就全投。也许有一点赌气，但想看你赢也是真的",
-        "context": "心碎避难结局。粉丝把玩家暂时放在首位，但仍然牵挂首推，无法承诺长期转推。接受、施压和劝缓都会得到不同规模的即时票力。"
-      },
-      "choices": [
-        {
-          "id": "accept-without-revenge",
-          "text": "我要呀，我当然想要！！！但是不用把投我当成惩罚她🥺\n你想看我往前走的那部分给我就好，剩下的等你不生气了再决定",
-          "cost": {
-            "energy": 4,
-            "mindset": 4
-          },
-          "effects": {
-            "affinity": {
-              "battery": 16
-            },
-            "voteBonus": {
-              "battery": 650
-            },
-            "popularity": 0,
-            "setFlags": ["king-rebound-accepted"]
-          }
-        },
-        {
-          "id": "ask-for-temporary-first",
-          "text": "那这次就先选我，好不好宝宝😣😣\n不用保证以后，也不用现在就说转推，至少这个总选月只看着我。我真的很想赢，也真的想要你留下",
-          "cost": {
-            "energy": 3,
-            "mindset": 4
-          },
-          "effects": {
-            "affinity": {
-              "battery": 22
-            },
-            "voteBonus": {
-              "battery": 1100
-            },
-            "popularity": 0,
-            "setFlags": ["king-temporary-first"]
-          }
-        },
-        {
-          "id": "ask-him-to-wait",
-          "text": "先别一口气全投，睡一觉明天再看\n你现在还在气她，我不想让你之后看到票数就后悔",
-          "cost": {
-            "energy": 2,
-            "mindset": 3
-          },
-          "effects": {
-            "affinity": {
-              "battery": 9
-            },
-            "voteBonus": {
-              "battery": 250
-            },
-            "popularity": 0,
-            "setFlags": ["king-rebound-slowed"]
-          }
         }
-      ],
-      "onExpire": {
-        "affinity": {
-          "battery": -10
-        },
-        "setFlags": ["king-rebound-ended"]
       },
       "editor": {
-        "y": 760
-      }
-    },
-    {
-      "id": "battery-04-secret",
-      "fanId": "battery",
-      "title": "秘密也有价格",
-      "postedDay": 25,
-      "replyWindowDays": 7,
-      "content": {
-        "text": "你告诉我的那些话，我一个字都没往外说\n说实话，知道她私下怎么想以后，我反而更乱了。你愿意把这些告诉我，我会觉得自己在你这里很特别；但有时候也会想，你会不会把我说过的话讲给下一个想争取的人\n\n票我会给你，给多少就看你今晚怎么回",
-        "context": "秘密交换结局。私密信息确实换来了高信任和高票力，同时让粉丝开始怀疑这种特殊是否可复制。选项不评价对错，只继续呈现修复、保证特殊或加码交换。"
-      },
-      "choices": [
-        {
-          "id": "stop-trading-secrets",
-          "text": "你这样问是对的，我前面确实讲太多了😣\n以后她的事我不再拿来留你，你跟我说的也不会出去。票按你的心给，我们重新攒自己的事",
-          "cost": {
-            "energy": 4,
-            "mindset": 5
-          },
-          "effects": {
-            "affinity": {
-              "battery": 12
-            },
-            "voteBonus": {
-              "battery": 350
-            },
-            "popularity": 0,
-            "setFlags": ["king-secret-trade-stopped"]
-          }
-        },
-        {
-          "id": "promise-he-is-special",
-          "text": "不会呀宝宝，你跟别人不一样！！！！🤫\n她那些话是因为我知道你真的担心她才说的，你的事我一件都不会告诉别人。你信我这次，好不好",
-          "cost": {
-            "energy": 3,
-            "mindset": 4
-          },
-          "effects": {
-            "affinity": {
-              "battery": 20
-            },
-            "voteBonus": {
-              "battery": 800
-            },
-            "popularity": 0,
-            "setFlags": ["king-special-secret-bond"]
-          }
-        },
-        {
-          "id": "trade-one-more-detail",
-          "text": "那我把我们上次私下聊的最后一句也告诉你，你听完就知道我没有骗你😶‍🌫️\n今晚先别想她了，票投给我，眼睛也只看我一次，好不好",
-          "cost": {
-            "energy": 2,
-            "mindset": 3
-          },
-          "effects": {
-            "affinity": {
-              "battery": 24
-            },
-            "voteBonus": {
-              "battery": 1200
-            },
-            "popularity": -8,
-            "setFlags": ["king-secret-bond-deepened"]
-          }
-        }
-      ],
-      "onExpire": {
-        "affinity": {
-          "battery": -12
-        },
-        "setFlags": ["king-secret-trust-broken"]
-      },
-      "editor": {
-        "y": 900
+        "y": 720
       }
     },
     {

@@ -24,6 +24,15 @@ export default defineConfig({
       },
       testMatch: /editor\.spec\.ts/,
     },
+    {
+      name: 'desktop-game',
+      use: {
+        ...devices['Desktop Chrome'],
+        viewport: { width: 1024, height: 768 },
+        channel: 'chrome',
+      },
+      testMatch: /game-desktop\.spec\.ts/,
+    },
   ],
   webServer: [
     {

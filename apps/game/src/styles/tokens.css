@@ -26,4 +26,5 @@
   --space-lg: 1.5rem;
   --space-xl: 2rem;
   --shadow-card: 0 12px 30px rgba(82, 58, 110, 0.08);
+  --z-transient-feedback: 70;
 }

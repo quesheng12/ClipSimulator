@@ -98,13 +98,12 @@ const patterns: Pattern[] = [
   { label: '破折号「——」', re: /——/g },
 ];
 
-const sentenceOf = (t: string): number =>
-  t.split(/[。！？!?]/).filter((s) => s.trim().length > 0).length;
+const fullStopOf = (t: string): number => t.match(/。/g)?.length ?? 0;
 
 let totalHits = 0;
 const globalCounts = new Map<string, number>();
 const perNode = new Map<string, string[]>();
-const essayChoices: TextItem[] = [];
+const completeSentenceChoices: TextItem[] = [];
 
 for (const item of items) {
   for (const p of patterns) {
@@ -118,9 +117,10 @@ for (const item of items) {
       perNode.set(item.location, list);
     }
   }
-  // 小作文式回复：偶像的 choice 文本 ≥3 句且 ≥60 字
-  if (item.isChoice && sentenceOf(item.text) >= 3 && item.text.length >= 60) {
-    essayChoices.push(item);
+  // 连续完整句式复核：真人长回复很常见，感叹号和问号也承担情绪节拍；
+  // 只把 60 字以上且至少使用 3 个句号的 choice 交给人工检查。
+  if (item.isChoice && fullStopOf(item.text) >= 3 && item.text.length >= 60) {
+    completeSentenceChoices.push(item);
   }
 }
 
@@ -133,20 +133,20 @@ console.log('\n命中分布（按节点/粉丝，前 20）：');
 const top = [...perNode.entries()].sort((a, b) => b[1].length - a[1].length).slice(0, 20);
 for (const [loc, hits] of top) console.log(`  ${loc}: ${hits.join('、')}`);
 
-if (essayChoices.length > 0) {
-  console.log('\n疑似小作文式回复（≥3 句且 ≥60 字）：');
-  for (const e of essayChoices) {
+if (completeSentenceChoices.length > 0) {
+  console.log('\n连续完整句式复核（≥60 字且句号 ≥3，不代表一定有 AI 味）：');
+  for (const e of completeSentenceChoices) {
     console.log(
-      `  [${e.location}] ${e.text.slice(0, 42)}…（${e.text.length} 字 / ${sentenceOf(e.text)} 句）`,
+      `  [${e.location}] ${e.text.slice(0, 42)}…（${e.text.length} 字 / ${fullStopOf(e.text)} 个句号）`,
     );
   }
 }
 
 console.log('\n备注：对比句并非全错——说话人真会那么说的（如饭头说「不是因为我是饭头」）应保留。');
 console.log(
-  `共 ${totalHits} 处命中${essayChoices.length > 0 ? `、${essayChoices.length} 条小作文` : ''}。`,
+  `共 ${totalHits} 处命中${completeSentenceChoices.length > 0 ? `、${completeSentenceChoices.length} 条连续完整句式待复核` : ''}。`,
 );
 
-if (process.argv.includes('--strict') && (totalHits > 0 || essayChoices.length > 0)) {
+if (process.argv.includes('--strict') && (totalHits > 0 || completeSentenceChoices.length > 0)) {
   process.exit(1);
 }

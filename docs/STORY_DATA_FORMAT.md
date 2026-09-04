@@ -1,6 +1,6 @@
-# 剧情数据格式 v15
+# 剧情数据格式 v16
 
-当前游戏读取一个完整的 JSON 内容包：`content/test-story.json`。编辑器和游戏共享这份格式，但不共享入口或 UI 代码。v15 为每名核心粉丝和每个普通 NPC 联系人增加必填的应用内头像 ID，并要求不同角色不能共用；玩家实际选择的身份仍独立保存在浏览器本地，不写入内容包。
+当前游戏读取一个完整的 JSON 内容包：`content/test-story.json`。编辑器和游戏共享这份格式，但不共享入口或 UI 代码。v16 为外卖配置增加按累计点单次数触发的短提醒文案；玩家实际选择的身份仍独立保存在浏览器本地，不写入内容包。
 
 ## 顶层结构
 
@@ -22,11 +22,11 @@ StoryPack
 
 正式类型定义见 `packages/story-core/src/types.ts`，运行时结构与图校验见 `packages/story-core/src/validation.ts`。
 
-v15 内容包必须设置 `"schemaVersion": 15`，并提供以下顶层字段：
+v16 内容包必须设置 `"schemaVersion": 16`，并提供以下顶层字段：
 
 ```json
 {
-  "schemaVersion": 15,
+  "schemaVersion": 16,
   "profileSetup": {
     "namePools": {
       "adapted": ["孙可恬", "周夏雨", "陈静扬"],
@@ -55,6 +55,27 @@ v15 内容包必须设置 `"schemaVersion": 15`，并提供以下顶层字段：
   }
 }
 ```
+
+## 外卖配置
+
+`config.takeout` 同时定义单次恢复、本回合次数上限、累计提醒与提前结局阈值：
+
+```json
+{
+  "recovery": { "energy": 3, "mindset": 3 },
+  "maxPerTurn": 2,
+  "warnings": [
+    { "count": 3, "text": "经常吃夜宵，好像腰围粗了一点" },
+    { "count": 4, "text": "要不要控制下饮食？" }
+  ],
+  "triggerCount": 5,
+  "endingId": "takeout-idol"
+}
+```
+
+- `warnings[]` 按累计点单次数匹配。`count` 必须是正整数、不得重复，并严格小于 `triggerCount`。
+- `text` 是玩家可见内容，支持统一的 `{{variableName}}` 模板解析。
+- 收据关闭后，匹配的提醒以居中浮动状态短暂显示；它不阻塞操作，也不写入 `GameState`。
 
 ## 玩家身份配置
 
@@ -315,12 +336,12 @@ v15 内容包必须设置 `"schemaVersion": 15`，并提供以下顶层字段：
 {
   "id": "takeout-idol",
   "title": "胖成一条蛆，耻辱退团",
-  "description": "第四份外卖送到时，公司也送来了退团通知。",
+  "description": "第五份外卖送到时，公司也送来了退团通知。",
   "image": {
     "src": "/assets/endings/takeout-shame-post.webp",
     "alt": "JBS48超话投稿截图：用外卖满减、舞台和胖成一条蛆的梗轻松吐槽，右下角配有嫌弃猫表情。"
   },
-  "trigger": { "takeoutCountAtLeast": 4 }
+  "trigger": { "takeoutCountAtLeast": 5 }
 }
 ```
 
@@ -331,6 +352,7 @@ v15 内容包必须设置 `"schemaVersion": 15`，并提供以下顶层字段：
 
 ## 文件版本与存档
 
+- v16 为 `config.takeout` 增加必填 `warnings[]`。从 v15 迁移时补充提醒数组（不需要提醒时使用 `[]`），保证每个提醒次数唯一且早于 `triggerCount`，再把 `schemaVersion` 改为 `16`。
 - v15 把 `fans[].avatar` 和可选的 `backgroundFlips[].avatar` 资源路径改为必填 `avatarId`。迁移时为每个核心粉丝及每个唯一 `contactId ?? fanName` 分配不同的内置 ID；同一联系人的多轮记录复用该 ID，再把 `schemaVersion` 改为 `15`。
 - v14 移除 `nodes[].choices[].feedback`。从 v13 迁移时，删除每条回复的 `feedback`，保留好感和泛人气数值，再把 `schemaVersion` 改为 `14`。
 - v13 要求每个 `nodes[].choices[].effects` 显式包含整数 `popularity`。从 v12 迁移时，为没有泛人气效果的回复补 `"popularity": 0`，保留已有非零数值，再把 `schemaVersion` 改为 `13`。
@@ -350,7 +372,7 @@ v15 内容包必须设置 `"schemaVersion": 15`，并提供以下顶层字段：
 npm run validate:content
 ```
 
-保存与构建会检查结构、重复 ID、角色头像 ID 唯一性、同一 NPC 多轮头像一致性、缺失引用、越界日期、循环、不可达节点、票力上限、身份配置、静态变量、未知模板引用和内容规模。超过 140 个字符的回复由编辑器显示非阻塞软提醒，不属于内容包结构错误。剧情文件只能包含声明式 JSON，不能嵌入任意 JavaScript。
+保存与构建会检查结构、重复 ID、角色头像 ID 唯一性、同一 NPC 多轮头像一致性、外卖提醒次数唯一且早于结局阈值、缺失引用、越界日期、循环、不可达节点、票力上限、身份配置、静态变量、未知模板引用和内容规模。超过 140 个字符的回复由编辑器显示非阻塞软提醒，不属于内容包结构错误。剧情文件只能包含声明式 JSON，不能嵌入任意 JavaScript。
 
 ## 修订记录
 
@@ -374,3 +396,4 @@ npm run validate:content
 | v13  | 2026-08-23 | 每条回复显式设置可手动编辑的泛人气变化值；无变化时保存为 0。                               |
 | v14  | 2026-08-23 | 移除回复结算评语；游戏根据好感变化值显示中性的增减记录。                                   |
 | v15  | 2026-08-30 | 核心粉丝和普通 NPC 改用必填的内置头像 ID，并校验跨角色唯一与同联系人多轮一致。             |
+| v16  | 2026-08-31 | 外卖配置增加按累计点单次数触发的内容提醒，测试包将提前结局阈值调整为第 5 次。              |

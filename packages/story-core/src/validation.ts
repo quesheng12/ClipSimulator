@@ -5,7 +5,7 @@ import {
   RESERVED_TEMPLATE_VARIABLES,
 } from './templates';
 import { FAN_AVATAR_IDS } from './fan-avatars';
-import type { StoryPack, ValidationIssue } from './types';
+import type { StoryNode, StoryPack, ValidationIssue } from './types';
 
 const resourcesSchema = z.object({
   energy: z.number().int().min(0),
@@ -140,7 +140,7 @@ const backgroundFlipSchema = z
   });
 
 export const storyPackSchema: z.ZodType<StoryPack> = z.object({
-  schemaVersion: z.literal(15),
+  schemaVersion: z.literal(16),
   id: z.string().min(1),
   title: z.string().min(1),
   description: z.string(),
@@ -173,6 +173,12 @@ export const storyPackSchema: z.ZodType<StoryPack> = z.object({
     takeout: z.object({
       recovery: resourcesSchema,
       maxPerTurn: z.number().int().min(1),
+      warnings: z.array(
+        z.object({
+          count: z.number().int().min(1),
+          text: z.string().trim().min(1),
+        }),
+      ),
       triggerCount: z.number().int().min(1),
       endingId: z.string().min(1),
     }),
@@ -474,6 +480,27 @@ export function validateStoryPack(value: unknown): ValidationIssue[] {
     });
   }
 
+  const seenTakeoutWarningCounts = new Set<number>();
+  for (const [warningIndex, warning] of pack.config.takeout.warnings.entries()) {
+    if (seenTakeoutWarningCounts.has(warning.count)) {
+      issues.push({
+        severity: 'error',
+        code: 'duplicate-takeout-warning-count',
+        message: `外卖提醒次数重复：第 ${warning.count} 次`,
+        path: `config.takeout.warnings.${warningIndex}.count`,
+      });
+    }
+    seenTakeoutWarningCounts.add(warning.count);
+    if (warning.count >= pack.config.takeout.triggerCount) {
+      issues.push({
+        severity: 'error',
+        code: 'takeout-warning-at-or-after-ending',
+        message: `第 ${warning.count} 次外卖提醒必须早于第 ${pack.config.takeout.triggerCount} 次的结局`,
+        path: `config.takeout.warnings.${warningIndex}.count`,
+      });
+    }
+  }
+
   for (const fan of pack.fans) {
     issues.push(
       ...duplicateIssues(
@@ -665,13 +692,52 @@ export function validateStoryPack(value: unknown): ValidationIssue[] {
     }
   }
 
-  // 节奏警告只统计无触发条件的基线节点；条件节点按支线/旗帜出现，不拉长单周目基线。
-  const decisions = pack.nodes.filter((node) => !node.trigger).length;
+  // 节奏警告统计每位粉丝在单周目中能走到的最长基线路径。
+  // 互斥分支只会命中其中一条，条件节点也不计入固定流程，不能把包内节点总数直接相加。
+  const baselineNodes = pack.nodes.filter((node) => !node.trigger);
+  const baselineIds = new Set(baselineNodes.map((node) => node.id));
+  const baselineIncoming = new Set<string>();
+  for (const node of baselineNodes) {
+    for (const target of edges.get(node.id) ?? []) {
+      if (baselineIds.has(target) && nodeMap.get(target)?.fanId === node.fanId) {
+        baselineIncoming.add(target);
+      }
+    }
+  }
+
+  const longestMemo = new Map<string, number>();
+  const longestVisiting = new Set<string>();
+  const longestBaselinePath = (id: string): number => {
+    const cached = longestMemo.get(id);
+    if (cached !== undefined) return cached;
+    if (longestVisiting.has(id)) return 0;
+    longestVisiting.add(id);
+    const node = nodeMap.get(id);
+    const downstream = (edges.get(id) ?? []).filter(
+      (target) => baselineIds.has(target) && nodeMap.get(target)?.fanId === node?.fanId,
+    );
+    const length = 1 + Math.max(0, ...downstream.map(longestBaselinePath));
+    longestVisiting.delete(id);
+    longestMemo.set(id, length);
+    return length;
+  };
+
+  const baselineByFan = new Map<string, StoryNode[]>();
+  for (const node of baselineNodes) {
+    const list = baselineByFan.get(node.fanId) ?? [];
+    list.push(node);
+    baselineByFan.set(node.fanId, list);
+  }
+  const decisions = [...baselineByFan.values()].reduce((total, fanNodes) => {
+    const fanRoots = fanNodes.filter((node) => !baselineIncoming.has(node.id));
+    const candidates = fanRoots.length > 0 ? fanRoots : fanNodes;
+    return total + Math.max(0, ...candidates.map((node) => longestBaselinePath(node.id)));
+  }, 0);
   if (decisions > 28) {
     issues.push({
       severity: 'warning',
       code: 'pacing-heavy',
-      message: `当前共有 ${decisions} 个翻牌节点，可能超过 20 分钟单周目目标`,
+      message: `单周目最多需要处理 ${decisions} 个基线翻牌，可能超过 20 分钟目标`,
       path: 'nodes',
     });
   }

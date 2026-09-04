@@ -69,6 +69,7 @@ describe('story templates', () => {
     source.fans[0]!.pastChats[0]!.message = '{{idolName}}，这是过去的消息。';
     source.fans[0]!.pastChats[0]!.reply = '{{idolNickname}}记得。';
     source.earlyEndings[0]!.image!.alt = '{{idolName}}收到的虚构投稿截图。';
+    source.config.takeout.warnings[0]!.text = '{{idolNickname}}，夜宵要适量。';
 
     const variables = buildTemplateVariables(source, { idolName: '沈星遥', teamId: 'sii' });
     const resolved = resolveStoryPackTemplates(source, variables);
@@ -78,6 +79,7 @@ describe('story templates', () => {
     expect(resolved.nodes[0]!.choices[0]!.text).toContain('Team SII');
     expect(resolved.nodes[0]!.id).toBe('{{idolName}}-node');
     expect(resolved.nodes[0]!.choices[0]!.nextNodeId).toBe('{{idolName}}-next');
+    expect(resolved.config.takeout.warnings[0]!.text).toBe('遥遥，夜宵要适量。');
     expect(resolved.nodes[0]!.choices[0]!.effects.setFlags).toEqual(['{{idolName}}-flag']);
     expect(resolved.backgroundFlips[0]!.contactId).toBe('{{idolName}}-contact');
     expect(resolved.backgroundFlips.find((flip) => flip.id === 'topic-idol-dog-01')!.reply).toBe(

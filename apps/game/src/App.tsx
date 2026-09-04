@@ -1,5 +1,13 @@
 import * as RadixSelect from '@radix-ui/react-select';
-import { useEffect, useMemo, useRef, useState, type CSSProperties, type FormEvent } from 'react';
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type FormEvent,
+} from 'react';
 import {
   ArrowRight,
   BatteryCharging,
@@ -25,6 +33,7 @@ import {
   TrendingUp,
   Minus,
   RotateCcw,
+  SendHorizontal,
   Star,
   Trophy,
   UserRound,
@@ -56,7 +65,13 @@ import type {
   TeamDefinition,
 } from '@clip/story-core/types';
 import { buildTemplateVariables, resolveStoryPackTemplates } from '@clip/story-core/templates';
-import { affinityLabel, FanAvatar, FanTags, ResourcePanel } from './components';
+import {
+  affinityLabel,
+  FanAvatar,
+  FanTags,
+  HoldToConfirmButton,
+  ResourcePanel,
+} from './components';
 import {
   getBackgroundConversationHistory,
   getBackgroundParticipant,
@@ -98,6 +113,8 @@ type View =
     }
   | { name: 'result'; nodeId: string; choiceId: string }
   | { name: 'ending' };
+
+type NavigationDirection = 'forward' | 'back' | 'replace';
 
 const TAKEOUT_SHOPS = [
   {
@@ -156,6 +173,13 @@ interface TakeoutReceipt {
   moodRecovery: number;
 }
 
+interface TakeoutReminder {
+  count: number;
+  text: string;
+}
+
+const TAKEOUT_REMINDER_DURATION_MS = 2450;
+
 function pickTakeoutShop(): TakeoutShop {
   return TAKEOUT_SHOPS[Math.floor(Math.random() * TAKEOUT_SHOPS.length)] ?? TAKEOUT_SHOPS[0];
 }
@@ -165,6 +189,7 @@ type NavigationState = {
   view: View;
   settingsOpen: boolean;
   depth: number;
+  scrollTop: number;
 };
 
 const NAVIGATION_STATE_KEY = 'clipSimulatorNavigation';
@@ -227,6 +252,12 @@ function readNavigationState(value: unknown): NavigationState | undefined {
     view,
     settingsOpen: candidate.settingsOpen === true && view.name === 'menu',
     depth: candidate.depth as number,
+    scrollTop:
+      typeof candidate.scrollTop === 'number' &&
+      Number.isFinite(candidate.scrollTop) &&
+      candidate.scrollTop >= 0
+        ? candidate.scrollTop
+        : 0,
   };
 }
 
@@ -712,14 +743,18 @@ function SettingsSheet({
           </div>
         </section>
 
-        <button type="button" className="button button--primary button--wide" onClick={onRestart}>
+        <HoldToConfirmButton
+          className="settings-restart-button"
+          idleLabel="按住放弃进度，从头开始"
+          describedBy="settings-restart-note"
+          onConfirm={onRestart}
+        >
           <RotateCcw size={18} aria-hidden="true" />
-          放弃进度，从头开始
-        </button>
-        <p className="settings-restart-note">
+        </HoldToConfirmButton>
+        <p className="settings-restart-note" id="settings-restart-note">
           {hasProgress
-            ? '保留成员资料与设置，清除当前周目进度。'
-            : '保留成员资料与设置，从第 1 日开始。'}
+            ? '按住至进度填满。将保留成员资料与设置，清除当前周目进度。'
+            : '按住至进度填满。保留成员资料与设置，从第 1 日开始。'}
         </p>
         <p className="sheet-privacy-note">
           <LockKeyhole size={14} aria-hidden="true" /> 进度只保存在当前浏览器
@@ -1061,6 +1096,12 @@ function WorkbenchScreen({
   onMenu: () => void;
 }) {
   const pendingNodes = getPendingNodes(state, pack);
+  const pendingNodeIds = pendingNodes.map((node) => node.id);
+  const pendingNodeIdsKey = pendingNodeIds.join('|');
+  const previousPendingNodeIdsRef = useRef(new Set(pendingNodeIds));
+  const newPendingNodeIds = new Set(
+    pendingNodeIds.filter((nodeId) => !previousPendingNodeIdsRef.current.has(nodeId)),
+  );
   const pendingFlips = pendingNodes.flatMap((node) => {
     const participant = getCoreParticipant(state, pack, node.fanId);
     return participant ? [{ participant, node }] : [];
@@ -1077,6 +1118,10 @@ function WorkbenchScreen({
   const nextTurnDay = Math.min(pack.config.totalDays, state.currentDay + pack.config.turnDays);
   const team = teamForProfile(pack, profile);
 
+  useEffect(() => {
+    previousPendingNodeIdsRef.current = new Set(pendingNodeIds);
+  }, [pendingNodeIdsKey]);
+
   return (
     <main className="game-screen inbox-screen">
       <header className="game-header game-header--inbox">
@@ -1090,21 +1135,35 @@ function WorkbenchScreen({
             </span>
             <h1>翻牌消息</h1>
           </div>
-          <span className="game-header__countdown">离总选结束还剩 {electionDaysRemaining} 天</span>
+          <span className="game-header__countdown" key={`countdown-${state.currentDay}`}>
+            离总选结束还剩 {electionDaysRemaining} 天
+          </span>
         </div>
         <section className="inbox-summary" aria-label="当前营业状态">
-          <strong>Day {state.currentDay}</strong>
+          <strong className="inbox-summary__day" key={`day-${state.currentDay}`}>
+            Day {state.currentDay}
+          </strong>
           <span>
-            <BatteryCharging size={15} aria-hidden="true" /> 精力 {state.resources.energy}
+            <BatteryCharging size={15} aria-hidden="true" /> 精力{' '}
+            <b className="inbox-summary__value" key={`energy-${state.resources.energy}`}>
+              {state.resources.energy}
+            </b>
           </span>
           <span>
-            <Smile size={15} aria-hidden="true" /> 心情 {state.resources.mindset}
+            <Smile size={15} aria-hidden="true" /> 心情{' '}
+            <b className="inbox-summary__value" key={`mindset-${state.resources.mindset}`}>
+              {state.resources.mindset}
+            </b>
           </span>
         </section>
       </header>
 
       {event && (
-        <section className="turn-event" aria-label="本回合事件">
+        <section
+          className="turn-event"
+          aria-label="本回合事件"
+          key={`turn-event-${state.turn}-${event.title}`}
+        >
           <Star size={18} aria-hidden="true" />
           <div>
             <strong>{event.title}</strong>
@@ -1116,7 +1175,12 @@ function WorkbenchScreen({
       <section className="inbox-message-list" aria-label="翻牌消息列表">
         <header className="conversation-group-heading">
           <h2>未回复</h2>
-          <strong aria-label={`${pendingNodes.length} 条未回复`}>{pendingNodes.length}</strong>
+          <strong
+            aria-label={`${pendingNodes.length} 条未回复`}
+            key={`pending-count-${pendingNodes.length}`}
+          >
+            {pendingNodes.length}
+          </strong>
         </header>
 
         <div className="conversation-group conversation-group--pending">
@@ -1131,7 +1195,12 @@ function WorkbenchScreen({
                   nextTurnDay > deadlineDay;
 
                 return (
-                  <li key={node.id}>
+                  <li
+                    key={node.id}
+                    className={
+                      newPendingNodeIds.has(node.id) ? 'conversation-list__item--new' : undefined
+                    }
+                  >
                     <ConversationRow
                       participant={participant}
                       preview={node.content.text}
@@ -1249,142 +1318,182 @@ function ConversationScreen({
 }) {
   const timelineEndRef = useRef<HTMLDivElement>(null);
   const choiceSectionRef = useRef<HTMLElement>(null);
+  const [choicesOpen, setChoicesOpen] = useState(false);
 
   useEffect(() => {
-    // 有待回复节点时直接露出选项区；仅浏览历史时才滚动到聊天末尾。
-    if (activeNode && onReply) {
-      choiceSectionRef.current?.scrollIntoView({ block: 'end' });
-    } else {
+    setChoicesOpen(false);
+  }, [activeNode?.id, participant.id]);
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      if (activeNode && onReply && choicesOpen) {
+        choiceSectionRef.current?.focus({ preventScroll: true });
+        choiceSectionRef.current?.scrollIntoView({ block: 'start' });
+        return;
+      }
       timelineEndRef.current?.scrollIntoView({ block: 'end' });
-    }
-  }, [activeNode?.id, exchanges.length, exchanges.at(-1)?.selectedChoiceId]);
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [activeNode?.id, choicesOpen, exchanges.length, exchanges.at(-1)?.selectedChoiceId, onReply]);
 
   return (
-    <main className="reply-screen conversation-screen">
-      <header className="reply-header">
-        <button type="button" className="icon-button" onClick={onBack} aria-label="返回翻牌消息">
-          <ChevronLeft size={21} aria-hidden="true" />
-        </button>
-        <div
-          className="reply-header__contact"
-          style={{ '--fan-accent': participant.accent } as React.CSSProperties}
-        >
-          <h1>{participant.name}</h1>
-          {participant.handle && <span className="reply-header__handle">{participant.handle}</span>}
-          <FanTags tags={participant.tags} compact />
-        </div>
-        <small>第 {state.currentDay} 日</small>
-      </header>
+    <>
+      <main
+        className={`reply-screen conversation-screen${
+          activeNode && onReply && !choicesOpen ? ' conversation-screen--composer-collapsed' : ''
+        }`}
+      >
+        <header className="reply-header">
+          <button type="button" className="icon-button" onClick={onBack} aria-label="返回翻牌消息">
+            <ChevronLeft size={21} aria-hidden="true" />
+          </button>
+          <div
+            className="reply-header__contact"
+            style={{ '--fan-accent': participant.accent } as React.CSSProperties}
+          >
+            <h1>{participant.name}</h1>
+            {participant.handle && (
+              <span className="reply-header__handle">{participant.handle}</span>
+            )}
+            <FanTags tags={participant.tags} compact />
+          </div>
+          <small>第 {state.currentDay} 日</small>
+        </header>
 
-      <section className="chat-timeline" aria-label={`与${participant.name}的全部翻牌对话`}>
-        {exchanges.map((exchange, index) => {
-          const marker = exchange.timeLabel ?? `第 ${exchange.day} 日`;
-          const previous = exchanges[index - 1];
-          const previousMarker = previous
-            ? (previous.timeLabel ?? `第 ${previous.day} 日`)
-            : undefined;
-          return (
-            <div className="chat-exchange" key={exchange.id}>
-              {(index === 0 || previousMarker !== marker) && (
-                <div className="chat-day-marker">{marker}</div>
-              )}
-              <div className="chat-row chat-row--fan">
-                <FanAvatar fan={participant} small muted={participant.kind === 'background'} />
-                <article
-                  className="fan-message"
-                  style={{ '--fan-accent': participant.accent } as React.CSSProperties}
-                >
-                  <p>{exchange.incoming}</p>
-                </article>
-              </div>
-              {exchange.continuations?.map((continuation, continuationIndex) => (
-                <div
-                  className="chat-row chat-row--fan chat-row--continuation"
-                  key={`${exchange.id}-continuation-${continuationIndex}`}
-                >
+        <section className="chat-timeline" aria-label={`与${participant.name}的全部翻牌对话`}>
+          {exchanges.map((exchange, index) => {
+            const marker = exchange.timeLabel ?? `第 ${exchange.day} 日`;
+            const previous = exchanges[index - 1];
+            const previousMarker = previous
+              ? (previous.timeLabel ?? `第 ${previous.day} 日`)
+              : undefined;
+            return (
+              <div className="chat-exchange" key={exchange.id}>
+                {(index === 0 || previousMarker !== marker) && (
+                  <div className="chat-day-marker">{marker}</div>
+                )}
+                <div className="chat-row chat-row--fan">
                   <FanAvatar fan={participant} small muted={participant.kind === 'background'} />
                   <article
-                    className="fan-message fan-message--continuation"
+                    className="fan-message"
                     style={{ '--fan-accent': participant.accent } as React.CSSProperties}
                   >
-                    <p>{continuation}</p>
+                    <p>{exchange.incoming}</p>
                   </article>
                 </div>
-              ))}
-              {exchange.outgoing && (
-                <div className="chat-row chat-row--idol">
-                  <article className="idol-message">
-                    <p>{exchange.outgoing}</p>
-                  </article>
-                </div>
-              )}
-              {exchange.status === 'expired' && (
-                <div className="chat-system-note">
-                  这条翻牌已于第 {exchange.deadlineDay} 日 24:00 过期
-                </div>
-              )}
-              {exchange.status === 'pending' && exchange.deadlineDay !== undefined && (
-                <div className="chat-deadline">第 {exchange.deadlineDay} 日 24:00 前回复</div>
-              )}
-            </div>
-          );
-        })}
-        <div ref={timelineEndRef} aria-hidden="true" />
-      </section>
-
-      {activeNode && onReply ? (
-        <section
-          ref={choiceSectionRef}
-          className="choice-section reply-options"
-          aria-labelledby="choice-title"
-        >
-          <div className="choice-section__heading">
-            <div>
-              <span>候选消息</span>
-              <h1 id="choice-title">选择一条回复</h1>
-            </div>
-            <ResourcePanel resources={state.resources} max={pack.config.resources.max} />
-          </div>
-          <div className="choice-list">
-            {activeNode.choices.map((choice, index) => {
-              const affordable = canAfford(state.resources, choice.cost);
-              return (
-                <button
-                  key={choice.id}
-                  type="button"
-                  className="choice-card"
-                  onClick={() => onReply(choice)}
-                  disabled={!affordable}
-                >
-                  <span className="choice-card__prompt" aria-hidden="true">
-                    <CircleHelp size={17} />
-                  </span>
-                  <span className="choice-card__copy">
-                    <strong>{choice.text}</strong>
-                    {!affordable && <small>当前精力或心情不足</small>}
-                  </span>
-                  <span
-                    className="choice-card__cost"
-                    aria-label={`候选回复 ${String.fromCharCode(65 + index)}，消耗 ${choice.cost.energy} 点精力，${choice.cost.mindset} 点心情`}
+                {exchange.continuations?.map((continuation, continuationIndex) => (
+                  <div
+                    className="chat-row chat-row--fan chat-row--continuation"
+                    key={`${exchange.id}-continuation-${continuationIndex}`}
                   >
-                    <span className="choice-card__cost-item choice-card__cost-item--energy">
-                      -{choice.cost.energy}
-                      <BatteryCharging size={14} aria-hidden="true" />
-                    </span>
-                    <span className="choice-card__cost-item choice-card__cost-item--mindset">
-                      -{choice.cost.mindset}
-                      <Smile size={14} aria-hidden="true" />
-                    </span>
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+                    <FanAvatar fan={participant} small muted={participant.kind === 'background'} />
+                    <article
+                      className="fan-message fan-message--continuation"
+                      style={{ '--fan-accent': participant.accent } as React.CSSProperties}
+                    >
+                      <p>{continuation}</p>
+                    </article>
+                  </div>
+                ))}
+                {exchange.outgoing && (
+                  <div className="chat-row chat-row--idol">
+                    <article className="idol-message">
+                      <p>{exchange.outgoing}</p>
+                    </article>
+                  </div>
+                )}
+                {exchange.status === 'expired' && (
+                  <div className="chat-system-note">
+                    这条翻牌已于第 {exchange.deadlineDay} 日 24:00 过期
+                  </div>
+                )}
+                {exchange.status === 'pending' && exchange.deadlineDay !== undefined && (
+                  <div className="chat-deadline">第 {exchange.deadlineDay} 日 24:00 前回复</div>
+                )}
+              </div>
+            );
+          })}
+          <div ref={timelineEndRef} aria-hidden="true" />
         </section>
-      ) : (
-        <div className="conversation-closed-note">当前没有待回复的翻牌</div>
+
+        {activeNode && onReply && choicesOpen ? (
+          <section
+            id="reply-choice-options"
+            ref={choiceSectionRef}
+            className="choice-section reply-options"
+            aria-labelledby="choice-title"
+            tabIndex={-1}
+          >
+            <div className="choice-section__heading">
+              <div>
+                <span>候选消息</span>
+                <h1 id="choice-title">选择一条回复</h1>
+              </div>
+              <ResourcePanel resources={state.resources} max={pack.config.resources.max} />
+            </div>
+            <div className="choice-list">
+              {activeNode.choices.map((choice, index) => {
+                const affordable = canAfford(state.resources, choice.cost);
+                return (
+                  <button
+                    key={choice.id}
+                    type="button"
+                    className="choice-card"
+                    onClick={() => onReply(choice)}
+                    disabled={!affordable}
+                  >
+                    <span className="choice-card__prompt" aria-hidden="true">
+                      <CircleHelp size={17} />
+                    </span>
+                    <span className="choice-card__copy">
+                      <strong>{choice.text}</strong>
+                      {!affordable && <small>当前精力或心情不足</small>}
+                    </span>
+                    <span
+                      className="choice-card__cost"
+                      aria-label={`候选回复 ${String.fromCharCode(65 + index)}，消耗 ${choice.cost.energy} 点精力，${choice.cost.mindset} 点心情`}
+                    >
+                      <span className="choice-card__cost-item choice-card__cost-item--energy">
+                        -{choice.cost.energy}
+                        <BatteryCharging size={14} aria-hidden="true" />
+                      </span>
+                      <span className="choice-card__cost-item choice-card__cost-item--mindset">
+                        -{choice.cost.mindset}
+                        <Smile size={14} aria-hidden="true" />
+                      </span>
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </section>
+        ) : !activeNode || !onReply ? (
+          <div className="conversation-closed-note">当前没有待回复的翻牌</div>
+        ) : null}
+      </main>
+
+      {activeNode && onReply && !choicesOpen && (
+        <footer className="reply-composer reply-composer--fixed">
+          <button
+            type="button"
+            className="reply-composer__trigger"
+            aria-label="打开回复选项"
+            aria-controls="reply-choice-options"
+            aria-expanded="false"
+            onClick={() => setChoicesOpen(true)}
+          >
+            <span className="reply-composer__lead" aria-hidden="true">
+              <MessageCircleMore size={18} />
+            </span>
+            <span className="reply-composer__placeholder">点此选择回复…</span>
+            <span className="reply-composer__action" aria-hidden="true">
+              发送
+              <SendHorizontal size={15} />
+            </span>
+          </button>
+        </footer>
       )}
-    </main>
+    </>
   );
 }
 
@@ -1614,15 +1723,32 @@ export default function App() {
           : { name: 'menu' },
       settingsOpen: false,
       depth: 0,
+      scrollTop: 0,
     };
     const restored = readNavigationState(window.history.state);
     return normalizeNavigation(restored ?? fallback, initialSave);
   });
+  const [navigationDirection, setNavigationDirection] = useState<NavigationDirection>('replace');
   const [storageWarning, setStorageWarning] = useState(false);
   const [takeoutReceipt, setTakeoutReceipt] = useState<TakeoutReceipt>();
+  const [takeoutReminder, setTakeoutReminder] = useState<TakeoutReminder>();
+  const appFrameRef = useRef<HTMLDivElement>(null);
   const stateRef = useRef(state);
   const navigationRef = useRef(navigation);
   const view = navigation.view;
+
+  const desktopPhoneFrameOwnsScroll = () => window.matchMedia('(min-width: 680px)').matches;
+
+  const readActiveScrollTop = () =>
+    desktopPhoneFrameOwnsScroll() ? (appFrameRef.current?.scrollTop ?? 0) : window.scrollY;
+
+  const saveActiveScrollPosition = () => {
+    const current = navigationRef.current;
+    const next = { ...current, scrollTop: readActiveScrollTop() };
+    navigationRef.current = next;
+    window.history.replaceState(withNavigationState(next), '');
+    return next;
+  };
 
   useEffect(() => scheduleDeferredImagePreloads(DEFERRED_IMAGE_SOURCES), []);
 
@@ -1635,12 +1761,27 @@ export default function App() {
   }, [navigation]);
 
   useEffect(() => {
+    if (!takeoutReminder) return;
+    const timeoutId = window.setTimeout(
+      () => setTakeoutReminder(undefined),
+      TAKEOUT_REMINDER_DURATION_MS,
+    );
+    return () => window.clearTimeout(timeoutId);
+  }, [takeoutReminder]);
+
+  useEffect(() => {
+    const previousScrollRestoration = window.history.scrollRestoration;
+    window.history.scrollRestoration = 'manual';
     window.history.replaceState(withNavigationState(navigationRef.current), '');
 
     const handlePopState = (event: PopStateEvent) => {
       const restored = readNavigationState(event.state);
       if (!restored) return;
+      const current = navigationRef.current;
       const next = normalizeNavigation(restored, stateRef.current);
+      if (JSON.stringify(current.view) !== JSON.stringify(next.view)) {
+        setNavigationDirection(next.depth < current.depth ? 'back' : 'forward');
+      }
       navigationRef.current = next;
       setNavigation(next);
       if (JSON.stringify(next) !== JSON.stringify(restored)) {
@@ -1649,7 +1790,37 @@ export default function App() {
     };
 
     window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
+    return () => {
+      window.removeEventListener('popstate', handlePopState);
+      window.history.scrollRestoration = previousScrollRestoration;
+    };
+  }, []);
+
+  useLayoutEffect(() => {
+    const frame = appFrameRef.current;
+    if (desktopPhoneFrameOwnsScroll()) {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+      frame?.scrollTo({ top: navigation.scrollTop, left: 0, behavior: 'auto' });
+      return;
+    }
+    if (frame) frame.scrollTop = 0;
+    window.scrollTo({ top: navigation.scrollTop, left: 0, behavior: 'auto' });
+  }, [navigation]);
+
+  useEffect(() => {
+    const frame = appFrameRef.current;
+    let animationFrame = 0;
+    const rememberScroll = () => {
+      window.cancelAnimationFrame(animationFrame);
+      animationFrame = window.requestAnimationFrame(() => saveActiveScrollPosition());
+    };
+    window.addEventListener('scroll', rememberScroll, { passive: true });
+    frame?.addEventListener('scroll', rememberScroll, { passive: true });
+    return () => {
+      window.cancelAnimationFrame(animationFrame);
+      window.removeEventListener('scroll', rememberScroll);
+      frame?.removeEventListener('scroll', rememberScroll);
+    };
   }, []);
 
   useEffect(() => {
@@ -1704,18 +1875,26 @@ export default function App() {
 
   const commitNavigation = (
     nextView: View,
-    options: { replace?: boolean; settingsOpen?: boolean } = {},
+    options: {
+      replace?: boolean;
+      settingsOpen?: boolean;
+      direction?: NavigationDirection;
+    } = {},
   ) => {
-    const current = navigationRef.current;
+    const current = saveActiveScrollPosition();
     const next = normalizeNavigation(
       {
         version: 1,
         view: nextView,
         settingsOpen: options.settingsOpen === true && nextView.name === 'menu',
         depth: options.replace ? current.depth : current.depth + 1,
+        scrollTop: 0,
       },
       stateRef.current,
     );
+    if (JSON.stringify(current.view) !== JSON.stringify(next.view)) {
+      setNavigationDirection(options.direction ?? 'forward');
+    }
     navigationRef.current = next;
     setNavigation(next);
     if (options.replace) {
@@ -1723,14 +1902,14 @@ export default function App() {
     } else {
       window.history.pushState(withNavigationState(next), '');
     }
-    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
   };
 
   const goBack = (fallback: View) => {
     if (navigationRef.current.depth > 0) {
+      saveActiveScrollPosition();
       window.history.back();
     } else {
-      commitNavigation(fallback, { replace: true });
+      commitNavigation(fallback, { replace: true, direction: 'back' });
     }
   };
 
@@ -1741,6 +1920,8 @@ export default function App() {
     );
     clearEarlyEndingCheckpoint();
     setEarlyEndingCheckpoint(undefined);
+    setTakeoutReceipt(undefined);
+    setTakeoutReminder(undefined);
     setDisplayMode(mode);
     if (!persistMode(mode)) setStorageWarning(true);
     const nextState = createInitialGame(storyPack, mode);
@@ -1767,6 +1948,8 @@ export default function App() {
       stateRef.current?.status === 'early-ending' ? earlyEndingCheckpoint : stateRef.current,
     );
     clearSave();
+    setTakeoutReceipt(undefined);
+    setTakeoutReminder(undefined);
     stateRef.current = undefined;
     setState(undefined);
     const current = navigationRef.current;
@@ -1775,8 +1958,10 @@ export default function App() {
       view: { name: 'menu' },
       settingsOpen: false,
       depth: 0,
+      scrollTop: 0,
     };
     navigationRef.current = root;
+    setNavigationDirection('replace');
     setNavigation(root);
     if (current.depth > 0) {
       window.history.go(-current.depth);
@@ -1798,7 +1983,7 @@ export default function App() {
     setEarlyEndingCheckpoint(undefined);
     stateRef.current = checkpoint;
     setState(checkpoint);
-    commitNavigation({ name: 'workbench' }, { replace: true });
+    commitNavigation({ name: 'workbench' }, { replace: true, direction: 'back' });
   };
 
   const currentNode =
@@ -1827,10 +2012,21 @@ export default function App() {
       : undefined;
 
   return (
-    <div className="app-frame">
+    <div ref={appFrameRef} className="app-frame" data-navigation-direction={navigationDirection}>
       {storageWarning && (
         <div className="storage-warning" role="status">
           浏览器阻止了本地存档；本次游玩仍可继续。
+        </div>
+      )}
+      {takeoutReminder && (
+        <div
+          key={takeoutReminder.count}
+          className="takeout-reminder"
+          role="status"
+          aria-live="polite"
+          aria-atomic="true"
+        >
+          <span className="takeout-reminder__bubble">{takeoutReminder.text}</span>
         </div>
       )}
       {takeoutReceipt && (
@@ -1838,9 +2034,16 @@ export default function App() {
           receipt={takeoutReceipt}
           onClose={() => {
             setTakeoutReceipt(undefined);
-            if (stateRef.current?.status !== 'playing') {
+            const currentState = stateRef.current;
+            if (currentState?.status !== 'playing') {
+              setTakeoutReminder(undefined);
               commitNavigation({ name: 'ending' }, { replace: true });
+              return;
             }
+            const warning = runtimePack.config.takeout.warnings.find(
+              (candidate) => candidate.count === currentState.takeoutCount,
+            );
+            if (warning) setTakeoutReminder(warning);
           }}
         />
       )}
@@ -1891,6 +2094,7 @@ export default function App() {
             const next = orderTakeout(state, storyPack);
             rememberEarlyEndingCheckpoint(state, next);
             recordGameTransition(storyPack, state, next, { type: 'takeout' });
+            setTakeoutReminder(undefined);
             setTakeoutReceipt({
               shop: pickTakeoutShop(),
               energyRecovery: storyPack.config.takeout.recovery.energy,
